@@ -36,7 +36,7 @@ export async function getFolderStructure(): Promise<GeneratedFolder> {
       })
       .filter(booleanFilter)
   );
-  console.log(relUnixPaths);
+
   const generatedFolder = folderMapToGeneratedFolder('/', relUnixPaths);
   return generatedFolder;
 }

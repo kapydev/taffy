@@ -1,6 +1,10 @@
-import { createBetterStore } from '@cto-ai/shared-helpers';
+import {
+  createBetterStore,
+  prettyPrintGeneratedFolder,
+} from '@cto-ai/shared-helpers';
 import { GeneratedFolder } from '@cto-ai/shared-types';
 import { trpc } from '../client';
+import { chatStore } from './chat-store';
 
 export const fileStore = createBetterStore({
   rootFolder: undefined as GeneratedFolder | undefined,
@@ -8,5 +12,16 @@ export const fileStore = createBetterStore({
 
 trpc.files.getWorkingDirFolderStructure.query().then((fileTree) => {
   if (!fileTree) return;
-  fileStore.set('rootFolder', fileTree as GeneratedFolder);
+  const rootFolder = fileTree as GeneratedFolder;
+  fileStore.set('rootFolder', rootFolder);
+  const prettyFileTree = prettyPrintGeneratedFolder(rootFolder);
+  const msgs = chatStore.get('messages');
+  if (msgs.length > 0) return;
+  chatStore.set('messages', [
+    ...msgs,
+    {
+      role: 'system',
+      content: prettyFileTree,
+    },
+  ]);
 });

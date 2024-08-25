@@ -1,5 +1,6 @@
 import { GeneratedFolder, GeneratedFile } from '@cto-ai/shared-types';
 import path from 'path';
+import archy from 'archy';
 
 export function folderMapToGeneratedFolder(
   name: string,
@@ -48,4 +49,19 @@ export function folderMapToGeneratedFolder(
   }
 
   return folder;
+}
+
+function convertToArchy(node: GeneratedFolder): archy.Data {
+  return {
+    label: node.name,
+    nodes: [
+      ...node.files.map((file) => file.name),
+      ...node.subFolders.map((subFolder) => convertToArchy(subFolder)),
+    ],
+  };
+}
+
+export function prettyPrintGeneratedFolder(folder: GeneratedFolder): string {
+  const archyData = convertToArchy(folder);
+  return archy(archyData);
 }
