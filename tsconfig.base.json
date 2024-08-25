@@ -15,7 +15,8 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@cto-ai/components": ["components/src/index.ts"]
+      "@cto-ai/components": ["components/src/index.ts"],
+      "@cto-ai/server/types": ["apps/server/src/types.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
