@@ -2,7 +2,9 @@
   "name": "@cto-ai/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "serve": "nx run-many --target=serve --all"
+  },
   "private": true,
   "dependencies": {
     "react": "18.3.1",
