@@ -1,3 +1,3 @@
-import { trpc } from "../client";
+import { trpc } from '../client';
 
-trpc.userList.query()
+trpc.userList.query().then(console.log);

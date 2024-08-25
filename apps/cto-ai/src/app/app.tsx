@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@cto-ai/components';
 import { Button } from '@cto-ai/components';
 import { Input } from '@cto-ai/components';
 import { ChevronRight, ChevronDown, Send } from 'lucide-react';
+import '../stores/file-store';
 
 // Mock data for file tree
 const fileTree = [

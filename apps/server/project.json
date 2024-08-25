@@ -43,7 +43,8 @@
       "dependsOn": ["build"],
       "options": {
         "buildTarget": "server:build",
-        "runBuildTargetDependencies": false
+        "runBuildTargetDependencies": false,
+        "watch": true
       },
       "configurations": {
         "development": {
