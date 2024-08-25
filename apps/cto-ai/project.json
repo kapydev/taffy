@@ -1,0 +1,9 @@
+{
+  "name": "cto-ai",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/cto-ai/src",
+  "projectType": "application",
+  "tags": [],
+  "// targets": "to see all targets run: nx show project cto-ai --web",
+  "targets": {}
+}
