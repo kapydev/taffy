@@ -8,7 +8,6 @@ export function createBetterStore<T extends Record<string, any>>(
     subscribeWithSelector((set, get) => storeDefaults)
   );
   const use = <K extends keyof T, V extends T[K]>(key: K) =>
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     useStore((state) => state[key]) as V;
   const set = <K extends keyof T, V extends T[K]>(key: K, val: V) => {
     useStore.setState({ [key]: val } as Partial<T>);

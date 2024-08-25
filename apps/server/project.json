@@ -26,7 +26,9 @@
         }
       },
       "configurations": {
-        "development": {},
+        "development": {
+          "watch": true
+        },
         "production": {
           "esbuildOptions": {
             "sourcemap": false,
@@ -38,21 +40,13 @@
       }
     },
     "serve": {
-      "executor": "@nx/js:node",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "development",
-      "dependsOn": ["build"],
       "options": {
-        "buildTarget": "server:build",
-        "runBuildTargetDependencies": false,
-        "watch": true
-      },
-      "configurations": {
-        "development": {
-          "buildTarget": "server:build:development"
-        },
-        "production": {
-          "buildTarget": "server:build:production"
-        }
+        "commands": [
+          "nx run server:build:development",
+          "nodemon ./dist/apps/server/main.js"
+        ]
       }
     }
   }

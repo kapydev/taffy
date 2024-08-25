@@ -1,1 +1,1 @@
-export * from './lib/shared-helpers';
+export * from './create-better-store';
