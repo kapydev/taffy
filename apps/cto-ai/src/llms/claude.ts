@@ -11,14 +11,19 @@ export class Claude extends LLM {
   }
 
   async *prompt(messages: RawMessage[]): AsyncIterable<string> {
-    const client = new Anthropic({ apiKey: this.apiKey });
+    const client = new Anthropic({
+      apiKey: this.apiKey,
+      //URGENT TODO: Fix this
+      dangerouslyAllowBrowser: true,
+    });
 
-    if (messages.length > 0 && messages[0].role !== 'system') {
-      throw new Error('The first message must be a system prompt.');
+    let systemMessage: string | undefined = undefined;
+    let remainingMessages = messages;
+
+    if (messages.length > 0 && messages[0].role === 'system') {
+      systemMessage = messages[0].content;
+      remainingMessages = messages.slice(1);
     }
-
-    const systemMessage = messages[0];
-    const remainingMessages = messages.slice(1);
 
     if (remainingMessages.some((msg) => msg.role === 'system')) {
       throw new Error('Only the first message can be a system prompt.');
@@ -26,7 +31,7 @@ export class Claude extends LLM {
 
     const stream = client.messages.stream({
       model: 'claude-3-5-sonnet-20240620',
-      system: systemMessage.content,
+      system: systemMessage,
       max_tokens: this.maxTokens,
       messages: remainingMessages.map((msg) => {
         if (msg.role === 'system') {
@@ -37,8 +42,13 @@ export class Claude extends LLM {
       stream: true,
     });
 
-    stream.on('text', (text) => yield text);
-
-    await stream.finalMessage();
+    for await (const event of stream) {
+      if (
+        event.type === 'content_block_delta' &&
+        event.delta.type === 'text_delta'
+      ) {
+        yield event.delta.text;
+      }
+    }
   }
 }

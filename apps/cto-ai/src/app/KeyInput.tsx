@@ -1,5 +1,3 @@
-'use client';
-
 import { Button, Input } from '@cto-ai/components';
 import { KeyRound } from 'lucide-react';
 import { useState } from 'react';

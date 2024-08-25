@@ -1,29 +1,25 @@
-import { Button, Input, ScrollArea, Textarea } from '@cto-ai/components';
+import { Button, Input } from '@cto-ai/components';
 import { Send } from 'lucide-react';
 import { useState } from 'react';
 
-import { chatStore } from '../stores/chat-store';
+import { chatStore, promptClaude } from '../stores/chat-store';
 
 export function MainChat() {
   const messages = chatStore.use('messages');
   const [input, setInput] = useState('');
 
   const handleSend = () => {
-    if (input.trim()) {
-      chatStore.set('messages', [
-        ...chatStore.get('messages'),
-        { role: 'human', content: input },
-      ]);
-      setInput('');
-      // Here you would typically send the message to your chatbot/LLM
-      // and then add its response to the messages
-
-      // Scroll to bottom after sending the message
-      const scrollArea = document.querySelector('.scroll-area');
-      if (scrollArea) {
-        scrollArea.scrollTop = scrollArea.scrollHeight;
-      }
+    if (!input.trim()) return;
+    const scrollArea = document.querySelector('.scroll-area');
+    if (scrollArea) {
+      scrollArea.scrollTop = scrollArea.scrollHeight;
     }
+    setInput('');
+    chatStore.set('messages', [
+      ...chatStore.get('messages'),
+      { role: 'user', content: input },
+    ]);
+    promptClaude();
   };
 
   return (
@@ -36,10 +32,12 @@ export function MainChat() {
             <div
               key={index}
               className={`mb-4 ${
-                message.role === 'ai' ? 'text-blue-600' : 'text-green-600'
+                message.role === 'assistant'
+                  ? 'text-blue-600'
+                  : 'text-green-600'
               }`}
             >
-              <strong>{message.role === 'ai' ? 'AI: ' : 'You: '}</strong>
+              <strong>{message.role === 'assistant' ? 'AI: ' : 'You: '}</strong>
               <div
                 dangerouslySetInnerHTML={{
                   __html: message.content

@@ -1,5 +1,6 @@
 import { createBetterStore } from '@cto-ai/shared-helpers';
 import { RawMessage } from '@cto-ai/shared-types';
+import { Claude } from '../llms/claude';
 
 const initialMessages: RawMessage[] = [
   // { role: 'human', content: 'Hello, can you help me with React?' },
@@ -26,3 +27,21 @@ export const keyStore = createBetterStore(
   },
   { persistKey: 'key-store' }
 );
+
+export async function promptClaude() {
+  const curMsgs = chatStore.get('messages');
+  const claudeKey = keyStore.get('claudeKey');
+  if (claudeKey === '') {
+    throw new Error('Missing Claude key!');
+  }
+  const claude = new Claude(claudeKey);
+  const stream = claude.prompt(curMsgs);
+  let fullResponse = '';
+  for await (const textChunk of stream) {
+    fullResponse += textChunk;
+    chatStore.set('messages', [
+      ...curMsgs,
+      { role: 'assistant', content: fullResponse },
+    ]);
+  }
+}
