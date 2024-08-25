@@ -1,41 +1,19 @@
-import React, { useState } from 'react';
-import { Checkbox } from '@cto-ai/components';
-import { ScrollArea } from '@cto-ai/components';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@cto-ai/components';
-import { Button } from '@cto-ai/components';
-import { Input } from '@cto-ai/components';
-import { ChevronRight, ChevronDown, Send } from 'lucide-react';
-import '../stores/file-store';
+import {
+  Button,
+  Checkbox,
+  Input,
+  ScrollArea,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@cto-ai/components';
+import { GeneratedFolder } from '@cto-ai/shared-types';
+import { ChevronRight, Send } from 'lucide-react';
+import { useState } from 'react';
 
-// Mock data for file tree
-const fileTree = [
-  {
-    name: 'src',
-    type: 'folder',
-    children: [
-      {
-        name: 'components',
-        type: 'folder',
-        children: [
-          { name: 'Button.tsx', type: 'file' },
-          { name: 'Input.tsx', type: 'file' },
-        ],
-      },
-      { name: 'App.tsx', type: 'file' },
-      { name: 'index.tsx', type: 'file' },
-    ],
-  },
-  {
-    name: 'public',
-    type: 'folder',
-    children: [
-      { name: 'index.html', type: 'file' },
-      { name: 'favicon.ico', type: 'file' },
-    ],
-  },
-  { name: 'package.json', type: 'file' },
-  { name: 'README.md', type: 'file' },
-];
+import '../stores/file-store';
+import { fileStore } from '../stores/file-store';
 
 // Mock data for chat messages
 const initialMessages = [
@@ -57,6 +35,7 @@ export default function Component() {
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
   const [messages, setMessages] = useState(initialMessages);
   const [input, setInput] = useState('');
+  const rootFolder = fileStore.use('rootFolder');
 
   const toggleFile = (path: string) => {
     setSelectedFiles((prev) =>
@@ -64,19 +43,19 @@ export default function Component() {
     );
   };
 
-  const renderFileTree = (items: any[], path = '') => {
-    return items.map((item, index) => {
+  const renderFileTree = (folder: GeneratedFolder, path = '') => {
+    return folder.subFolders.map((item) => {
       const currentPath = `${path}/${item.name}`;
-      if (item.type === 'folder') {
+      if (item.subFolders.length > 0 || item.files.length > 0) {
         return (
           <div key={currentPath}>
             <div className="flex items-center">
-              {item.children ? <ChevronRight className="h-4 w-4" /> : null}
+              {item.subFolders.length > 0 ? (
+                <ChevronRight className="h-4 w-4" />
+              ) : null}
               <span>{item.name}</span>
             </div>
-            <div className="ml-4">
-              {renderFileTree(item.children || [], currentPath)}
-            </div>
+            <div className="ml-4">{renderFileTree(item, currentPath)}</div>
           </div>
         );
       } else {
@@ -108,7 +87,7 @@ export default function Component() {
       <div className="w-64 bg-gray-100 p-4 overflow-auto">
         <h2 className="text-lg font-semibold mb-4">Repository Files</h2>
         <ScrollArea className="h-[calc(100vh-8rem)]">
-          {renderFileTree(fileTree)}
+          {renderFileTree(rootFolder)}
         </ScrollArea>
       </div>
       <div className="flex-1 flex flex-col">

@@ -11,7 +11,7 @@ interface GeneratedFileBase {
 }
 
 export interface GeneratedTextFile extends GeneratedFileBase {
-  content: string;
+  content?: string;
   contentEncoding: 'utf8' | 'base64';
 }
 
@@ -20,7 +20,7 @@ export interface GeneratedTextFile extends GeneratedFileBase {
  * When using JSON. base64 is preferred
  */
 export interface GeneratedBinaryFile extends GeneratedFileBase {
-  content: Uint8Array;
+  content?: Uint8Array;
   contentEncoding: 'binary';
 }
 

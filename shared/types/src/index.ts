@@ -1,1 +1,1 @@
-export * from './folder-structure';
+export * from './generated-folder';

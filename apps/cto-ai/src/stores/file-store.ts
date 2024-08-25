@@ -2,11 +2,12 @@ import { createBetterStore } from '@cto-ai/shared-helpers';
 import { GeneratedFolder } from '@cto-ai/shared-types';
 import { trpc } from '../client';
 
-const fileStore = createBetterStore({
-  fileTree: {} as GeneratedFolder,
+export const fileStore = createBetterStore({
+  rootFolder: undefined as GeneratedFolder | undefined,
 });
-
-trpc.files.getFileTree.query().then((fileTree) => {
+console.log('hello!');
+trpc.files.getWorkingDirFolderStructure.query().then((fileTree) => {
+  console.log(fileTree);
   if (!fileTree) return;
-  //   fileStore.set('fileTree', fileTree);
+  fileStore.set('rootFolder', fileTree as GeneratedFolder);
 });
