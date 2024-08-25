@@ -11,6 +11,7 @@
     "@trpc/client": "^11.0.0-rc.485",
     "@trpc/server": "^11.0.0-rc.485",
     "axios": "^1.6.0",
+    "chokidar": "^3.6.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
@@ -25,7 +26,8 @@
     "react-dom": "18.3.1",
     "tailwind-merge": "^2.5.2",
     "tslib": "^2.3.0",
-    "vaul": "^0.9.1"
+    "vaul": "^0.9.1",
+    "zustand": "^4.5.5"
   },
   "devDependencies": {
     "@babel/core": "^7.14.5",

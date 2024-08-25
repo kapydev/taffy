@@ -1,13 +1,11 @@
-import { publicProcedure, router } from './trpc';
 import { createHTTPServer } from '@trpc/server/adapters/standalone';
 import cors from 'cors';
+import './files';
+import { fileRouter } from './routers/files';
+import { router } from './trpc';
 
 export const appRouter = router({
-  userList: publicProcedure.query(async () => {
-    // Retrieve users from a datasource, this is an imaginary database
-    console.log('hey');
-    return ['hello worldd'];
-  }),
+  files: fileRouter,
 });
 
 const server = createHTTPServer({
