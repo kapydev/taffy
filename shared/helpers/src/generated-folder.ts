@@ -1,4 +1,5 @@
 import { GeneratedFolder, GeneratedFile } from '@cto-ai/shared-types';
+import path from 'path';
 
 export function folderMapToGeneratedFolder(
   name: string,
@@ -10,8 +11,8 @@ export function folderMapToGeneratedFolder(
     subFolders: [],
   };
 
-  for (const [path, items] of Object.entries(structure)) {
-    const splitPath = path.split('/').filter(Boolean);
+  for (const [curPath, items] of Object.entries(structure)) {
+    const splitPath = curPath.split('/').filter(Boolean);
     let currentFolder = folder;
 
     for (let i = 0; i < splitPath.length; i++) {
@@ -33,6 +34,8 @@ export function folderMapToGeneratedFolder(
     }
 
     items.forEach((item) => {
+      const resolvedPath = path.posix.join(curPath, item);
+      if (structure[resolvedPath]) return;
       const fileType = item.includes('.') ? item.split('.').pop() : undefined;
       const file: GeneratedFile = {
         name: item,

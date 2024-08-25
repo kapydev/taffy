@@ -19,6 +19,7 @@ export default function App() {
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
 
   const rootFolder = fileStore.use('rootFolder');
+  console.log(rootFolder);
   const messages = chatStore.use('messages');
 
   const toggleFile = (path: string) => {
