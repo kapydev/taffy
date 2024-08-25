@@ -19,3 +19,10 @@ const initialMessages: RawMessage[] = [
 export const chatStore = createBetterStore({
   messages: initialMessages,
 });
+
+export const keyStore = createBetterStore(
+  {
+    claudeKey: '',
+  },
+  { persistKey: 'key-store' }
+);

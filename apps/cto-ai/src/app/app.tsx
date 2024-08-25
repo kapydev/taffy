@@ -1,5 +1,6 @@
 import {
   Checkbox,
+  Input,
   ScrollArea,
   Tabs,
   TabsContent,
@@ -12,6 +13,7 @@ import { useState } from 'react';
 import { chatStore } from '../stores/chat-store';
 import { fileStore } from '../stores/file-store';
 import { MainChat } from './MainChat';
+import { KeyInput } from './KeyInput';
 
 export default function App() {
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
@@ -57,11 +59,12 @@ export default function App() {
 
   return (
     <div className="flex h-screen">
-      <div className="w-64 bg-gray-100 p-4 overflow-auto">
+      <div className="w-64 flex flex-col bg-gray-100 p-4 overflow-auto">
         <h2 className="text-lg font-semibold mb-4">Repository Files</h2>
-        <ScrollArea className="h-[calc(100vh-8rem)]">
+        <ScrollArea className="flex-1">
           {rootFolder && renderFileTree(rootFolder)}
         </ScrollArea>
+        <KeyInput />
       </div>
       <MainChat />
     </div>

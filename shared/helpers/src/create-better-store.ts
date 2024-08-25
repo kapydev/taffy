@@ -1,12 +1,20 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { subscribeWithSelector } from 'zustand/middleware';
 
 export function createBetterStore<T extends Record<string, any>>(
-  storeDefaults: T
+  storeDefaults: T,
+  opts?: {
+    persistKey?: string;
+  }
 ) {
-  const useStore = create<T>()(
-    subscribeWithSelector((set, get) => storeDefaults)
-  );
+  const useStore = opts?.persistKey
+    ? create<T>()(
+        subscribeWithSelector(
+          persist((set, get) => storeDefaults, { name: opts.persistKey })
+        )
+      )
+    : create<T>()(subscribeWithSelector((set, get) => storeDefaults));
   const use = <K extends keyof T, V extends T[K]>(key: K) =>
     useStore((state) => state[key]) as V;
   const set = <K extends keyof T, V extends T[K]>(key: K, val: V) => {
