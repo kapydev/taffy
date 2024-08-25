@@ -1,2 +1,2 @@
 export * from './generated-folder';
-export * from './messages';
+export * from './raw-messages';

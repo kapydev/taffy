@@ -1,1 +1,0 @@
-export const SYSTEM_PROMPT = `You are a CTO meant to assist the user.`
