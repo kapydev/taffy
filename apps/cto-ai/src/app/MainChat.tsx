@@ -27,8 +27,8 @@ export function MainChat() {
   };
 
   return (
-    <div className="flex flex-col p-4">
-      <div className="flex flex-col-reverse overflow-y-scroll ">
+    <div className="flex flex-col p-4 flex-1">
+      <div className="flex flex-col-reverse overflow-y-scroll flex-1">
         {messages
           .slice()
           .reverse()
