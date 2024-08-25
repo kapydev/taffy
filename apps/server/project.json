@@ -45,7 +45,7 @@
       "options": {
         "commands": [
           "nx run server:build:development",
-          "nodemon ./dist/apps/server/main.js"
+          "nodemon --delay 100ms ./dist/apps/server/main.js"
         ]
       }
     }
