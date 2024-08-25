@@ -3,23 +3,24 @@ import { BaseMessage } from './BaseMessage';
 import { prettyPrintGeneratedFolder } from '@cto-ai/shared-helpers';
 import { GeneratedFolder, RawMessage } from '@cto-ai/shared-types';
 
-export class SystemPrompt implements BaseMessage {
+export class SystemPrompt extends BaseMessage {
   prompt: string;
 
   constructor(root: GeneratedFolder) {
+    super();
     this.prompt = [
-      this.getPersona(),
-      this.getActionTutorial(),
-      this.getFolderStructure(root),
-    ].join('\n');
+      this.addTitle('PERSONA', this.getPersona()),
+      this.addTitle('ACTION TUTORIAL', this.getActionTutorial()),
+      this.addTitle('CODEBASE CONTEXT', this.getCodebaseContext(root)),
+    ].join('\n\n');
   }
 
-  getFolderStructure(folder: GeneratedFolder): string {
-    return dedent`The following is the user's codebase structure. 
+  getCodebaseContext(folder: GeneratedFolder): string {
+    return `The following is the user's codebase structure. 
     
-    If it does not provide enough context to you solve the user's problem, use the actions as necessary to get more context.
-    
-    ${prettyPrintGeneratedFolder(folder)}`;
+If it does not provide enough context to you solve the user's problem, use the actions as necessary to get more context.
+
+${prettyPrintGeneratedFolder(folder)}`;
   }
 
   getPersona(): string {
@@ -36,7 +37,7 @@ export class SystemPrompt implements BaseMessage {
       
       Below are the actions available to you and instructions on how to use them`,
       actionToLLMDescription(readFileAction),
-    ].join('\n');
+    ].join('\n\n');
   }
 
   toRawMessages(): RawMessage[] {
@@ -58,13 +59,13 @@ function actionToLLMDescription(action: Action): string {
     .map((key) => `${key}=${action.sampleProps[key]}`)
     .join(' ');
 
-  let result = dedent`Name: ${action.name}
-    Description:
-    ${action.desc}
-    Props:
-    ${propDescStr}
-    Sample:
-    {ACTION ${action.name} ${samplePropsStr}}\n`;
+  let result = `Name: ${action.name}
+Description:
+${action.desc}
+Props:
+${propDescStr}
+Sample:
+{ACTION ${action.name} ${samplePropsStr}}\n`;
 
   if (action.sampleContents !== undefined) {
     result += action.sampleContents + '\n';
@@ -92,5 +93,5 @@ const readFileAction: Action = {
   sampleProps: {
     file: JSON.stringify('src/index.ts'),
   },
-  sampleContents: 'Sample content for READ_FILE action',
+  sampleContents: undefined,
 };
