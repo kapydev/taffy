@@ -37,7 +37,8 @@
       "plugin": "@nx/jest/plugin",
       "options": {
         "targetName": "test"
-      }
+      },
+      "exclude": ["apps/server-e2e/**/*"]
     }
   ],
   "generators": {
@@ -56,6 +57,13 @@
         "linter": "eslint",
         "unitTestRunner": "none"
       }
+    }
+  },
+  "targetDefaults": {
+    "@nx/esbuild:esbuild": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
     }
   }
 }
