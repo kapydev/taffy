@@ -37,7 +37,9 @@ export function MainChat() {
                   : 'text-green-600'
               }`}
             >
-              <strong>{message.role === 'assistant' ? 'AI: ' : 'You: '}</strong>
+              <strong>
+                {message.role.charAt(0).toUpperCase() + message.role.slice(1)}
+              </strong>
               <div
                 dangerouslySetInnerHTML={{
                   __html: message.content
