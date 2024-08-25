@@ -1,7 +1,8 @@
 import { createBetterStore } from '@cto-ai/shared-helpers';
+import { RawMessage } from '@cto-ai/shared-types';
 
-const initialMessages = [
-  { role: 'human', content: 'Hello, can you help me with React?' },
+const initialMessages: RawMessage[] = [
+  // { role: 'human', content: 'Hello, can you help me with React?' },
   // {
   //   role: 'ai',
   //   content:
