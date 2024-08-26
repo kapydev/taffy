@@ -1,16 +1,16 @@
 import { RawMessage } from '@cto-ai/shared-types';
 import { BaseMessage } from './BaseMessage';
 
-export class HumanMessage extends BaseMessage {
-  constructor(public userInput: string) {
+export class AssistantMessage extends BaseMessage {
+  constructor(public assistantResponse: string) {
     super();
   }
 
   toRawMessages(): RawMessage[] {
     return [
       {
-        role: 'user',
-        content: this.userInput,
+        role: 'assistant',
+        content: this.assistantResponse,
       },
     ];
   }

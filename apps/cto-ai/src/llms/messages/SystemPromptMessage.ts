@@ -3,7 +3,7 @@ import { BaseMessage } from './BaseMessage';
 import { prettyPrintGeneratedFolder } from '@cto-ai/shared-helpers';
 import { GeneratedFolder, RawMessage } from '@cto-ai/shared-types';
 
-export class SystemPrompt extends BaseMessage {
+export class SystemPromptMessage extends BaseMessage {
   prompt: string;
 
   constructor(root: GeneratedFolder) {
@@ -32,10 +32,12 @@ ${prettyPrintGeneratedFolder(folder)}`;
       dedent`There are several actions available to you to use where necessary.
       
       The actions are used for these cases:
-      1. Request additional data from users
+      1. Request additional context, from the user or other information source
       2. Prompt the user to make a change to their codebase
+
+      You can request to perform multiple actions at once. 
       
-      Below are the actions available to you and instructions on how to use them`,
+      Below are the actions available to you and instructions on how to use them.`,
       actionToLLMDescription(readFileAction),
     ].join('\n\n');
   }
@@ -86,7 +88,7 @@ interface Action {
 
 const readFileAction: Action = {
   name: 'READ_FILE',
-  desc: 'Ask the user for permission to add a file to the context',
+  desc: 'Ask the user for permission to add a file to the context. You can ask to read multiple files, BUT WAIT FOR THE USERS RESPONSE BEFORE CONTINUING TO RESPOND TO THE ORIGINAL QUESTION.',
   propDesc: {
     file: 'The file referenced for the action',
   },

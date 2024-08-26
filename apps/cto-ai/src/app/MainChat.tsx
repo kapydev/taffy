@@ -3,6 +3,7 @@ import { Send } from 'lucide-react';
 import { useState } from 'react';
 
 import { chatStore, promptClaude } from '../stores/chat-store';
+import { HumanMessage } from '../llms/messages/HumanMessage';
 
 export function MainChat() {
   const messages = chatStore.use('messages');
@@ -17,7 +18,7 @@ export function MainChat() {
     setInput('');
     chatStore.set('messages', [
       ...chatStore.get('messages'),
-      { role: 'user', content: input },
+      new HumanMessage(input),
     ]);
     promptClaude();
   };
@@ -26,6 +27,7 @@ export function MainChat() {
     <div className="flex flex-col p-4 flex-1">
       <div className="flex flex-col-reverse overflow-y-scroll flex-1">
         {messages
+          .flatMap((msg) => msg.toRawMessages())
           .slice()
           .reverse()
           .map((message, index) => (

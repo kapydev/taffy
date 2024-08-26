@@ -1,7 +1,7 @@
 import { createBetterStore } from '@cto-ai/shared-helpers';
 import { GeneratedFolder } from '@cto-ai/shared-types';
 import { trpc } from '../client';
-import { SystemPrompt } from '../llms/messages/SystemPrompt';
+import { SystemPromptMessage } from '../llms/messages/SystemPromptMessage';
 import { chatStore } from './chat-store';
 
 export const fileStore = createBetterStore({
@@ -14,6 +14,5 @@ trpc.files.getWorkingDirFolderStructure.query().then((fileTree) => {
   fileStore.set('rootFolder', rootFolder);
   const msgs = chatStore.get('messages');
   if (msgs.length > 0) return;
-  const basePrompt = new SystemPrompt(rootFolder);
-  chatStore.set('messages', [...msgs, ...basePrompt.toRawMessages()]);
+  chatStore.set('messages', [new SystemPromptMessage(rootFolder)]);
 });
