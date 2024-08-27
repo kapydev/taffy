@@ -3,6 +3,7 @@ import { RawMessage } from '@cto-ai/shared-types';
 import { Claude } from '../llms/claude';
 import { CustomMessage } from '../llms/messages/Messages';
 import { AssistantMessage } from '../llms/messages/AssistantMessage';
+import { LLM } from '../llms/base-llm';
 
 const initialMessages: RawMessage[] = [
   // { role: 'human', content: 'Hello, can you help me with React?' },
@@ -30,18 +31,27 @@ export const keyStore = createBetterStore(
   { persistKey: 'key-store' }
 );
 
-export async function promptClaude() {
-  const curMsgs = chatStore.get('messages');
+export async function runPromptsClaude() {
   const claudeKey = keyStore.get('claudeKey');
   if (claudeKey === '') {
     throw new Error('Missing Claude key!');
   }
   const claude = new Claude(claudeKey);
+  return runPrompts(claude);
+}
+
+async function runPrompts(llm: LLM) {
+  const curMsgs = chatStore.get('messages');
+
   const rawMessages = curMsgs.flatMap((msg) => msg.toRawMessages());
-  const stream = claude.prompt(rawMessages);
-  let fullResponse = '';
+  const stream = llm.prompt(rawMessages);
+  const assistantMessage = new AssistantMessage('');
   for await (const textChunk of stream) {
-    fullResponse += textChunk;
-    chatStore.set('messages', [...curMsgs, new AssistantMessage(fullResponse)]);
+    assistantMessage.response += textChunk;
+
+    chatStore.set('messages', [
+      ...curMsgs,
+      ...assistantMessage.toParsedMessages(),
+    ]);
   }
 }

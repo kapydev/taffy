@@ -2,6 +2,7 @@ import { RawMessage } from '@cto-ai/shared-types';
 import { BaseMessage } from './BaseMessage';
 
 export class FileContextMessage extends BaseMessage {
+  role: 'user' | 'assistant' | 'system' = 'user';
   constructor(public filePath: string, public fileContent: string) {
     super();
   }

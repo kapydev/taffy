@@ -1,16 +1,22 @@
 import { RawMessage } from '@cto-ai/shared-types';
 import { BaseMessage } from './BaseMessage';
+import { CustomMessage } from './Messages';
 
 export class AssistantMessage extends BaseMessage {
-  constructor(public assistantResponse: string) {
+  role: 'user' | 'assistant' | 'system' = 'assistant';
+  constructor(public response: string) {
     super();
+  }
+
+  toParsedMessages(): CustomMessage[] {
+    return [this];
   }
 
   toRawMessages(): RawMessage[] {
     return [
       {
         role: 'assistant',
-        content: this.assistantResponse,
+        content: this.response,
       },
     ];
   }
