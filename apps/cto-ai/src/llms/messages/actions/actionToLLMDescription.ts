@@ -1,6 +1,6 @@
-import { Action } from './Action';
+import { ActionTemplate } from './Action';
 
-export function actionToLLMDescription(action: Action): string {
+export function actionToLLMDescription(action: ActionTemplate): string {
   const propDescStr = Object.keys(action.propDesc)
     .map((key) => `${key} - ${action.propDesc[key]}`)
     .join('\n');

@@ -2,7 +2,7 @@ import dedent from 'dedent-js';
 import { BaseMessage } from './BaseMessage';
 import { prettyPrintGeneratedFolder } from '@cto-ai/shared-helpers';
 import { GeneratedFolder, RawMessage } from '@cto-ai/shared-types';
-import { readFileAction } from './actions/readFileAction';
+import { readFileActionTemplate } from './actions/readFileAction';
 import { actionToLLMDescription } from './actions/actionToLLMDescription';
 
 export class SystemPromptMessage extends BaseMessage {
@@ -41,7 +41,7 @@ ${prettyPrintGeneratedFolder(folder)}`;
       You can request to perform multiple actions at once. 
       
       Below are the actions available to you and instructions on how to use them.`,
-      actionToLLMDescription(readFileAction),
+      actionToLLMDescription(readFileActionTemplate),
     ].join('\n\n');
   }
 
