@@ -1,6 +1,7 @@
 import { RawMessage } from '@cto-ai/shared-types';
 import { BaseMessage } from './BaseMessage';
 import { CustomMessage } from './Messages';
+import { ActionMessage } from './ActionMessage';
 
 export class AssistantMessage extends BaseMessage {
   role: 'user' | 'assistant' | 'system' = 'assistant';
@@ -9,7 +10,9 @@ export class AssistantMessage extends BaseMessage {
   }
 
   toParsedMessages(): CustomMessage[] {
-    return [this];
+    const parsedMessages: CustomMessage[] = [];
+
+    return parsedMessages;
   }
 
   toRawMessages(): RawMessage[] {

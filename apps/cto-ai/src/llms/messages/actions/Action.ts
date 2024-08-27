@@ -1,3 +1,5 @@
+import { ReadFileAction } from './readFileAction';
+
 export interface ActionTemplate {
   name: string;
   desc: string;
@@ -7,7 +9,10 @@ export interface ActionTemplate {
 }
 
 export type InferAction<T extends ActionTemplate> = {
-  name: T['name'];
-  contents: T['sampleContents'];
-  props: T['sampleProps'];
+  name?: T['name'];
+  contents?: T['sampleContents'];
+  props?: T['sampleProps'];
 };
+
+export type AnyAction = InferAction<ActionTemplate>;
+export type Action = ReadFileAction;

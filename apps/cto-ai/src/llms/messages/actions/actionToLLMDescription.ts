@@ -1,25 +1,34 @@
-import { ActionTemplate } from './Action';
+import { Action, ActionTemplate, AnyAction } from './Action';
 
 export function actionToLLMDescription(action: ActionTemplate): string {
   const propDescStr = Object.keys(action.propDesc)
     .map((key) => `${key} - ${action.propDesc[key]}`)
     .join('\n');
 
-  const samplePropsStr = JSON.stringify(action.sampleProps);
+  const sampleAction: AnyAction = {
+    name: action.name,
+    props: action.sampleProps,
+    contents: action.sampleContents,
+  };
 
-  let result = `Name: ${action.name}
+  return `Name: ${action.name}
 Description:
 ${action.desc}
 Props:
 ${propDescStr}
 Sample:
-{ACTION ${action.name} ${samplePropsStr}}\n`;
+${actionToActionString(sampleAction)}`;
+}
 
-  if (action.sampleContents !== undefined) {
-    result += action.sampleContents + '\n';
+export function actionToActionString(action: AnyAction): string {
+  const samplePropsStr = JSON.stringify(action.props);
+
+  let result = `{ACTION ${action.name} ${samplePropsStr}}`;
+
+  if (action.contents !== undefined) {
+    result += action.contents + '\n';
   }
 
   result += `{END_ACTION ${action.name}}`;
-
   return result;
 }

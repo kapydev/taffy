@@ -1,11 +1,12 @@
 import { RawMessage } from '@cto-ai/shared-types';
 import { BaseMessage } from './BaseMessage';
-import { ActionTemplate } from './actions/Action';
+import { actionToActionString } from './actions';
+import { Action } from './actions/Action';
 
 export class ActionMessage extends BaseMessage {
   role: 'user' | 'assistant' | 'system' = 'assistant';
 
-  constructor(public actionString: string) {
+  constructor(public action: Action) {
     super();
   }
 
@@ -13,7 +14,7 @@ export class ActionMessage extends BaseMessage {
     return [
       {
         role: this.role,
-        content: this.actionString,
+        content: actionToActionString(this.action),
       },
     ];
   }
