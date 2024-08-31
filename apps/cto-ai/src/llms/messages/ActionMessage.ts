@@ -5,9 +5,24 @@ import { Action, AnyAction } from './actions/Action';
 
 export class ActionMessage extends BaseMessage {
   role: 'user' | 'assistant' | 'system' = 'assistant';
+  name: AnyAction['name'];
+  props: AnyAction['props'];
 
-  constructor(public action: AnyAction) {
+  get action(): AnyAction {
+    return {
+      name: this.name,
+      props: this.props,
+      contents: this.contents,
+    };
+  }
+
+  constructor(action: AnyAction) {
     super();
+    this.name = action.name;
+    if (action.contents) {
+      this.contents = action.contents;
+    }
+    this.props = action.props;
   }
 
   toRawMessages(): RawMessage[] {

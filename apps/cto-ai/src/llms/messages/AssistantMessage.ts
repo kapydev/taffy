@@ -5,8 +5,10 @@ import { ActionMessage } from './ActionMessage';
 
 export class AssistantMessage extends BaseMessage {
   role: 'user' | 'assistant' | 'system' = 'assistant';
-  constructor(public response: string) {
+  constructor(response?: string) {
     super();
+    if (!response) return;
+    this.contents = response;
   }
 
   toParsedMessages(): CustomMessage[] {
@@ -19,7 +21,7 @@ export class AssistantMessage extends BaseMessage {
     return [
       {
         role: 'assistant',
-        content: this.response,
+        content: this.contents,
       },
     ];
   }
