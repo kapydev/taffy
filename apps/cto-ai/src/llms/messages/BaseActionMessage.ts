@@ -1,22 +1,22 @@
 import { RawMessage } from '@cto-ai/shared-types';
 import { BaseMessage } from './BaseMessage';
 import { actionToActionString } from './actions';
-import { Action, AnyAction } from './actions/Action';
+import { AnyAction } from './actions/Action';
 
-export class ActionMessage extends BaseMessage {
+export class BaseActionMessage<T extends AnyAction> extends BaseMessage {
   role: 'user' | 'assistant' | 'system' = 'assistant';
-  name: AnyAction['name'];
-  props: AnyAction['props'];
+  name: T['name'];
+  props: T['props'];
 
-  get action(): AnyAction {
+  get action(): T {
     return {
       name: this.name,
       props: this.props,
       contents: this.contents,
-    };
+    } as T;
   }
 
-  constructor(action: AnyAction) {
+  constructor(action: T) {
     super();
     this.name = action.name;
     if (action.contents) {

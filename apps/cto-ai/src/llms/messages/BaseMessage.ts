@@ -2,11 +2,18 @@ import { RawMessage } from '@cto-ai/shared-types';
 
 export abstract class BaseMessage {
   public contents = '';
+  private _titles: string[] = [];
   abstract role: RawMessage['role'];
   abstract toRawMessages(): RawMessage[];
 
   /** Add a title to your message with markdown headings */
   addTitle(title: string, contents: string) {
-    return `# ${title}\n${contents}`;
+    const formattedTitle = `# ${title}\n${contents}`;
+    this._titles.push(title);
+    return formattedTitle;
+  }
+
+  get titles(): readonly string[] {
+    return this._titles;
   }
 }

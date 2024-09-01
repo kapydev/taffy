@@ -1,7 +1,7 @@
 import { RawMessage } from '@cto-ai/shared-types';
 import { BaseMessage } from './BaseMessage';
 import { CustomMessage } from './Messages';
-import { ActionMessage } from './ActionMessage';
+import { BaseActionMessage } from './BaseActionMessage';
 
 export class AssistantMessage extends BaseMessage {
   role: 'user' | 'assistant' | 'system' = 'assistant';

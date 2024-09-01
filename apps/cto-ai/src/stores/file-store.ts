@@ -5,6 +5,7 @@ import { SystemPromptMessage } from '../llms/messages/SystemPromptMessage';
 import { chatStore } from './chat-store';
 import { HumanMessage } from '../llms/messages/HumanMessage';
 import { AssistantMessage } from '../llms/messages/AssistantMessage';
+import { LLMOutputParser } from '../llms/messages/LLMOutputParser';
 
 export const fileStore = createBetterStore({
   rootFolder: undefined as GeneratedFolder | undefined,
@@ -16,11 +17,8 @@ trpc.files.getWorkingDirFolderStructure.query().then((fileTree) => {
   fileStore.set('rootFolder', rootFolder);
   const msgs = chatStore.get('messages');
   if (msgs.length > 0) return;
-  chatStore.set('messages', [
-    new SystemPromptMessage(rootFolder),
-    new HumanMessage('Please tell me how to implement a gpt adapter'),
-    new AssistantMessage(
-`To implement a gpt adapter, we can look at how the claude.ts adapter is implemented, and implement it based on that.
+  const parser = new LLMOutputParser();
+  parser.parse(`To implement a gpt adapter, we can look at how the claude.ts adapter is implemented, and implement it based on that.
 
 I will need access to the base-llm.ts and claude.ts files to fully understand how to do it.
 
@@ -28,7 +26,12 @@ I will need access to the base-llm.ts and claude.ts files to fully understand ho
 {END_ACTION READ_FILE}
 
 {ACTION READ_FILE {"file":"apps/cto-ai/src/llms/base-llm.ts"}}
-{END_ACTION READ_FILE}`
-    ),
+{END_ACTION READ_FILE}
+
+We can proceed after the file contents are provided.`);
+  chatStore.set('messages', [
+    new SystemPromptMessage(rootFolder),
+    new HumanMessage('Please tell me how to implement a gpt adapter'),
+    ...parser.getMessages(),
   ]);
 });

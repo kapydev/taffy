@@ -1,9 +1,13 @@
 import { LLMGeneratedMessage } from './Messages';
-import { ActionMessage } from './ActionMessage';
+import { BaseActionMessage } from './BaseActionMessage';
 import { AssistantMessage } from './AssistantMessage';
 
 export class LLMOutputParser {
   private messages: LLMGeneratedMessage[] = [new AssistantMessage()];
+
+  parse(lines: string) {
+    lines.split('\n').forEach((line) => this.parseLine(line));
+  }
 
   parseLine(line: string) {
     const actionStartMatch = line.match(/{ACTION (\w+) (.*)}/);
@@ -11,7 +15,7 @@ export class LLMOutputParser {
     if (actionStartMatch) {
       const actionType = actionStartMatch[1];
       const actionPayload = JSON.parse(actionStartMatch[2]);
-      const actionMessage = new ActionMessage({
+      const actionMessage = new BaseActionMessage({
         name: actionType,
         ...actionPayload,
       });

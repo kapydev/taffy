@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 import { chatStore, runPromptsClaude } from '../stores/chat-store';
 import { HumanMessage } from '../llms/messages/HumanMessage';
+import { Messages } from './Messages';
 
 export function MainChat() {
   const messages = chatStore.use('messages');
@@ -25,32 +26,8 @@ export function MainChat() {
 
   return (
     <div className="flex flex-col p-4 flex-1">
-      <div className="flex flex-col-reverse overflow-y-scroll flex-1">
-        {messages
-          .flatMap((msg) => msg.toRawMessages())
-          .slice()
-          .reverse()
-          .map((message, index) => (
-            <div
-              key={index}
-              className={`mb-4 ${
-                message.role === 'assistant'
-                  ? 'text-blue-600'
-                  : 'text-green-600'
-              }`}
-            >
-              <strong>
-                {message.role.charAt(0).toUpperCase() + message.role.slice(1)}
-              </strong>
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: message.content
-                    .replace(/\n/g, '<br>')
-                    .replace(/```(.+?)```/gs, '<pre><code>$1</code></pre>'),
-                }}
-              />
-            </div>
-          ))}
+      <div className="flex flex-col-reverse overflow-x-scroll flex-1">
+        <Messages />
       </div>
       <div className="flex mt-4">
         <Input

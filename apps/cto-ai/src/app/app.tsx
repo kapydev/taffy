@@ -57,8 +57,8 @@ export default function App() {
   };
 
   return (
-    <div className="flex h-screen">
-      <div className="w-64 flex flex-col bg-gray-100 p-4 overflow-auto">
+    <div className="flex h-screen w-screen">
+      <div className="w-64 flex flex-col bg-gray-100 p-4 overflow-auto flex-shrink-0">
         <h2 className="text-lg font-semibold mb-4">Repository Files</h2>
         <ScrollArea className="flex-1">
           {rootFolder && renderFileTree(rootFolder)}
