@@ -1,6 +1,7 @@
-import { LLMGeneratedMessage } from './Messages';
-import { BaseActionMessage } from './BaseActionMessage';
+import { readFileActionTemplate } from './actions';
 import { AssistantMessage } from './AssistantMessage';
+import { LLMGeneratedMessage } from './Messages';
+import { ReadFileActionMessage } from './ReadFileActionMessage';
 
 export class LLMOutputParser {
   private messages: LLMGeneratedMessage[] = [new AssistantMessage()];
@@ -10,16 +11,21 @@ export class LLMOutputParser {
   }
 
   parseLine(line: string) {
-    const actionStartMatch = line.match(/{ACTION (\w+) (.*)}/);
+    const actionStartMatch = line.match(/{ACTION (\w+)(?: (.*))?}/);
     const actionEndMatch = line.match(/{END_ACTION (\w+)}/);
     if (actionStartMatch) {
       const actionType = actionStartMatch[1];
-      const actionPayload = JSON.parse(actionStartMatch[2]);
-      const actionMessage = new BaseActionMessage({
-        name: actionType,
-        ...actionPayload,
-      });
-      this.messages.push(actionMessage);
+      const actionPayload = actionStartMatch[2]
+        ? JSON.parse(actionStartMatch[2])
+        : {};
+      if (actionType === readFileActionTemplate.name) {
+        this.messages.push(
+          new ReadFileActionMessage({
+            name: actionType,
+            ...actionPayload,
+          })
+        );
+      }
     } else if (actionEndMatch) {
       const assistantMessage = new AssistantMessage(''); // Create a new assistant message with empty response
       this.messages.push(assistantMessage);

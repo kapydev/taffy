@@ -1,4 +1,8 @@
 import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+  Button,
   Card,
   CardContent,
   CardDescription,
@@ -11,6 +15,7 @@ import { HumanMessage } from '../../llms/messages/HumanMessage';
 import { AssistantMessage } from '../../llms/messages/AssistantMessage';
 import { BaseActionMessage } from '../../llms/messages/BaseActionMessage';
 import { ReadFileActionMessage } from '../../llms/messages/ReadFileActionMessage';
+import { FilePlus2Icon, ServerIcon } from 'lucide-react';
 
 export function CustomMessageRender({ message }: { message: CustomMessage }) {
   if (message instanceof SystemPromptMessage) {
@@ -31,16 +36,19 @@ function ReadFileActionMessageRender({
   message: ReadFileActionMessage;
 }) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Requesting permission to read the following files</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <Alert>
+      <FilePlus2Icon className="w-4 h-4" />
+      <AlertTitle>Requesting permission to read the following files</AlertTitle>
+      <AlertDescription>
         {message.files.map((fileName) => (
           <div>{fileName}</div>
         ))}
-      </CardContent>
-    </Card>
+      </AlertDescription>
+      <div className="flex gap-2">
+        <Button className="text-red-500">Decline</Button>
+        <Button className="text-black">Approve</Button>
+      </div>
+    </Alert>
   );
 }
 
@@ -54,14 +62,14 @@ function HumanMessageRender({ message }: { message: HumanMessage }) {
 
 function SystemPromptRender({ message }: { message: SystemPromptMessage }) {
   return (
-    <Card>
-      <CardHeader>
-        <CardDescription>
-          {message.titles.map((title) => (
-            <div key={title}>{title}</div>
-          ))}
-        </CardDescription>
-      </CardHeader>
-    </Card>
+    <Alert>
+      <ServerIcon className="w-4 h-4" />
+      <AlertTitle>System Prompt Overview</AlertTitle>
+      <AlertDescription>
+        {message.titles.map((title) => (
+          <div key={title}>{title}</div>
+        ))}
+      </AlertDescription>
+    </Alert>
   );
 }

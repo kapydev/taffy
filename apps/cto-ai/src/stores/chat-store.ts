@@ -46,12 +46,12 @@ async function runPrompts(llm: LLM) {
   const rawMessages = curMsgs.flatMap((msg) => msg.toRawMessages());
   const stream = llm.prompt(rawMessages);
   const assistantMessage = new AssistantMessage('');
-  for await (const textChunk of stream) {
-    assistantMessage.response += textChunk;
+  // for await (const textChunk of stream) {
+  //   assistantMessage.response += textChunk;
 
-    chatStore.set('messages', [
-      ...curMsgs,
-      ...assistantMessage.toParsedMessages(),
-    ]);
-  }
+  //   chatStore.set('messages', [
+  //     ...curMsgs,
+  //     ...assistantMessage.toParsedMessages(),
+  //   ]);
+  // }
 }

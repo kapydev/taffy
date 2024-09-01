@@ -22,10 +22,9 @@ trpc.files.getWorkingDirFolderStructure.query().then((fileTree) => {
 
 I will need access to the base-llm.ts and claude.ts files to fully understand how to do it.
 
-{ACTION READ_FILE {"file":"apps/cto-ai/src/llms/claude.ts"}}
-{END_ACTION READ_FILE}
-
-{ACTION READ_FILE {"file":"apps/cto-ai/src/llms/base-llm.ts"}}
+{ACTION READ_FILE}
+apps/cto-ai/src/llms/claude.ts
+apps/cto-ai/src/llms/base-llm.ts
 {END_ACTION READ_FILE}
 
 We can proceed after the file contents are provided.`);
