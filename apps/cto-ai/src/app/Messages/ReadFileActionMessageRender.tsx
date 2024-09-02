@@ -2,13 +2,20 @@ import { Alert, AlertDescription, AlertTitle } from '@cto-ai/components';
 import { FilePlus2Icon } from 'lucide-react';
 import { Button } from 'react-day-picker';
 import { ReadFileActionMessage } from '../../llms/messages/ReadFileActionMessage';
+import { FileContextMessage } from '../../llms/messages/FileContextMessage';
+import { getFileContentsByPath } from '../../stores/file-store';
 
 export function ReadFileActionMessageRender({
   message,
 }: {
   message: ReadFileActionMessage;
 }) {
-  const addFilesToContext = () => {};
+  const addFilesToContext = () => {
+    message.files.map((filePath) => {
+      const contents = getFileContentsByPath(filePath);
+      const fileContextMsg = new FileContextMessage(filePath, contents);
+    });
+  };
 
   return (
     <Alert>

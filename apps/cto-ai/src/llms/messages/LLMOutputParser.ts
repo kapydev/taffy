@@ -1,4 +1,4 @@
-import { readFileActionTemplate } from './actions';
+import { writeFileActionTemplate } from './actions';
 import { AssistantMessage } from './AssistantMessage';
 import { LLMGeneratedMessage } from './Messages';
 import { ReadFileActionMessage } from './ReadFileActionMessage';
@@ -18,7 +18,7 @@ export class LLMOutputParser {
       const actionPayload = actionStartMatch[2]
         ? JSON.parse(actionStartMatch[2])
         : {};
-      if (actionType === readFileActionTemplate.name) {
+      if (actionType === writeFileActionTemplate.name) {
         this.messages.push(
           new ReadFileActionMessage({
             name: actionType,

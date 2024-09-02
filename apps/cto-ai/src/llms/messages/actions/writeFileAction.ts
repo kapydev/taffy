@@ -1,6 +1,6 @@
 import { ActionTemplate, InferAction } from './Action';
 
-export const readFileActionTemplate = {
+export const writeFileActionTemplate = {
   name: 'WRITE_FILE',
   desc: 'Ask the user for permission to create a new file. The contents should be all the files that needs to be written, seperated by newlines.',
   propDesc: {
@@ -15,4 +15,4 @@ export const readFileActionTemplate = {
 }`,
 } satisfies ActionTemplate;
 
-export type WriteFileAction = InferAction<typeof readFileActionTemplate>;
+export type WriteFileAction = InferAction<typeof writeFileActionTemplate>;

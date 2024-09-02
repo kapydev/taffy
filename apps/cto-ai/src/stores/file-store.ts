@@ -12,7 +12,7 @@ export const fileStore = createBetterStore({
   rootFolder: undefined as GeneratedFolder | undefined,
 });
 
-function getFileContentsByPath(filePath: string): GeneratedFile | undefined {
+export function getFileContentsByPath(filePath: string): GeneratedFile | undefined {
   const traverseFolder = (
     folder: GeneratedFolder,
     targetPath: string
