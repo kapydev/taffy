@@ -61,7 +61,7 @@ export function MessageGroupWrapper({
               .flatMap((msg) =>
                 msg.toRawMessages().flatMap((rawMsg) => rawMsg.content)
               )
-              .join()}
+              .join('')}
           </code>
         </pre>
       );
