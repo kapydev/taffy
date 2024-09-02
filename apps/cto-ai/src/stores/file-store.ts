@@ -17,19 +17,29 @@ export function getFileContentsByPath(
 ): GeneratedFile | undefined {
   const traverseFolder = (
     folder: GeneratedFolder,
-    targetPath: string
+    pathParts: string[]
   ): GeneratedFile | undefined => {
-    for (const file of folder.files) {
-      if (path.posix.join(folder.name, file.name) === targetPath) {
-        return file;
-      }
+    if (pathParts.length === 0) {
+      return undefined;
     }
+
+    const [currentPart, ...remainingParts] = pathParts;
+
+    if (remainingParts.length === 0) {
+      for (const file of folder.files) {
+        if (file.name === currentPart) {
+          return file;
+        }
+      }
+      return undefined;
+    }
+
     for (const subFolder of folder.subFolders) {
-      const result = traverseFolder(subFolder, targetPath);
-      if (result) {
-        return result;
+      if (subFolder.name === currentPart) {
+        return traverseFolder(subFolder, remainingParts);
       }
     }
+
     return undefined;
   };
 
@@ -38,7 +48,8 @@ export function getFileContentsByPath(
     return undefined;
   }
 
-  return traverseFolder(rootFolder, filePath);
+  const pathParts = filePath.split('/');
+  return traverseFolder(rootFolder, pathParts);
 }
 
 trpc.files.getWorkingDirFolderStructure.query().then((fileTree) => {

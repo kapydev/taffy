@@ -37,13 +37,4 @@ async function runPrompts(llm: LLM) {
   await parser.handleTextStream(stream, () => {
     chatStore.set('messages', [...curMsgs, ...parser.getMessages()]);
   });
-
-  // for await (const textChunk of stream) {
-  //   assistantMessage.response += textChunk;
-
-  //   chatStore.set('messages', [
-  //     ...curMsgs,
-  //     ...assistantMessage.toParsedMessages(),
-  //   ]);
-  // }
 }

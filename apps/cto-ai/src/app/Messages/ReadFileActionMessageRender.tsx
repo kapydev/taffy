@@ -4,6 +4,7 @@ import { Button } from 'react-day-picker';
 import { ReadFileActionMessage } from '../../llms/messages/ReadFileActionMessage';
 import { FileContextMessage } from '../../llms/messages/FileContextMessage';
 import { getFileContentsByPath } from '../../stores/file-store';
+import { chatStore } from '../../stores/chat-store';
 
 export function ReadFileActionMessageRender({
   message,
@@ -11,10 +12,14 @@ export function ReadFileActionMessageRender({
   message: ReadFileActionMessage;
 }) {
   const addFilesToContext = () => {
-    message.files.map((filePath) => {
+    const fileContextMsgs = message.files.map((filePath) => {
       const contents = getFileContentsByPath(filePath);
-      const fileContextMsg = new FileContextMessage(filePath, contents);
+      return new FileContextMessage(filePath, contents);
     });
+    chatStore.set('messages', [
+      ...chatStore.get('messages'),
+      ...fileContextMsgs,
+    ]);
   };
 
   return (
