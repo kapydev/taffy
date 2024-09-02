@@ -2,8 +2,8 @@ import { Button, Input } from '@cto-ai/components';
 import { Send } from 'lucide-react';
 import { useState } from 'react';
 
-import { chatStore, runPromptsClaude } from '../stores/chat-store';
 import { HumanMessage } from '../llms/messages/HumanMessage';
+import { chatStore, runPromptsGPT } from '../stores/chat-store';
 import { Messages } from './Messages';
 
 export function MainChat() {
@@ -20,7 +20,7 @@ export function MainChat() {
       ...chatStore.get('messages'),
       new HumanMessage(input),
     ]);
-    runPromptsClaude();
+    runPromptsGPT();
   };
 
   return (

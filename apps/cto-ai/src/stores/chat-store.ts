@@ -4,6 +4,7 @@ import { Claude } from '../llms/claude';
 import { LLMOutputParser } from '../llms/messages/LLMOutputParser';
 import { CustomMessage } from '../llms/messages/Messages';
 import { RawMessage } from '@cto-ai/shared-types';
+import { GPT } from '../llms/gpt';
 
 export const chatStore = createBetterStore({
   messages: [] as CustomMessage[],
@@ -15,6 +16,8 @@ window.chatStore = chatStore;
 export const keyStore = createBetterStore(
   {
     claudeKey: '',
+    gptKey: '',
+    deepSeekKey: '',
   },
   { persistKey: 'key-store' }
 );
@@ -26,6 +29,15 @@ export async function runPromptsClaude() {
   }
   const claude = new Claude(claudeKey);
   return runPrompts(claude);
+}
+
+export async function runPromptsGPT() {
+  const gptKey = keyStore.get('gptKey');
+  if (gptKey === '') {
+    throw new Error('Missing Claude key!');
+  }
+  const gpt = new GPT(gptKey);
+  return runPrompts(gpt);
 }
 
 async function runPrompts(llm: LLM) {

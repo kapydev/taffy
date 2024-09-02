@@ -25,6 +25,7 @@
     "lucide-react": "^0.435.0",
     "nodemon": "^3.1.4",
     "non.geist": "^1.0.3",
+    "openai": "^4.57.0",
     "parse-gitignore": "^2.0.0",
     "react": "18.3.1",
     "react-day-picker": "^9.0.8",
