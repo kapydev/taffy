@@ -2,13 +2,16 @@ import { Alert, AlertDescription, AlertTitle } from '@cto-ai/components';
 import { FilePlus2Icon } from 'lucide-react';
 import { Button } from 'react-day-picker';
 import { WriteFileActionMessage } from '../../llms/messages/WriteFileActionMessage';
+import { updateFileContentsByPath } from '../../stores/file-store';
 
 export function WriteFileActionMessageRender({
   message,
 }: {
   message: WriteFileActionMessage;
 }) {
-  const writeUpdatedFile = async () => {};
+  const writeUpdatedFile = async () => {
+    await updateFileContentsByPath(message.props?.filePath, message.body);
+  };
 
   return (
     <Alert>
@@ -18,10 +21,8 @@ export function WriteFileActionMessageRender({
       </AlertTitle>
       <AlertDescription>
         <div>File Path - {message.props?.filePath} </div>
-        <div>Start line - </div>
-        <div>End line - {}</div>
         <pre>
-          <code>{message.contents}</code>
+          <code>{message.body}</code>
         </pre>
       </AlertDescription>
       <div className="flex gap-2">

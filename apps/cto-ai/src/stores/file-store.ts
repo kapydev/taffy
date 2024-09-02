@@ -22,13 +22,14 @@ export async function getFileContentsByPath(
 export async function updateFileContentsByPath(
   filePath: string,
   contents: string,
-  startLine: number,
-  endLine: number
+  lineData?: {
+    start: number;
+    end: number;
+  }
 ): Promise<void> {
   await trpc.files.updateFileByPath.mutate({
     filePath,
-    startLine,
-    endLine,
+    lineData,
     content: contents,
   });
 

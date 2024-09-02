@@ -10,12 +10,10 @@ export function UpdateFileActionMessageRender({
   message: UpdateFileActionMessage;
 }) {
   const updateFile = async () => {
-    await updateFileContentsByPath(
-      message.props?.filePath,
-      message.body,
-      message.props?.startLine,
-      message.props?.endLine
-    );
+    await updateFileContentsByPath(message.props.filePath, message.body, {
+      start: message.props.startLine,
+      end: message.props.endLine,
+    });
   };
 
   return (
@@ -25,9 +23,9 @@ export function UpdateFileActionMessageRender({
         Requesting permission to update the following files
       </AlertTitle>
       <AlertDescription>
-        <div>File Path - {message.props?.filePath} </div>
-        <div>Start line - {message.props?.startLine}</div>
-        <div>End line - {message.props?.endLine}</div>
+        <div>File Path - {message.props.filePath} </div>
+        <div>Start line - {message.props.startLine}</div>
+        <div>End line - {message.props.endLine}</div>
         <pre>
           <code>{message.body}</code>
         </pre>

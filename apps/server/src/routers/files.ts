@@ -30,21 +30,32 @@ export const fileRouter = router({
     .input(
       z.object({
         filePath: z.string(),
-        startLine: z.number(),
-        endLine: z.number(),
+        lineData: z
+          .object({
+            start: z.number(),
+            end: z.number(),
+          })
+          .optional(),
         content: z.string(),
       })
     )
     .mutation(async (opts) => {
-      const { filePath, startLine, endLine, content } = opts.input;
+      const { filePath, lineData, content } = opts.input;
       try {
         const fileContents = await fs.readFile(filePath, 'utf8');
         const fileLines = fileContents.split('\n');
-        const updatedLines = [
-          ...fileLines.slice(0, startLine - 1),
-          content,
-          ...fileLines.slice(endLine),
-        ];
+        let updatedLines;
+        if (lineData) {
+          const { start, end } = lineData;
+          updatedLines = [
+            ...fileLines.slice(0, start - 1),
+            content,
+            ...fileLines.slice(end),
+          ];
+        } else {
+          updatedLines = [content];
+        }
+
         await fs.writeFile(filePath, updatedLines.join('\n'), 'utf8');
         return { success: true };
       } catch (error) {
