@@ -1,15 +1,43 @@
 import { createBetterStore } from '@cto-ai/shared-helpers';
-import { GeneratedFolder } from '@cto-ai/shared-types';
+import { GeneratedFile, GeneratedFolder } from '@cto-ai/shared-types';
 import { trpc } from '../client';
 import { SystemPromptMessage } from '../llms/messages/SystemPromptMessage';
 import { chatStore } from './chat-store';
 import { HumanMessage } from '../llms/messages/HumanMessage';
 import { AssistantMessage } from '../llms/messages/AssistantMessage';
 import { LLMOutputParser } from '../llms/messages/LLMOutputParser';
+import path from 'path';
 
 export const fileStore = createBetterStore({
   rootFolder: undefined as GeneratedFolder | undefined,
 });
+
+function getFileContentsByPath(filePath: string): GeneratedFile | undefined {
+  const traverseFolder = (
+    folder: GeneratedFolder,
+    targetPath: string
+  ): GeneratedFile | undefined => {
+    for (const file of folder.files) {
+      if (path.posix.join(folder.name, file.name) === targetPath) {
+        return file;
+      }
+    }
+    for (const subFolder of folder.subFolders) {
+      const result = traverseFolder(subFolder, targetPath);
+      if (result) {
+        return result;
+      }
+    }
+    return undefined;
+  };
+
+  const rootFolder = fileStore.get('rootFolder');
+  if (!rootFolder) {
+    return undefined;
+  }
+
+  return traverseFolder(rootFolder, filePath);
+}
 
 trpc.files.getWorkingDirFolderStructure.query().then((fileTree) => {
   if (!fileTree) return;
