@@ -4,6 +4,7 @@ import { Claude } from '../llms/claude';
 import { CustomMessage } from '../llms/messages/Messages';
 import { AssistantMessage } from '../llms/messages/AssistantMessage';
 import { LLM } from '../llms/base-llm';
+import { LLMOutputParser } from '../llms/messages/LLMOutputParser';
 
 const initialMessages: RawMessage[] = [
   // { role: 'human', content: 'Hello, can you help me with React?' },
@@ -44,8 +45,13 @@ async function runPrompts(llm: LLM) {
   const curMsgs = chatStore.get('messages');
 
   const rawMessages = curMsgs.flatMap((msg) => msg.toRawMessages());
+  const parser = new LLMOutputParser();
   const stream = llm.prompt(rawMessages);
-  const assistantMessage = new AssistantMessage('');
+
+  await parser.handleTextStream(stream, () => {
+    chatStore.set('messages', [...curMsgs, ...parser.getMessages()]);
+  });
+
   // for await (const textChunk of stream) {
   //   assistantMessage.response += textChunk;
 

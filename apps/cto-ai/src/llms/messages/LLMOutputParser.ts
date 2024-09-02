@@ -6,8 +6,31 @@ import { ReadFileActionMessage } from './ReadFileActionMessage';
 export class LLMOutputParser {
   private messages: LLMGeneratedMessage[] = [new AssistantMessage()];
 
+  async handleTextStream(
+    stream: AsyncIterable<string>,
+    onMsgUpdate?: () => void
+  ) {
+    let curLine = '';
+    for await (const textChunk of stream) {
+      curLine += textChunk;
+      if (!curLine.includes('\n')) continue;
+      const lines = curLine.split('\n');
+      curLine = lines.pop() || '';
+      this.parseLines(lines);
+      onMsgUpdate?.();
+    }
+    if (curLine) {
+      this.parse(curLine);
+      onMsgUpdate?.();
+    }
+  }
+
   parse(lines: string) {
-    lines.split('\n').forEach((line) => this.parseLine(line));
+    this.parseLines(lines.split('\n'));
+  }
+
+  parseLines(lines: string[]) {
+    lines.forEach(this.parseLine, this);
   }
 
   parseLine(line: string) {

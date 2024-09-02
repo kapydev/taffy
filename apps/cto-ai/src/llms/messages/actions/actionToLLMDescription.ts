@@ -26,9 +26,9 @@ export function actionToActionString(action: AnyAction): string {
   let result = `{ACTION ${action.name}`;
 
   if (action.props && Object.keys(action.props).length > 0) {
-    result += ` ${samplePropsStr}`;
+    result += ` ${samplePropsStr}}`;
   } else {
-    result += ``;
+    result += `}`;
   }
 
   if (action.contents !== undefined) {
