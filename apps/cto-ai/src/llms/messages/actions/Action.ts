@@ -9,9 +9,9 @@ export interface ActionTemplate {
 }
 
 export type InferAction<T extends ActionTemplate> = {
-  type?: T['name'];
-  body?: T['sampleContents'];
-  props?: T['sampleProps'];
+  type: T['name'];
+  body: T['sampleContents'];
+  props: T['sampleProps'];
 };
 
 export type AnyAction = InferAction<ActionTemplate>;

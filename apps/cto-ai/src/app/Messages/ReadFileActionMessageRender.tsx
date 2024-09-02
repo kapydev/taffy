@@ -1,10 +1,10 @@
 import { Alert, AlertDescription, AlertTitle } from '@cto-ai/components';
 import { FilePlus2Icon } from 'lucide-react';
 import { Button } from 'react-day-picker';
-import { ReadFileActionMessage } from '../../llms/messages/ReadFileActionMessage';
 import { FileContextMessage } from '../../llms/messages/FileContextMessage';
+import { ReadFileActionMessage } from '../../llms/messages/ReadFileActionMessage';
+import { chatStore, runPrompts } from '../../stores/chat-store';
 import { getFileContentsByPath } from '../../stores/file-store';
-import { chatStore } from '../../stores/chat-store';
 
 export function ReadFileActionMessageRender({
   message,
@@ -23,6 +23,7 @@ export function ReadFileActionMessageRender({
       ...chatStore.get('messages'),
       ...fileContextMsgs,
     ]);
+    runPrompts();
   };
 
   return (

@@ -2,13 +2,21 @@ import { Alert, AlertDescription, AlertTitle } from '@cto-ai/components';
 import { FileEditIcon } from 'lucide-react';
 import { Button } from 'react-day-picker';
 import { UpdateFileActionMessage } from '../../llms/messages/UpdateFileActionMessage';
+import { updateFileContentsByPath } from '../../stores/file-store';
 
 export function UpdateFileActionMessageRender({
   message,
 }: {
   message: UpdateFileActionMessage;
 }) {
-  const updateFile = async () => {};
+  const updateFile = async () => {
+    await updateFileContentsByPath(
+      message.props?.filePath,
+      message.body,
+      message.props?.startLine,
+      message.props?.endLine
+    );
+  };
 
   return (
     <Alert>
@@ -21,7 +29,7 @@ export function UpdateFileActionMessageRender({
         <div>Start line - {message.props?.startLine}</div>
         <div>End line - {message.props?.endLine}</div>
         <pre>
-          <code>{message.contents}</code>
+          <code>{message.body}</code>
         </pre>
       </AlertDescription>
       <div className="flex gap-2">

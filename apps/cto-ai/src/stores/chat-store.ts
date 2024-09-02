@@ -8,6 +8,7 @@ import { GPT } from '../llms/gpt';
 
 export const chatStore = createBetterStore({
   messages: [] as CustomMessage[],
+  llm: null as LLM | null,
 });
 
 //@ts-expect-error for debugging
@@ -22,25 +23,21 @@ export const keyStore = createBetterStore(
   { persistKey: 'key-store' }
 );
 
-export async function runPromptsClaude() {
-  const claudeKey = keyStore.get('claudeKey');
-  if (claudeKey === '') {
-    throw new Error('Missing Claude key!');
+const setLlm = () => {
+  const curLlm = chatStore.get('llm');
+  if (curLlm) return curLlm;
+  if (keyStore.get('gptKey')) {
+    chatStore.set('llm', new GPT(keyStore.get('gptKey')));
+  } else if (keyStore.get('claudeKey')) {
+    chatStore.set('llm', new Claude(keyStore.get('claudeKey')));
   }
-  const claude = new Claude(claudeKey);
-  return runPrompts(claude);
-}
+  return chatStore.get('llm')!;
+};
 
-export async function runPromptsGPT() {
-  const gptKey = keyStore.get('gptKey');
-  if (gptKey === '') {
-    throw new Error('Missing Claude key!');
+export async function runPrompts(llm: LLM | null = chatStore.get('llm')) {
+  if (!llm) {
+    llm = setLlm();
   }
-  const gpt = new GPT(gptKey);
-  return runPrompts(gpt);
-}
-
-async function runPrompts(llm: LLM) {
   const curMsgs = chatStore.get('messages');
 
   const rawMessages = getRawMessages();

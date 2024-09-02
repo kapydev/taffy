@@ -3,7 +3,7 @@ import { Send } from 'lucide-react';
 import { useState } from 'react';
 
 import { HumanMessage } from '../llms/messages/HumanMessage';
-import { chatStore, runPromptsGPT } from '../stores/chat-store';
+import { chatStore, runPrompts } from '../stores/chat-store';
 import { Messages } from './Messages';
 
 export function MainChat() {
@@ -20,7 +20,7 @@ export function MainChat() {
       ...chatStore.get('messages'),
       new HumanMessage(input),
     ]);
-    runPromptsGPT();
+    runPrompts();
   };
 
   return (

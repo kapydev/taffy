@@ -19,6 +19,29 @@ export async function getFileContentsByPath(
   return data;
 }
 
+export async function updateFileContentsByPath(
+  filePath: string,
+  contents: string,
+  startLine: number,
+  endLine: number
+): Promise<void> {
+  await trpc.files.updateFileByPath.mutate({
+    filePath,
+    startLine,
+    endLine,
+    content: contents,
+  });
+
+  const data = await trpc.files.getFileByPath.query({ filePath });
+  if (!data) throw new Error('File not found');
+
+  const curFolder = fileStore.get('rootFolder');
+  if (curFolder) {
+    updateFileByKey(curFolder, filePath, data);
+    fileStore.set('rootFolder', curFolder);
+  }
+}
+
 trpc.files.getWorkingDirFolderStructure.query().then((fileTree) => {
   if (!fileTree) return;
   const rootFolder = fileTree as GeneratedFolder;

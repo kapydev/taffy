@@ -26,4 +26,29 @@ export const fileRouter = router({
         return undefined;
       }
     }),
+  updateFileByPath: publicProcedure
+    .input(
+      z.object({
+        filePath: z.string(),
+        startLine: z.number(),
+        endLine: z.number(),
+        content: z.string(),
+      })
+    )
+    .mutation(async (opts) => {
+      const { filePath, startLine, endLine, content } = opts.input;
+      try {
+        const fileContents = await fs.readFile(filePath, 'utf8');
+        const fileLines = fileContents.split('\n');
+        const updatedLines = [
+          ...fileLines.slice(0, startLine - 1),
+          content,
+          ...fileLines.slice(endLine),
+        ];
+        await fs.writeFile(filePath, updatedLines.join('\n'), 'utf8');
+        return { success: true };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    }),
 });
