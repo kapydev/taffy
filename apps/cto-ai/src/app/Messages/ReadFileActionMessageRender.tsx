@@ -12,6 +12,7 @@ export function ReadFileActionMessageRender({
   message: ReadFileActionMessage;
 }) {
   const addFilesToContext = () => {
+    console.log(message.files);
     const fileContextMsgs = message.files.map((filePath) => {
       const contents = getFileContentsByPath(filePath);
       return new FileContextMessage(filePath, contents);

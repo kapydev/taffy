@@ -3,10 +3,6 @@ import { GeneratedFile, GeneratedFolder } from '@cto-ai/shared-types';
 import { trpc } from '../client';
 import { SystemPromptMessage } from '../llms/messages/SystemPromptMessage';
 import { chatStore } from './chat-store';
-import { HumanMessage } from '../llms/messages/HumanMessage';
-import { AssistantMessage } from '../llms/messages/AssistantMessage';
-import { LLMOutputParser } from '../llms/messages/LLMOutputParser';
-import path from 'path';
 
 export const fileStore = createBetterStore({
   rootFolder: undefined as GeneratedFolder | undefined,
