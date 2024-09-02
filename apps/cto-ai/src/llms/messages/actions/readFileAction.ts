@@ -1,3 +1,4 @@
+import { ReadFileActionMessage } from '../ReadFileActionMessage';
 import { ActionTemplate, InferAction } from './Action';
 
 export const readFileActionTemplate = {

@@ -2,6 +2,9 @@ import { writeFileActionTemplate } from './actions';
 import { AssistantMessage } from './AssistantMessage';
 import { LLMGeneratedMessage } from './Messages';
 import { ReadFileActionMessage } from './ReadFileActionMessage';
+import { WriteFileActionMessage } from './WriteFileActionMessage';
+
+const logger = console;
 
 export class LLMOutputParser {
   private messages: LLMGeneratedMessage[] = [new AssistantMessage()];
@@ -17,10 +20,12 @@ export class LLMOutputParser {
       const lines = curLine.split('\n');
       curLine = lines.pop() || '';
       this.parseLines(lines);
+      logger.log(lines.join('\n'));
       onMsgUpdate?.();
     }
     if (curLine) {
       this.parse(curLine);
+      logger.log(curLine);
       onMsgUpdate?.();
     }
   }
@@ -43,7 +48,7 @@ export class LLMOutputParser {
         : {};
       if (actionType === writeFileActionTemplate.name) {
         this.messages.push(
-          new ReadFileActionMessage({
+          new WriteFileActionMessage({
             name: actionType,
             ...actionPayload,
           })

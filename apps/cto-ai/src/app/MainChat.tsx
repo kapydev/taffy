@@ -7,7 +7,6 @@ import { HumanMessage } from '../llms/messages/HumanMessage';
 import { Messages } from './Messages';
 
 export function MainChat() {
-  const messages = chatStore.use('messages');
   const [input, setInput] = useState('');
 
   const handleSend = () => {

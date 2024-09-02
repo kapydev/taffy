@@ -8,17 +8,19 @@ import { chatStore } from '../../stores/chat-store';
 export function Messages() {
   const messages = chatStore.use('messages');
   const groupedMessages = messages.reduce((acc, message) => {
-    if (!acc[message.role]) {
-      acc[message.role] = [];
+    const lastGroup = acc[acc.length - 1];
+    if (!lastGroup || lastGroup[0].role !== message.role) {
+      acc.push([message]);
+    } else {
+      lastGroup.push(message);
     }
-    acc[message.role].push(message);
     return acc;
-  }, {} as Record<CustomMessage['role'], CustomMessage[]>);
+  }, [] as CustomMessage[][]);
 
   return (
     <div>
-      {Object.entries(groupedMessages).map(([role, messages]) => (
-        <MessageGroupWrapper key={role} messages={messages} />
+      {groupedMessages.map((group, index) => (
+        <MessageGroupWrapper key={index} messages={group} />
       ))}
     </div>
   );

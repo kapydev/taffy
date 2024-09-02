@@ -1,3 +1,4 @@
+import { BaseActionMessage } from '../BaseActionMessage';
 import { ReadFileAction } from './readFileAction';
 
 export interface ActionTemplate {
