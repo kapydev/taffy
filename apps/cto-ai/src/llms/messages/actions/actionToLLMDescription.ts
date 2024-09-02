@@ -6,9 +6,9 @@ export function actionToLLMDescription(action: ActionTemplate): string {
     .join('\n');
 
   const sampleAction: AnyAction = {
-    name: action.name,
+    type: action.name,
     props: action.sampleProps,
-    contents: action.sampleContents,
+    body: action.sampleContents,
   };
 
   return `Name: ${action.name}
@@ -23,7 +23,7 @@ ${actionToActionString(sampleAction)}`;
 export function actionToActionString(action: AnyAction): string {
   const samplePropsStr = JSON.stringify(action.props);
 
-  let result = `{ACTION ${action.name}`;
+  let result = `{ACTION ${action.type}`;
 
   if (action.props && Object.keys(action.props).length > 0) {
     result += ` ${samplePropsStr}}`;
@@ -31,10 +31,10 @@ export function actionToActionString(action: AnyAction): string {
     result += `}`;
   }
 
-  if (action.contents !== undefined) {
-    result += '\n' + action.contents;
+  if (action.body !== undefined) {
+    result += '\n' + action.body;
   }
 
-  result += `\n{END_ACTION ${action.name}}`;
+  result += `\n{END_ACTION ${action.type}}`;
   return result;
 }

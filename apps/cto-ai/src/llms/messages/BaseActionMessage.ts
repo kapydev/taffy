@@ -1,35 +1,44 @@
 import { RawMessage } from '@cto-ai/shared-types';
 import { BaseMessage } from './BaseMessage';
-import { actionToActionString } from './actions';
 import { AnyAction } from './actions/Action';
 
 export class BaseActionMessage<T extends AnyAction> extends BaseMessage {
   role: 'user' | 'assistant' | 'system' = 'assistant';
-  name: T['name'];
-  props: T['props'];
+  name: T['type'];
 
   get action(): T {
     return {
-      name: this.name,
+      type: this.name,
       props: this.props,
-      contents: this.contents,
+      body: this.contents,
     } as T;
   }
 
-  constructor(action: T) {
+  constructor(actionType: T['type']) {
     super();
-    this.name = action.name;
-    if (action.contents) {
-      this.contents = action.contents;
+    this.name = actionType;
+  }
+
+  get props(): T['props'] {
+    const actionStartMatch = this.contents.match(/{ACTION \w+ (.*)}/);
+    if (actionStartMatch) {
+      return JSON.parse(actionStartMatch[1]);
     }
-    this.props = action.props;
+    return {} as T['props'];
+  }
+
+  get body(): string {
+    const bodyMatch = this.contents.match(
+      /{ACTION \w+.*}\n([\s\S]*?)\n{END_ACTION \w+}/
+    );
+    return bodyMatch ? bodyMatch[1] : '';
   }
 
   toRawMessages(): RawMessage[] {
     return [
       {
         role: this.role,
-        content: actionToActionString(this.action),
+        content: this.contents,
       },
     ];
   }

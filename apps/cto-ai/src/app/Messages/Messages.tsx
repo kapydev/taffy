@@ -50,6 +50,8 @@ export function MessageGroupWrapper({
     throw new Error('MessageGroupWrapper: not all messages have the same role');
   }
 
+  console.log(messages);
+
   const messageRender = useMemo(() => {
     if (mode === 'RAW') {
       return (

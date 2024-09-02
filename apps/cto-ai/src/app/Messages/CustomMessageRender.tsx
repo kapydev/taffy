@@ -4,12 +4,14 @@ import { HumanMessage } from '../../llms/messages/HumanMessage';
 import { CustomMessage } from '../../llms/messages/Messages';
 import { ReadFileActionMessage } from '../../llms/messages/ReadFileActionMessage';
 import { SystemPromptMessage } from '../../llms/messages/SystemPromptMessage';
+import { UpdateFileActionMessage } from '../../llms/messages/UpdateFileActionMessage';
 import { WriteFileActionMessage } from '../../llms/messages/WriteFileActionMessage';
 import { AssistantMessageRender } from './AssistantMessageRender';
 import { FileContextMessageRender } from './FileContextMessageRender';
 import { HumanMessageRender } from './HumanMessageRender';
 import { ReadFileActionMessageRender } from './ReadFileActionMessageRender';
 import { SystemPromptRender } from './SystemPromptRender';
+import { UpdateFileActionMessageRender } from './UpdateFileActionMessageRender';
 import { WriteFileActionMessageRender } from './WriteFileActionMessageRender';
 
 export function CustomMessageRender({ message }: { message: CustomMessage }) {
@@ -25,6 +27,8 @@ export function CustomMessageRender({ message }: { message: CustomMessage }) {
     return <FileContextMessageRender message={message} />;
   } else if (message instanceof WriteFileActionMessage) {
     return <WriteFileActionMessageRender message={message} />;
+  } else if (message instanceof UpdateFileActionMessage) {
+    return <UpdateFileActionMessageRender message={message} />;
   }
   return <>TODO: {message.constructor.name}</>;
 }

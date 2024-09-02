@@ -1,4 +1,3 @@
-import { BaseActionMessage } from '../BaseActionMessage';
 import { ReadFileAction } from './readFileAction';
 
 export interface ActionTemplate {
@@ -10,8 +9,8 @@ export interface ActionTemplate {
 }
 
 export type InferAction<T extends ActionTemplate> = {
-  name?: T['name'];
-  contents?: T['sampleContents'];
+  type?: T['name'];
+  body?: T['sampleContents'];
   props?: T['sampleProps'];
 };
 

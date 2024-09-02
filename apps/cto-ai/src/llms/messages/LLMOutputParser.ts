@@ -1,6 +1,4 @@
-import { writeFileActionTemplate } from './actions';
 import { AssistantMessage } from './AssistantMessage';
-import { BaseActionMessage } from './BaseActionMessage';
 import { DeleteFileActionMessage } from './DeleteFileActionMessage';
 import { LLMGeneratedMessage } from './Messages';
 import { ReadFileActionMessage } from './ReadFileActionMessage';
@@ -10,7 +8,7 @@ import { WriteFileActionMessage } from './WriteFileActionMessage';
 const logger = console;
 
 const actionTypeToMessage: {
-  [key: string]: new (...args: any[]) => LLMGeneratedMessage;
+  [key: string]: new (actionType: string) => LLMGeneratedMessage;
 } = {
   READ_FILE: ReadFileActionMessage,
   WRITE_FILE: WriteFileActionMessage,
@@ -55,25 +53,18 @@ export class LLMOutputParser {
     const actionEndMatch = line.match(/{END_ACTION (\w+)}/);
     if (actionStartMatch) {
       const actionType = actionStartMatch[1];
-      const actionPayload = actionStartMatch[2]
-        ? JSON.parse(actionStartMatch[2])
-        : {};
       const constructor = actionTypeToMessage[actionType];
       if (!constructor) {
         throw new Error('MISSING_CONSTRUCTOR');
       }
-      this.messages.push(
-        new constructor({
-          name: actionType,
-          ...actionPayload,
-        })
-      );
+      this.messages.push(new constructor(actionType));
+      this.messages.at(-1)!.contents += `${line}\n`;
     } else if (actionEndMatch) {
+      this.messages.at(-1)!.contents += `${line}\n`;
       const assistantMessage = new AssistantMessage(''); // Create a new assistant message with empty response
       this.messages.push(assistantMessage);
     } else {
-      const lastMessage = this.messages[this.messages.length - 1];
-      lastMessage.contents += `${line}\n`;
+      this.messages.at(-1)!.contents += `${line}\n`;
     }
   }
 
