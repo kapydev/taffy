@@ -32,7 +32,7 @@ ${prettyPrintGeneratedFolder(folder)}`;
   }
 
   getPersona(): string {
-    return 'You are an expert Software Engineer';
+    return 'You are an expert Software Engineer. Keep your answers concise. If the user asks for changes to be made to their codebase, the changes NEED to be in the appropriate action blocks so their code can be updated.';
   }
 
   getActionTutorial(): string {

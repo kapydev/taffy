@@ -1,5 +1,6 @@
 import { GeneratedFile, RawMessage } from '@cto-ai/shared-types';
 import { BaseMessage } from './BaseMessage';
+import { addLineNumbers } from '@cto-ai/shared-helpers';
 
 export class FileContextMessage extends BaseMessage {
   role: 'user' | 'assistant' | 'system' = 'user';
@@ -8,7 +9,7 @@ export class FileContextMessage extends BaseMessage {
   }
 
   toRawMessages(): RawMessage[] {
-    if (this.file === undefined) {
+    if (this.file?.content === undefined) {
       return [
         {
           role: 'user',
@@ -27,9 +28,11 @@ export class FileContextMessage extends BaseMessage {
     return [
       {
         role: 'user',
-        content: `These are the latest contents of \`${this.filePath}\`. IGNORE ANY PREVIOUS FILES.
+        content: `These are the latest contents of \`${
+          this.filePath
+        }\`. IGNORE ANY PREVIOUS FILES. The lines numbers are NOT part of the files, and after each line number there is a single space, regardless of how many digits the line numbers have.
         
-${this.file.content}`,
+${addLineNumbers(this.file.content)}`,
       },
     ];
   }

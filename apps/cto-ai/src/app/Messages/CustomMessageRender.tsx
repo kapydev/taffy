@@ -4,11 +4,13 @@ import { HumanMessage } from '../../llms/messages/HumanMessage';
 import { CustomMessage } from '../../llms/messages/Messages';
 import { ReadFileActionMessage } from '../../llms/messages/ReadFileActionMessage';
 import { SystemPromptMessage } from '../../llms/messages/SystemPromptMessage';
+import { WriteFileActionMessage } from '../../llms/messages/WriteFileActionMessage';
 import { AssistantMessageRender } from './AssistantMessageRender';
 import { FileContextMessageRender } from './FileContextMessageRender';
 import { HumanMessageRender } from './HumanMessageRender';
 import { ReadFileActionMessageRender } from './ReadFileActionMessageRender';
 import { SystemPromptRender } from './SystemPromptRender';
+import { WriteFileActionMessageRender } from './WriteFileActionMessageRender';
 
 export function CustomMessageRender({ message }: { message: CustomMessage }) {
   if (message instanceof SystemPromptMessage) {
@@ -21,6 +23,8 @@ export function CustomMessageRender({ message }: { message: CustomMessage }) {
     return <ReadFileActionMessageRender message={message} />;
   } else if (message instanceof FileContextMessage) {
     return <FileContextMessageRender message={message} />;
+  } else if (message instanceof WriteFileActionMessage) {
+    return <WriteFileActionMessageRender message={message} />;
   }
   return <>TODO: {message.constructor.name}</>;
 }
