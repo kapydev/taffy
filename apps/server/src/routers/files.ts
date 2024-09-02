@@ -41,25 +41,30 @@ export const fileRouter = router({
     )
     .mutation(async (opts) => {
       const { filePath, lineData, content } = opts.input;
-      try {
-        const fileContents = await fs.readFile(filePath, 'utf8');
-        const fileLines = fileContents.split('\n');
-        let updatedLines;
-        if (lineData) {
-          const { start, end } = lineData;
-          updatedLines = [
-            ...fileLines.slice(0, start - 1),
-            content,
-            ...fileLines.slice(end),
-          ];
-        } else {
-          updatedLines = [content];
-        }
-
-        await fs.writeFile(filePath, updatedLines.join('\n'), 'utf8');
+      if (lineData === undefined) {
+        await fs.writeFile(filePath, content, 'utf-8');
         return { success: true };
-      } catch (error) {
-        return { success: false, error: error.message };
+      } else {
+        try {
+          const fileContents = await fs.readFile(filePath, 'utf8');
+          const fileLines = fileContents.split('\n');
+          let updatedLines;
+          if (lineData) {
+            const { start, end } = lineData;
+            updatedLines = [
+              ...fileLines.slice(0, start - 1),
+              content,
+              ...fileLines.slice(end),
+            ];
+          } else {
+            updatedLines = [content];
+          }
+
+          await fs.writeFile(filePath, updatedLines.join('\n'), 'utf8');
+          return { success: true };
+        } catch (error) {
+          return { success: false, error: error.message };
+        }
       }
     }),
 });
