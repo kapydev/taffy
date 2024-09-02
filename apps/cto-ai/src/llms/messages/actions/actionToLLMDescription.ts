@@ -23,12 +23,18 @@ ${actionToActionString(sampleAction)}`;
 export function actionToActionString(action: AnyAction): string {
   const samplePropsStr = JSON.stringify(action.props);
 
-  let result = `{ACTION ${action.name} ${samplePropsStr}}`;
+  let result = `{ACTION ${action.name}`;
 
-  if (action.contents !== undefined) {
-    result += action.contents + '\n';
+  if (action.props && Object.keys(action.props).length > 0) {
+    result += ` ${samplePropsStr}`;
+  } else {
+    result += ``;
   }
 
-  result += `{END_ACTION ${action.name}}`;
+  if (action.contents !== undefined) {
+    result += '\n' + action.contents;
+  }
+
+  result += `\n{END_ACTION ${action.name}}`;
   return result;
 }

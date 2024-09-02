@@ -12,7 +12,9 @@ export const fileStore = createBetterStore({
   rootFolder: undefined as GeneratedFolder | undefined,
 });
 
-export function getFileContentsByPath(filePath: string): GeneratedFile | undefined {
+export function getFileContentsByPath(
+  filePath: string
+): GeneratedFile | undefined {
   const traverseFolder = (
     folder: GeneratedFolder,
     targetPath: string
@@ -45,20 +47,5 @@ trpc.files.getWorkingDirFolderStructure.query().then((fileTree) => {
   fileStore.set('rootFolder', rootFolder);
   const msgs = chatStore.get('messages');
   if (msgs.length > 0) return;
-  const parser = new LLMOutputParser();
-  parser.parse(`To implement a gpt adapter, we can look at how the claude.ts adapter is implemented, and implement it based on that.
-
-I will need access to the base-llm.ts and claude.ts files to fully understand how to do it.
-
-{ACTION READ_FILE}
-apps/cto-ai/src/llms/claude.ts
-apps/cto-ai/src/llms/base-llm.ts
-{END_ACTION READ_FILE}
-
-We can proceed after the file contents are provided.`);
-  chatStore.set('messages', [
-    new SystemPromptMessage(rootFolder),
-    new HumanMessage('Please tell me how to implement a gpt adapter'),
-    ...parser.getMessages(),
-  ]);
+  chatStore.set('messages', [new SystemPromptMessage(rootFolder)]);
 });

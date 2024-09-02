@@ -9,7 +9,6 @@ export const deleteFileActionTemplate = {
   sampleProps: {
     filePath: 'src/utils/helloWorld.ts',
   },
-  sampleContents: '',
 } satisfies ActionTemplate;
 
 export type DeleteFileAction = InferAction<typeof deleteFileActionTemplate>;

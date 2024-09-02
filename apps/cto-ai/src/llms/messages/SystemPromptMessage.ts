@@ -4,6 +4,11 @@ import { prettyPrintGeneratedFolder } from '@cto-ai/shared-helpers';
 import { GeneratedFolder, RawMessage } from '@cto-ai/shared-types';
 import { readFileActionTemplate } from './actions/readFileAction';
 import { actionToLLMDescription } from './actions/actionToLLMDescription';
+import {
+  deleteFileActionTemplate,
+  updateFileActionTemplate,
+  writeFileActionTemplate,
+} from './actions';
 
 export class SystemPromptMessage extends BaseMessage {
   role: 'user' | 'assistant' | 'system' = 'system';
@@ -42,6 +47,9 @@ ${prettyPrintGeneratedFolder(folder)}`;
       
       Below are the actions available to you and instructions on how to use them.`,
       actionToLLMDescription(readFileActionTemplate),
+      actionToLLMDescription(writeFileActionTemplate),
+      actionToLLMDescription(updateFileActionTemplate),
+      actionToLLMDescription(deleteFileActionTemplate),
     ].join('\n\n');
   }
 
