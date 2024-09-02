@@ -33,6 +33,7 @@
     "tslib": "^2.3.0",
     "vaul": "^0.9.1",
     "ws": "^8.18.0",
+    "zod": "^3.23.8",
     "zustand": "^4.5.5"
   },
   "devDependencies": {

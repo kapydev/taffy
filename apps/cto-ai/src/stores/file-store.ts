@@ -1,4 +1,4 @@
-import { createBetterStore } from '@cto-ai/shared-helpers';
+import { createBetterStore, updateFileByKey } from '@cto-ai/shared-helpers';
 import { GeneratedFile, GeneratedFolder } from '@cto-ai/shared-types';
 import { trpc } from '../client';
 import { SystemPromptMessage } from '../llms/messages/SystemPromptMessage';
@@ -8,44 +8,15 @@ export const fileStore = createBetterStore({
   rootFolder: undefined as GeneratedFolder | undefined,
 });
 
-export function getFileContentsByPath(
+export async function getFileContentsByPath(
   filePath: string
-): GeneratedFile | undefined {
-  const traverseFolder = (
-    folder: GeneratedFolder,
-    pathParts: string[]
-  ): GeneratedFile | undefined => {
-    if (pathParts.length === 0) {
-      return undefined;
-    }
-
-    const [currentPart, ...remainingParts] = pathParts;
-
-    if (remainingParts.length === 0) {
-      for (const file of folder.files) {
-        if (file.name === currentPart) {
-          return file;
-        }
-      }
-      return undefined;
-    }
-
-    for (const subFolder of folder.subFolders) {
-      if (subFolder.name === currentPart) {
-        return traverseFolder(subFolder, remainingParts);
-      }
-    }
-
-    return undefined;
-  };
-
-  const rootFolder = fileStore.get('rootFolder');
-  if (!rootFolder) {
-    return undefined;
-  }
-
-  const pathParts = filePath.split('/');
-  return traverseFolder(rootFolder, pathParts);
+): Promise<GeneratedFile | undefined> {
+  const data = await trpc.files.getFileByPath.query({ filePath });
+  const curFolder = fileStore.get('rootFolder');
+  if (!curFolder) return data;
+  updateFileByKey(curFolder, filePath, data);
+  fileStore.set('rootFolder', curFolder);
+  return data;
 }
 
 trpc.files.getWorkingDirFolderStructure.query().then((fileTree) => {

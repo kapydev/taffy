@@ -64,7 +64,9 @@ export function MessageGroupWrapper({
         </pre>
       );
     }
-    return messages.map((msg) => <CustomMessageRender message={msg} />);
+    return messages.map((msg) => (
+      <CustomMessageRender key={msg.contents} message={msg} />
+    ));
   }, [mode, messages]);
 
   return (

@@ -3,6 +3,7 @@ import { LLM } from '../llms/base-llm';
 import { Claude } from '../llms/claude';
 import { LLMOutputParser } from '../llms/messages/LLMOutputParser';
 import { CustomMessage } from '../llms/messages/Messages';
+import { RawMessage } from '@cto-ai/shared-types';
 
 export const chatStore = createBetterStore({
   messages: [] as CustomMessage[],
@@ -30,11 +31,27 @@ export async function runPromptsClaude() {
 async function runPrompts(llm: LLM) {
   const curMsgs = chatStore.get('messages');
 
-  const rawMessages = curMsgs.flatMap((msg) => msg.toRawMessages());
+  const rawMessages = getRawMessages();
   const parser = new LLMOutputParser();
   const stream = llm.prompt(rawMessages);
 
   await parser.handleTextStream(stream, () => {
     chatStore.set('messages', [...curMsgs, ...parser.getMessages()]);
   });
+}
+
+function getRawMessages(): RawMessage[] {
+  const curMsgs = chatStore.get('messages');
+  const rawMsgs = curMsgs.flatMap((msg) => msg.toRawMessages());
+  const concatenatedMessages = rawMsgs.reduce((acc, rawMsg) => {
+    const lastMessage = acc[acc.length - 1];
+    if (lastMessage && lastMessage.role === rawMsg.role) {
+      lastMessage.content += rawMsg.content;
+    } else {
+      acc.push(rawMsg);
+    }
+    return acc;
+  }, [] as RawMessage[]);
+
+  return concatenatedMessages;
 }

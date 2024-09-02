@@ -11,12 +11,14 @@ export function ReadFileActionMessageRender({
 }: {
   message: ReadFileActionMessage;
 }) {
-  const addFilesToContext = () => {
+  const addFilesToContext = async () => {
     console.log(message.files);
-    const fileContextMsgs = message.files.map((filePath) => {
-      const contents = getFileContentsByPath(filePath);
-      return new FileContextMessage(filePath, contents);
-    });
+    const fileContextMsgs = await Promise.all(
+      message.files.map(async (filePath) => {
+        const contents = await getFileContentsByPath(filePath);
+        return new FileContextMessage(filePath, contents);
+      })
+    );
     chatStore.set('messages', [
       ...chatStore.get('messages'),
       ...fileContextMsgs,
