@@ -1,4 +1,5 @@
 import {
+  Button,
   Checkbox,
   Input,
   ScrollArea,
@@ -10,7 +11,7 @@ import {
 import { GeneratedFolder } from '@cto-ai/shared-types';
 import { ChevronRight } from 'lucide-react';
 import { useState } from 'react';
-import { chatStore } from '../stores/chat-store';
+import { chatStore, resetChatStore } from '../stores/chat-store';
 import { fileStore } from '../stores/file-store';
 import { MainChat } from './MainChat';
 import { KeyInput } from './KeyInput';
@@ -64,6 +65,9 @@ export default function App() {
           {rootFolder && renderFileTree(rootFolder)}
         </ScrollArea>
         <KeyInput />
+        <Button onClick={resetChatStore} className="ml-2">
+          Reset Chat
+        </Button>
       </div>
       <MainChat />
     </div>

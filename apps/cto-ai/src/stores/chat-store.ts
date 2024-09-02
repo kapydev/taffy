@@ -5,6 +5,8 @@ import { LLMOutputParser } from '../llms/messages/LLMOutputParser';
 import { CustomMessage } from '../llms/messages/Messages';
 import { RawMessage } from '@cto-ai/shared-types';
 import { GPT } from '../llms/gpt';
+import { fileStore } from './file-store';
+import { SystemPromptMessage } from '../llms/messages/SystemPromptMessage';
 
 export const chatStore = createBetterStore({
   messages: [] as CustomMessage[],
@@ -63,4 +65,10 @@ function getRawMessages(): RawMessage[] {
   }, [] as RawMessage[]);
 
   return concatenatedMessages;
+}
+
+export function resetChatStore() {
+  const rootFolder = fileStore.get('rootFolder');
+  if (!rootFolder) return;
+  chatStore.set('messages', [new SystemPromptMessage(rootFolder)]);
 }

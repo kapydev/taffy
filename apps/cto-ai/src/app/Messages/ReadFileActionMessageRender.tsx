@@ -32,7 +32,7 @@ export function ReadFileActionMessageRender({
       <AlertTitle>Requesting permission to read the following files</AlertTitle>
       <AlertDescription>
         {message.files.map((fileName) => (
-          <div>{fileName}</div>
+          <div key={fileName}>{fileName}</div>
         ))}
       </AlertDescription>
       <div className="flex gap-2">

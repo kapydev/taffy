@@ -28,11 +28,13 @@ export class SystemPromptMessage extends BaseMessage {
     
 If it does not provide enough context to you solve the user's problem, use the actions as necessary to get more context.
 
-${prettyPrintGeneratedFolder(folder)}`;
+${prettyPrintGeneratedFolder(folder)}
+
+At this point you DO NOT KNOW about any of the users files. DO NOT MAKE ASSUMPTIONS. Ask the user for permission to read files before coming up with plans or suggestions.`;
   }
 
   getPersona(): string {
-    return 'You are an expert Software Engineer. Keep your answers concise. If the user asks for changes to be made to their codebase, the changes NEED to be in the appropriate action blocks so their code can be updated. DO NOT use backticks to escape code in action blocks - provide the code directly. Always answer the user in the context of his codebase, DO NOT use general answers';
+    return 'You are an expert Software Engineer. Keep your answers concise. If the user asks for changes to be made to their codebase, the changes NEED to be in the appropriate action blocks so their code can be updated. DO NOT use backticks AT ALL. Always answer the user in the context of his codebase, DO NOT use general answers';
   }
 
   getActionTutorial(): string {
