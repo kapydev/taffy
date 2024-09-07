@@ -12,6 +12,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.27.0",
     "@nx/express": "^19.6.2",
+    "@supabase/supabase-js": "^2.45.3",
     "@trpc/client": "^11.0.0-rc.485",
     "@trpc/server": "^11.0.0-rc.485",
     "archy": "^1.0.0",

@@ -3,6 +3,7 @@ import { getFolderStructure } from '../files';
 import { publicProcedure, router } from '../trpc';
 import { z } from 'zod';
 import fs from 'fs/promises';
+import { supabase } from '../supabaseClient';
 
 export const fileRouter = router({
   getWorkingDirFolderStructure: publicProcedure.query(
