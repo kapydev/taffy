@@ -1,49 +1,66 @@
-import { Button, Input } from '@cto-ai/components';
-import { Send } from 'lucide-react';
+import { Button, Checkbox, ScrollArea } from '@cto-ai/components';
+import { GeneratedFolder } from '@cto-ai/shared-types';
+import { ChevronRight } from 'lucide-react';
 import { useState } from 'react';
-
-import { HumanMessage } from '../llms/messages/HumanMessage';
-import { chatStore, runPrompts } from '../stores/chat-store';
-import { Messages } from './Messages';
+import { resetChatStore } from '../stores/chat-store';
+import { fileStore } from '../stores/file-store';
+import { KeyInput } from './KeyInput';
+import { ChatPanel } from './ChatPanel';
 
 export function MainChat() {
-  const [input, setInput] = useState('');
+  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
 
-  const handleSend = () => {
-    if (!input.trim()) return;
-    const scrollArea = document.querySelector('.scroll-area');
-    if (scrollArea) {
-      scrollArea.scrollTop = scrollArea.scrollHeight;
-    }
-    setInput('');
-    chatStore.set('messages', [
-      ...chatStore.get('messages'),
-      new HumanMessage(input),
-    ]);
-    runPrompts();
+  const rootFolder = fileStore.use('rootFolder');
+
+  const toggleFile = (path: string) => {
+    setSelectedFiles((prev) =>
+      prev.includes(path) ? prev.filter((f) => f !== path) : [...prev, path]
+    );
+  };
+
+  const renderFileTree = (folder: GeneratedFolder, path = '') => {
+    return folder.subFolders.map((item) => {
+      const currentPath = `${path}/${item.name}`;
+      if (item.subFolders.length > 0 || item.files.length > 0) {
+        return (
+          <div key={currentPath}>
+            <div className="flex items-center">
+              {item.subFolders.length > 0 ? (
+                <ChevronRight className="h-4 w-4" />
+              ) : null}
+              <span>{item.name}</span>
+            </div>
+            <div className="ml-4">{renderFileTree(item, currentPath)}</div>
+          </div>
+        );
+      } else {
+        return (
+          <div key={currentPath} className="flex items-center space-x-2">
+            <Checkbox
+              id={currentPath}
+              checked={selectedFiles.includes(currentPath)}
+              onCheckedChange={() => toggleFile(currentPath)}
+            />
+            <label htmlFor={currentPath}>{item.name}</label>
+          </div>
+        );
+      }
+    });
   };
 
   return (
-    <div className="flex flex-col p-4 flex-1">
-      <div className="flex flex-col-reverse overflow-x-scroll flex-1">
-        <Messages />
-      </div>
-      <div className="flex mt-4">
-        <Input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              handleSend();
-            }
-          }}
-          placeholder="Type your message..."
-          className="flex-1 mr-2 h-10"
-        />
-        <Button onClick={handleSend}>
-          <Send className="h-4 w-4" />
+    <div className="flex h-full w-full">
+      <div className="w-64 flex flex-col bg-gray-100 p-4 overflow-auto flex-shrink-0">
+        <h2 className="text-lg font-semibold mb-4">Repository Files</h2>
+        <ScrollArea className="flex-1">
+          {rootFolder && renderFileTree(rootFolder)}
+        </ScrollArea>
+        <KeyInput />
+        <Button onClick={resetChatStore} className="ml-2">
+          Reset Chat
         </Button>
       </div>
+      <ChatPanel />
     </div>
   );
 }

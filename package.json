@@ -3,7 +3,10 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "serve": "nx run-many --target=serve --all"
+    "serve": "nx run-many --target=serve --all",
+    "init:services": "npx supabase start",
+    "db:types": "npx supabase gen types typescript --local > shared/types/src/supabase-types.ts",
+    "db:reset": "supabase db reset && npm run db:types"
   },
   "private": true,
   "dependencies": {
@@ -30,6 +33,8 @@
     "react": "18.3.1",
     "react-day-picker": "^9.0.8",
     "react-dom": "18.3.1",
+    "react-hot-toast": "^2.4.1",
+    "supabase": "^1.191.3",
     "tailwind-merge": "^2.5.2",
     "tslib": "^2.3.0",
     "vaul": "^0.9.1",
