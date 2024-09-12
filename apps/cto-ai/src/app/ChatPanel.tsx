@@ -1,4 +1,4 @@
-import { Button, Input } from '@cto-ai/components';
+import { Button, Input, Textarea } from '@cto-ai/components';
 import { Send } from 'lucide-react';
 import { useState } from 'react';
 
@@ -29,17 +29,18 @@ export function ChatPanel() {
         <Messages />
       </div>
       <div className="flex mt-4">
-        <Input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              handleSend();
-            }
-          }}
-          placeholder="Type your message..."
-          className="flex-1 mr-2 h-10"
-        />
+<Textarea
+  value={input}
+  onChange={(e) => setInput(e.target.value)}
+  onKeyDown={(e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  }}
+  placeholder="Type your message..."
+  className="flex-1 mr-2"
+/>
         <Button onClick={handleSend}>
           <Send className="h-4 w-4" />
         </Button>
