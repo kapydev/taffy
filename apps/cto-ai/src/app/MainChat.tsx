@@ -9,7 +9,6 @@ import { ChatPanel } from './ChatPanel';
 
 export function MainChat() {
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
-
   const rootFolder = fileStore.use('rootFolder');
 
   const toggleFile = (path: string) => {

@@ -45,6 +45,7 @@
     "zustand": "^4.5.5"
   },
   "devDependencies": {
+    "vite-plugin-checker": "^0.8.0",
     "@babel/core": "^7.14.5",
     "@babel/preset-react": "^7.14.5",
     "@nx/esbuild": "19.6.2",
