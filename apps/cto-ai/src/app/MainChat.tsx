@@ -9,7 +9,7 @@ import { ChatPanel } from './ChatPanel';
 
 export function MainChat() {
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
-  const rootFolder = fileStore.use('rootFolder');
+  const rootFolder = fileStore.use('files');
 
   const toggleFile = (path: string) => {
     setSelectedFiles((prev) =>
@@ -52,7 +52,8 @@ export function MainChat() {
       <div className="w-64 flex flex-col bg-gray-100 p-4 overflow-auto flex-shrink-0">
         <h2 className="text-lg font-semibold mb-4">Repository Files</h2>
         <ScrollArea className="flex-1">
-          {rootFolder && renderFileTree(rootFolder)}
+          {/* TODO: FILE TREE */}
+          {/* {rootFolder && renderFileTree(rootFolder)} */}
         </ScrollArea>
         <KeyInput />
         <Button onClick={resetChatStore} className="ml-2">

@@ -27,3 +27,5 @@ export interface GeneratedBinaryFile extends GeneratedFileBase {
 export type GeneratedFile = GeneratedTextFile | GeneratedBinaryFile;
 
 export declare type FileEncoding = 'base64' | 'utf8' | 'binary';
+
+export type FilesObj = Record<string, GeneratedFile>;

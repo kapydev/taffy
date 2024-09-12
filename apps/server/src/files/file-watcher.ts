@@ -2,7 +2,7 @@ import {
   booleanFilter,
   folderMapToGeneratedFolder,
 } from '@cto-ai/shared-helpers';
-import { GeneratedFile, GeneratedFolder } from '@cto-ai/shared-types';
+import { FilesObj, GeneratedFile, GeneratedFolder } from '@cto-ai/shared-types';
 import chokidar from 'chokidar';
 import fs from 'fs';
 import path from 'path';
@@ -45,7 +45,7 @@ export const watchForChanges = () => {
 };
 
 // New function to return structure in Record<string, string> format
-export async function getFilesObj(): Promise<Record<string, GeneratedFile>> {
+export async function getFilesObj(): Promise<FilesObj> {
   await new Promise<void>((resolve) => {
     watcher.on('ready', resolve);
     if (watcherReady) resolve();
@@ -67,7 +67,7 @@ export async function getFilesObj(): Promise<Record<string, GeneratedFile>> {
       })
       .filter(booleanFilter)
   );
-  const record: Record<string, GeneratedFile> = {};
+  const record: FilesObj = {};
 
   for (const [folder, files] of Object.entries(relUnixPaths)) {
     for (const file of files) {

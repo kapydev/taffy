@@ -68,7 +68,7 @@ function getRawMessages(): RawMessage[] {
 }
 
 export function resetChatStore() {
-  const rootFolder = fileStore.get('rootFolder');
+  const rootFolder = fileStore.get('files');
   if (!rootFolder) return;
   chatStore.set('messages', [new SystemPromptMessage(rootFolder)]);
 }

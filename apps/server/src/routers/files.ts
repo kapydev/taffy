@@ -1,15 +1,13 @@
-import { GeneratedFile, GeneratedFolder } from '@cto-ai/shared-types';
+import { FilesObj, GeneratedFile, GeneratedFolder } from '@cto-ai/shared-types';
 import fs from 'fs/promises';
 import { z } from 'zod';
 import { getFilesObj, getFolderStructure } from '../files';
 import { publicProcedure, router } from '../trpc';
 
 export const fileRouter = router({
-  getWorkingDirFilesObj: publicProcedure.query(
-    async (): Promise<Record<string, GeneratedFile>> => {
-      return getFilesObj();
-    }
-  ),
+  getWorkingDirFilesObj: publicProcedure.query(async (): Promise<FilesObj> => {
+    return getFilesObj();
+  }),
   getWorkingDirFolderStructure: publicProcedure.query(
     (): Promise<GeneratedFolder> => {
       return getFolderStructure();
@@ -67,7 +65,7 @@ export const fileRouter = router({
 
           await fs.writeFile(filePath, updatedLines.join('\n'), 'utf8');
           return { success: true };
-        } catch (error) {
+        } catch (error: any) {
           return { success: false, error: error.message };
         }
       }

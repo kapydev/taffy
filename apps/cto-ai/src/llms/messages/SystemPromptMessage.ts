@@ -1,7 +1,15 @@
 import dedent from 'dedent-js';
 import { BaseMessage } from './BaseMessage';
-import { prettyPrintGeneratedFolder } from '@cto-ai/shared-helpers';
-import { GeneratedFolder, RawMessage } from '@cto-ai/shared-types';
+import {
+  prettyPrintFilesObj,
+  prettyPrintGeneratedFolder,
+} from '@cto-ai/shared-helpers';
+import {
+  FilesObj,
+  GeneratedFile,
+  GeneratedFolder,
+  RawMessage,
+} from '@cto-ai/shared-types';
 import { readFileActionTemplate } from './actions/readFileAction';
 import { actionToLLMDescription } from './actions/actionToLLMDescription';
 import {
@@ -14,7 +22,7 @@ export class SystemPromptMessage extends BaseMessage {
   role: 'user' | 'assistant' | 'system' = 'system';
   prompt: string;
 
-  constructor(root: GeneratedFolder) {
+  constructor(root: FilesObj) {
     super();
     this.prompt = [
       this.addTitle('PERSONA', this.getPersona()),
@@ -23,12 +31,12 @@ export class SystemPromptMessage extends BaseMessage {
     ].join('\n\n');
   }
 
-  getCodebaseContext(folder: GeneratedFolder): string {
+  getCodebaseContext(folder: FilesObj): string {
     return `The following is the user's codebase structure. 
     
 If it does not provide enough context to you solve the user's problem, use the actions as necessary to get more context.
 
-${prettyPrintGeneratedFolder(folder)}
+${prettyPrintFilesObj(folder)}
 
 At this point you DO NOT KNOW about any of the users files. DO NOT MAKE ASSUMPTIONS. Ask the user for permission to read files before coming up with plans or suggestions.`;
   }

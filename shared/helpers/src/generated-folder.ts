@@ -1,4 +1,4 @@
-import { GeneratedFolder, GeneratedFile } from '@cto-ai/shared-types';
+import { GeneratedFolder, GeneratedFile, FilesObj } from '@cto-ai/shared-types';
 import path from 'path';
 import archy from 'archy';
 
@@ -195,4 +195,8 @@ function convertToArchy(node: GeneratedFolder): archy.Data {
 export function prettyPrintGeneratedFolder(folder: GeneratedFolder): string {
   const archyData = convertToArchy(folder);
   return archy(archyData);
+}
+
+export function prettyPrintFilesObj(filesObj: FilesObj): string {
+  return Object.keys(filesObj).join('\n');
 }
