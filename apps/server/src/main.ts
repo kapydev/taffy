@@ -1,15 +1,17 @@
 import { createHTTPServer } from '@trpc/server/adapters/standalone';
 import { applyWSSHandler } from '@trpc/server/adapters/ws';
 import cors from 'cors';
-import './files';
+import { WebSocketServer } from 'ws';
 import { fileRouter } from './routers/files';
 import { createContext, router } from './trpc';
-import ws from 'ws';
+import { watchForChanges } from './files';
+
+watchForChanges();
 
 const BACKEND_PORT = 3000;
 const WS_PORT = 3001;
 
-const wss = new ws.Server({
+const wss = new WebSocketServer({
   port: WS_PORT,
 });
 

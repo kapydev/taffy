@@ -1,11 +1,15 @@
 import { GeneratedFile, GeneratedFolder } from '@cto-ai/shared-types';
-import { getFolderStructure } from '../files';
-import { publicProcedure, router } from '../trpc';
-import { z } from 'zod';
 import fs from 'fs/promises';
-import { supabase } from '../supabaseClient';
+import { z } from 'zod';
+import { getFilesObj, getFolderStructure } from '../files';
+import { publicProcedure, router } from '../trpc';
 
 export const fileRouter = router({
+  getWorkingDirFilesObj: publicProcedure.query(
+    async (): Promise<Record<string, GeneratedFile>> => {
+      return getFilesObj();
+    }
+  ),
   getWorkingDirFolderStructure: publicProcedure.query(
     (): Promise<GeneratedFolder> => {
       return getFolderStructure();

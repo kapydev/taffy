@@ -1,21 +1,20 @@
 import { createBetterStore, updateFileByKey } from '@cto-ai/shared-helpers';
 import { GeneratedFile, GeneratedFolder } from '@cto-ai/shared-types';
 import { trpc } from '../client';
-import { SystemPromptMessage } from '../llms/messages/SystemPromptMessage';
 import { chatStore, resetChatStore } from './chat-store';
 
 export const fileStore = createBetterStore({
-  rootFolder: undefined as GeneratedFolder | undefined,
+  files: undefined as Record<string, GeneratedFile> | undefined,
 });
 
 export async function getFileContentsByPath(
   filePath: string
 ): Promise<GeneratedFile | undefined> {
   const data = await trpc.files.getFileByPath.query({ filePath });
-  const curFolder = fileStore.get('rootFolder');
-  if (!curFolder) return data;
-  updateFileByKey(curFolder, filePath, data);
-  fileStore.set('rootFolder', curFolder);
+  const curFiles = fileStore.get('files');
+  if (!curFiles || !data) return data;
+  curFiles[filePath] = data;
+  fileStore.set('files', curFiles);
   return data;
 }
 
