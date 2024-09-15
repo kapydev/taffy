@@ -38,7 +38,7 @@
       "options": {
         "targetName": "test"
       },
-      "exclude": ["apps/server-e2e/**/*"]
+      "exclude": ["apps/server-e2e/**/*", "apps/vsc-ext-e2e/**/*"]
     }
   ],
   "generators": {

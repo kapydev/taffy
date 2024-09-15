@@ -1,0 +1,51 @@
+{
+  "name": "vsc-ext",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/vsc-ext/src",
+  "projectType": "application",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/esbuild:esbuild",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "platform": "node",
+        "outputPath": "dist/apps/vsc-ext",
+        "format": ["cjs"],
+        "bundle": true,
+        "main": "apps/vsc-ext/src/main.ts",
+        "tsConfig": "apps/vsc-ext/tsconfig.app.json",
+        "assets": ["apps/vsc-ext/src/assets"],
+        "generatePackageJson": true,
+        "external": ["vscode"],
+        "esbuildOptions": {
+          "sourcemap": true,
+          "outExtension": {
+            ".js": ".js"
+          }
+        }
+      },
+      "configurations": {
+        "development": {
+          "watch": true
+        },
+        "production": {
+          "esbuildOptions": {
+            "sourcemap": false,
+            "outExtension": {
+              ".js": ".js"
+            }
+          }
+        }
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "defaultConfiguration": "development",
+      "options": {
+        "commands": ["nx run vsc-ext:build:development"]
+      }
+    }
+  }
+}
