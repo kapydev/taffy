@@ -13,27 +13,9 @@
   "contributes": {
     "commands": [
       {
-        "command": "cto-ai.helloWorld",
-        "title": "Hello World"
+        "command": "cto-ai.start",
+        "title": "Start CTO AI"
       }
-    ],
-    "viewsContainers": {
-      "activitybar": [
-        {
-          "id": "ctoAISidebarContainer",
-          "title": "CTO AI",
-          "icon": "media/ctoai-icon.png"
-        }
-      ]
-    },
-    "views": {
-      "ctoAISidebarContainer": [
-        {
-          "id": "ctoAISidebarView",
-          "name": "CTO AI Insights",
-          "type": "webview"
-        }
-      ]
-    }
+    ]
   }
 }
