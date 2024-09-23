@@ -2,10 +2,11 @@ import * as vscode from 'vscode';
 import html from '../../../dist/apps/cto-ai/static/index.html?raw';
 import '@cto-ai/shared-types';
 
+const logger = console;
+
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand('cto-ai.start', () => {
-      console.log('Hello World!');
       // Create and show a new webview
       const panel = vscode.window.createWebviewPanel(
         'cto-ai', // Identifies the type of the webview. Used internally
@@ -19,7 +20,7 @@ export function activate(context: vscode.ExtensionContext) {
       panel.webview.html = getWebViewContent();
       panel.webview.onDidReceiveMessage(
         (message) => {
-          console.log(message);
+          logger.log(message);
         },
         undefined,
         context.subscriptions
@@ -43,8 +44,8 @@ export function activate(context: vscode.ExtensionContext) {
         const fileName = editor.document.fileName;
 
         // Log the information
-        console.log(`Selected text: ${selectedText}`);
-        console.log(`File name: ${fileName}`);
+        logger.log(`Selected text: ${selectedText}`);
+        logger.log(`File name: ${fileName}`);
 
         // You can also show the message to the user
         vscode.window.showInformationMessage(
@@ -55,8 +56,6 @@ export function activate(context: vscode.ExtensionContext) {
       }
     }
   );
-
-  console.log('All registered :)');
 
   // Push the command to the subscriptions
   context.subscriptions.push(disposable);
@@ -76,16 +75,16 @@ function getWebViewContent(): string {
   // <body>
   //     <img src="https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif" width="300" />
   //     <h1 id="lines-of-code-counter">0</h1>
-  
+
   //     <script>
   //         (function() {
   //             const vscode = acquireVsCodeApi();
   //             const counter = document.getElementById('lines-of-code-counter');
-  
+
   //             let count = 0;
   //             setInterval(() => {
   //                 counter.textContent = count++;
-  
+
   //                 // Alert the extension when our cat introduces a bug
   //                 if (Math.random() < 0.001 * count) {
   //                     vscode.postMessage({

@@ -12,7 +12,6 @@ export function ReadFileActionMessageRender({
   message: ReadFileActionMessage;
 }) {
   const addFilesToContext = async () => {
-    console.log(message.files);
     const fileContextMsgs = await Promise.all(
       message.files.map(async (filePath) => {
         const contents = await getFileContentsByPath(filePath);

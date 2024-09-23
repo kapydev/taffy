@@ -5,7 +5,7 @@ import { WebSocketServer } from 'ws';
 import { fileRouter } from './routers/files';
 import { createContext, router } from './trpc';
 
-// watchForChanges();
+const logger = console
 
 const BACKEND_PORT = 3000;
 const WS_PORT = 3001;
@@ -38,21 +38,21 @@ const server = createHTTPServer({
   createContext,
 });
 
-console.log('Server listening');
+logger.log('Server listening');
 server.listen(BACKEND_PORT);
 
 wss.on('connection', (ws) => {
-  console.log(`➕➕ Connection (${wss.clients.size})`);
+  logger.log(`➕➕ Connection (${wss.clients.size})`);
   ws.once('close', () => {
-    console.log(`➖➖ Connection (${wss.clients.size})`);
+    logger.log(`➖➖ Connection (${wss.clients.size})`);
   });
 });
-console.log(
+logger.log(
   `✅ WebSocket Server listening on ws://localhost:${WS_PORT}
 ✅ HTTP Server listening on localhost:${BACKEND_PORT}`
 );
 process.on('SIGTERM', () => {
-  console.log('SIGTERM');
+  logger.log('SIGTERM');
   handler.broadcastReconnectNotification();
   wss.close();
 });

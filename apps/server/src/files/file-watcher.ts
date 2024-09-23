@@ -11,6 +11,8 @@ import { supabase } from '../supabaseClient';
 import { getGitIgnoredFiles } from './get-ignore-patterns';
 import { generateEmbedding } from '../helpers/generate-embeddings';
 
+const logger = console;
+
 const workingDir = getWorkingDir();
 
 let watcherReady = false;
@@ -22,7 +24,7 @@ watcher.on('ready', () => (watcherReady = true));
 export const watchForChanges = () => {
   // Watch for file changes and update embeddings
   watcher.on('change', async (filePath) => {
-    console.log(`File changed: ${filePath}`);
+    logger.log(`File changed: ${filePath}`);
 
     // Read file content
     const content = await fs.promises.readFile(filePath, 'utf-8');
@@ -37,9 +39,9 @@ export const watchForChanges = () => {
       .eq('file_path', filePath);
 
     if (error) {
-      console.error('Error updating embedding in Supabase:', error);
+      logger.error('Error updating embedding in Supabase:', error);
     } else {
-      console.log('Successfully updated embedding in Supabase for:', filePath);
+      logger.log('Successfully updated embedding in Supabase for:', filePath);
     }
   });
 };

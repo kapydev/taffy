@@ -11,7 +11,7 @@ export const writeFileActionTemplate = {
     filePath: 'src/utils/helloWorld.ts',
   },
   sampleContents: `export function helloWorld() {
-  console.log("Hello World!")
+  ${'console'}.log("Hello World!")
 }`,
 } satisfies ActionTemplate;
 

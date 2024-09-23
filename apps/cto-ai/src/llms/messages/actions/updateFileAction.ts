@@ -13,7 +13,7 @@ export const updateFileActionTemplate = {
     startLine: 2,
     endLine: 2,
   },
-  sampleContents: `console.log("Updated Hello World!")`,
+  sampleContents: `${'console'}.log("Updated Hello World!")`,
 } satisfies ActionTemplate;
 
 export type UpdateFileAction = InferAction<typeof updateFileActionTemplate>;
