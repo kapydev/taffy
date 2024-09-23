@@ -1,12 +1,20 @@
 import * as vscode from 'vscode';
 import html from '../../../dist/apps/cto-ai/static/index.html?raw';
 import '@cto-ai/shared-types';
-import { createVscExtHandler } from './createVscExtHandler';
-import { router } from './trpc';
+import { createVscExtHandler } from './adapter/createVscExtHandler';
+import { router, publicProcedure } from './trpc';
+import { fileRouter } from './routers/files';
 
 const logger = console;
 
-const appRouter = router({});
+export const appRouter = router({
+  files: fileRouter,
+  hello: publicProcedure.query(() => {
+    return {
+      message: 'Hello, world!',
+    };
+  }),
+});
 
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(

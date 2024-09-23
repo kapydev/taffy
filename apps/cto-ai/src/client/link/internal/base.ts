@@ -1,4 +1,5 @@
 import {
+  httpBatchLink,
   OperationResultEnvelope,
   TRPCClientError,
   TRPCLink,
@@ -7,7 +8,6 @@ import type { AnyTRPCRouter } from '@trpc/server';
 import { observable } from '@trpc/server/observable';
 import { MessengerMethods, TRPCChromeRequest } from '@cto-ai/shared-types';
 import { isTRPCResponse } from '@cto-ai/shared-helpers';
-import superjson from 'superjson';
 
 export const createBaseLink = <TRouter extends AnyTRPCRouter>(
   methods: MessengerMethods
@@ -21,7 +21,7 @@ export const createBaseLink = <TRouter extends AnyTRPCRouter>(
 
         try {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          const input = superjson.stringify(op.input);
+          const input = op.input;
 
           const onDisconnect = () => {
             observer.error(
@@ -47,7 +47,7 @@ export const createBaseLink = <TRouter extends AnyTRPCRouter>(
                 ...((!trpc.result.type || trpc.result.type === 'data') && {
                   type: 'data',
                   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                  data: superjson.parse(trpc.result.data),
+                  data: trpc.result.data,
                 }),
               },
             } as OperationResultEnvelope<TRouter>);

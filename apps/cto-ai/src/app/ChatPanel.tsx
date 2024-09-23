@@ -34,7 +34,7 @@ export function ChatPanel() {
         <Textarea
           value={input}
           onChange={(e) => {
-            trpc.files.getFileByPath.query({ filePath: 'ddd' });
+            trpc.hello.query().then((res) => console.log('SHAHSHHSAHHSA', res));
             setInput(e.target.value);
           }}
           onKeyDown={(e) => {

@@ -1,5 +1,6 @@
 //@ts-check
 const fs = require('fs');
+const dotenv = require('dotenv');
 
 // Custom plugin for loading raw files
 /**
@@ -27,11 +28,17 @@ const rawLoaderPlugin = {
   },
 };
 
+dotenv.config();
+
 module.exports = {
-  plugins: [
-    // nativeNodeModulesPlugin,
-    // ignorePlugin,
-    // customEntryPointPlugin,
-    rawLoaderPlugin,
-  ],
+  plugins: [rawLoaderPlugin],
+  bundle: true,
+  define: {
+    'process.env.VITE_SUPABASE_URL': JSON.stringify(
+      process.env.VITE_SUPABASE_URL
+    ),
+    'process.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(
+      process.env.VITE_SUPABASE_ANON_KEY
+    ),
+  },
 };

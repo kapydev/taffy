@@ -10,7 +10,7 @@
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
-        "platform": "node",
+        "platform": "neutral",
         "outputPath": "dist/apps/vsc-ext",
         "format": ["cjs"],
         "bundle": true,

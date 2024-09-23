@@ -1,5 +1,5 @@
 import { GeneratedFolder, GeneratedFile, FilesObj } from '@cto-ai/shared-types';
-import path from 'path';
+// import path from 'path';
 import archy from 'archy';
 
 /**
@@ -166,7 +166,8 @@ export function folderMapToGeneratedFolder(
     }
 
     items.forEach((item) => {
-      const resolvedPath = path.posix.join(curPath, item);
+      // const resolvedPath = path.posix.join(curPath, item);
+      const resolvedPath = curPath + 'TODO TODO TODO'
       if (structure[resolvedPath]) return;
       const fileType = item.includes('.') ? item.split('.').pop() : undefined;
       const file: GeneratedFile = {
