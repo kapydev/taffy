@@ -10,12 +10,24 @@
   ],
   "name": "cto-ai",
   "main": "./main.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "contributes": {
     "commands": [
       {
         "command": "cto-ai.start",
         "title": "Start CTO AI"
       }
-    ]
+    ],
+    "contributes": {
+      "keybindings": [
+        {
+          "command": "cto-ai.logSelectedTextAndFile",
+          "key": "ctrl+m",
+          "when": "editorTextFocus"
+        }
+      ]
+    }
   }
 }

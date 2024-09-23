@@ -6,7 +6,7 @@ import { fileRouter } from './routers/files';
 import { createContext, router } from './trpc';
 import { watchForChanges } from './files';
 
-watchForChanges();
+// watchForChanges();
 
 const BACKEND_PORT = 3000;
 const WS_PORT = 3001;
