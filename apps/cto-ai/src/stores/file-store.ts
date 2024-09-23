@@ -31,7 +31,6 @@ export async function updateFileContentsByPath(
     lineData,
     content: contents,
   });
-
   const data = await trpc.files.getFileByPath.query({ filePath });
   if (!data) throw new Error('File not found');
 
@@ -48,4 +47,8 @@ trpc.files.getWorkingDirFilesObj.query().then((fileTree) => {
   const msgs = chatStore.get('messages');
   if (msgs.length > 0) return;
   resetChatStore();
+});
+
+trpc.files.onSelectionChange.subscribe(undefined, {
+  onData: (data) => {},
 });

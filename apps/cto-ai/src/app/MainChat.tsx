@@ -7,9 +7,11 @@ import { fileStore } from '../stores/file-store';
 import { KeyInput } from './KeyInput';
 import { ChatPanel } from './ChatPanel';
 import { vscApi } from '../common/vsc-api';
+import { trpc } from '../client';
 
 export function MainChat() {
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
+
   const rootFolder = fileStore.use('files');
 
   const toggleFile = (path: string) => {

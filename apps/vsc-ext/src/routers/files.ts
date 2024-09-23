@@ -3,10 +3,42 @@ import { FilesObj, GeneratedFile, GeneratedFolder } from '@cto-ai/shared-types';
 import { z } from 'zod';
 import { getFilesObj } from '../files';
 import { publicProcedure, router } from '../trpc';
+import { observable } from '@trpc/server/observable';
+import * as vscode from 'vscode';
 
 export const fileRouter = router({
   getWorkingDirFilesObj: publicProcedure.query(async (): Promise<FilesObj> => {
     return getFilesObj();
+  }),
+  onSelectionChange: publicProcedure.subscription(() => {
+    const getSelectionData = () => {
+      const editor = vscode.window.activeTextEditor;
+      if (!editor) return undefined;
+      const fileName = editor.document.fileName;
+      const selection = editor.selection;
+      const selectedText = editor.document.getText(selection);
+      const fullFileContents = editor.document.getText();
+      const selectedLineNumbers = {
+        start: selection.start.line + 1,
+        end: selection.end.line + 1,
+      };
+      return {
+        fullFileContents,
+        selectedLineNumbers,
+        selectedText,
+        fileName,
+      };
+    };
+
+    return observable<ReturnType<typeof getSelectionData>>((emit) => {
+      emit.next(getSelectionData());
+
+      const disposable = vscode.window.onDidChangeTextEditorSelection(() => {
+        emit.next(getSelectionData());
+      });
+
+      return () => disposable.dispose()
+    });
   }),
   // getWorkingDirFolderStructure: publicProcedure.query(
   //   (): Promise<GeneratedFolder> => {
