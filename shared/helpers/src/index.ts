@@ -3,3 +3,4 @@ export * from './boolean-filter';
 export * from './capitalize';
 export * from './create-better-store';
 export * from './generated-folder';
+export * from './trpc-message';

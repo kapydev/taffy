@@ -1,23 +1,7 @@
-import {
-  createTRPCClient,
-  httpBatchLink,
-  createWSClient,
-  wsLink,
-} from '@trpc/client';
 import type { AppRouter } from '@cto-ai/server/types';
-
-// create persistent WebSocket connection
-const wsClient = createWSClient({
-  url: `ws://localhost:3001`,
-});
+import { createTRPCClient } from '@trpc/client';
+import { vscLink } from './link/vsc-link';
 
 export const trpc = createTRPCClient<AppRouter>({
-  links: [
-    httpBatchLink({
-      url: 'http://localhost:3000',
-    }),
-    wsLink({
-      client: wsClient,
-    }),
-  ],
+  links: [vscLink()],
 });

@@ -37,6 +37,7 @@
     "react-dom": "18.3.1",
     "react-hot-toast": "^2.4.1",
     "supabase": "^1.191.3",
+    "superjson": "^2.2.1",
     "tailwind-merge": "^2.5.2",
     "tslib": "^2.3.0",
     "vaul": "^0.9.1",

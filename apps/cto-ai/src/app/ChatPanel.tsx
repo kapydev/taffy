@@ -6,6 +6,7 @@ import { HumanMessage } from '../llms/messages/HumanMessage';
 import { chatStore, runPrompts } from '../stores/chat-store';
 import { Messages } from './Messages';
 import { vscApi } from '../common/vsc-api';
+import { trpc } from '../client';
 
 export function ChatPanel() {
   const [input, setInput] = useState('');
@@ -33,8 +34,8 @@ export function ChatPanel() {
         <Textarea
           value={input}
           onChange={(e) => {
+            trpc.files.getFileByPath.query({ filePath: 'ddd' });
             setInput(e.target.value);
-            vscApi.postMessage({ hhh: e.target.value });
           }}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
