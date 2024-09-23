@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { HumanMessage } from '../llms/messages/HumanMessage';
 import { chatStore, runPrompts } from '../stores/chat-store';
 import { Messages } from './Messages';
+import { vscApi } from '../common/vsc-api';
 
 export function ChatPanel() {
   const [input, setInput] = useState('');
@@ -29,18 +30,21 @@ export function ChatPanel() {
         <Messages />
       </div>
       <div className="flex mt-4">
-<Textarea
-  value={input}
-  onChange={(e) => setInput(e.target.value)}
-  onKeyDown={(e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  }}
-  placeholder="Type your message..."
-  className="flex-1 mr-2"
-/>
+        <Textarea
+          value={input}
+          onChange={(e) => {
+            setInput(e.target.value);
+            vscApi.postMessage({ hhh: e.target.value });
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              handleSend();
+            }
+          }}
+          placeholder="Type your message..."
+          className="flex-1 mr-2"
+        />
         <Button onClick={handleSend}>
           <Send className="h-4 w-4" />
         </Button>

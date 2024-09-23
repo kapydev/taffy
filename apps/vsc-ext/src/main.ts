@@ -1,8 +1,12 @@
 import * as vscode from 'vscode';
 import html from '../../../dist/apps/cto-ai/static/index.html?raw';
 import '@cto-ai/shared-types';
+import { createVscExtHandler } from './createVscExtHandler';
+import { router } from './trpc';
 
 const logger = console;
+
+const appRouter = router({});
 
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
@@ -18,13 +22,8 @@ export function activate(context: vscode.ExtensionContext) {
       );
 
       panel.webview.html = getWebViewContent();
-      panel.webview.onDidReceiveMessage(
-        (message) => {
-          logger.log(message);
-        },
-        undefined,
-        context.subscriptions
-      );
+
+      createVscExtHandler({ panel, context, router: appRouter });
     })
   );
 
