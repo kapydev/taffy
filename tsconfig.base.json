@@ -17,10 +17,9 @@
     "baseUrl": ".",
     "paths": {
       "@cto-ai/components": ["components/src/index.ts"],
-      "@cto-ai/server/types": ["apps/server/src/types.ts"],
-      "@cto-ai/vsc-ext/types": ["apps/vsc-ext/src/types.ts"],
       "@cto-ai/shared-helpers": ["shared/helpers/src/index.ts"],
-      "@cto-ai/shared-types": ["shared/types/src/index.ts"]
+      "@cto-ai/shared-types": ["shared/types/src/index.ts"],
+      "@cto-ai/vsc-ext/types": ["apps/vsc-ext/src/types.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
