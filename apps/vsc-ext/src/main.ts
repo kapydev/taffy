@@ -17,6 +17,13 @@ export function activate(context: vscode.ExtensionContext) {
       );
 
       panel.webview.html = getWebViewContent();
+      panel.webview.onDidReceiveMessage(
+        (message) => {
+          console.log(message);
+        },
+        undefined,
+        context.subscriptions
+      );
     })
   );
 
@@ -57,4 +64,38 @@ export function activate(context: vscode.ExtensionContext) {
 
 function getWebViewContent(): string {
   return html;
+
+  // return `<!DOCTYPE html>
+  // <html lang="en">
+  // <head>
+  // <base href="http://localhost:4200"/>
+  //     <meta charset="UTF-8">
+  //     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  //     <title>Cat Coding</title>
+  // </head>
+  // <body>
+  //     <img src="https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif" width="300" />
+  //     <h1 id="lines-of-code-counter">0</h1>
+  
+  //     <script>
+  //         (function() {
+  //             const vscode = acquireVsCodeApi();
+  //             const counter = document.getElementById('lines-of-code-counter');
+  
+  //             let count = 0;
+  //             setInterval(() => {
+  //                 counter.textContent = count++;
+  
+  //                 // Alert the extension when our cat introduces a bug
+  //                 if (Math.random() < 0.001 * count) {
+  //                     vscode.postMessage({
+  //                         command: 'alert',
+  //                         text: '🐛  on line ' + count
+  //                     })
+  //                 }
+  //             }, 100);
+  //         }())
+  //     </script>
+  // </body>
+  // </html>`
 }

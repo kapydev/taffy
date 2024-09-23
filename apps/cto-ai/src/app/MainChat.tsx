@@ -1,13 +1,21 @@
 import { Button, Checkbox, ScrollArea } from '@cto-ai/components';
 import { GeneratedFolder } from '@cto-ai/shared-types';
 import { ChevronRight } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { resetChatStore } from '../stores/chat-store';
 import { fileStore } from '../stores/file-store';
 import { KeyInput } from './KeyInput';
 import { ChatPanel } from './ChatPanel';
+import { vscApi } from '../common/vsc-api';
 
 export function MainChat() {
+  useEffect(() => {
+    console.log('11111111111111111111111111111111111');
+    console.log(vscApi.getState());
+    console.log("SENDING MESSAGEEE")
+    vscApi.postMessage({ dwqdwqinodnwqio: 'dwqinoi210910101' });
+    vscApi.setState({ dnwqioqo: 'ddd' });
+  });
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
   const rootFolder = fileStore.use('files');
 

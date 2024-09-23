@@ -39,7 +39,7 @@
         }
       }
     },
-    "serve": {
+    "serve-unused": {
       "executor": "nx:run-commands",
       "defaultConfiguration": "development",
       "options": {
