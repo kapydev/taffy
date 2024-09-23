@@ -9,7 +9,7 @@
     "Other"
   ],
   "name": "cto-ai",
-  "main": "./main.js",
+  "main": "./main.cjs",
   "activationEvents": [
     "onStartupFinished"
   ],

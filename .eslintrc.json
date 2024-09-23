@@ -8,9 +8,13 @@
       "rules": {
         "@nx/enforce-module-boundaries": [
           "error",
+
           {
             "enforceBuildableLibDependency": true,
-            "allow": ["@cto-ai/server/types"],
+            "allow": [
+              "@cto-ai/server/types",
+              "../../../dist/apps/cto-ai/static/index.html"
+            ],
             "depConstraints": [
               {
                 "sourceTag": "*",

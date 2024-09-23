@@ -17,14 +17,9 @@
         "main": "apps/vsc-ext/src/main.ts",
         "tsConfig": "apps/vsc-ext/tsconfig.app.json",
         "assets": ["apps/vsc-ext/src/assets"],
+        "esbuildConfig": "apps/vsc-ext/esbuild.config.js",
         "generatePackageJson": true,
-        "external": ["vscode"],
-        "esbuildOptions": {
-          "sourcemap": true,
-          "outExtension": {
-            ".js": ".js"
-          }
-        }
+        "external": ["vscode"]
       },
       "configurations": {
         "development": {

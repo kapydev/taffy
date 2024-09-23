@@ -52,7 +52,11 @@ const indexHtmlSpoofPlugin = (): Plugin => {
     transformIndexHtml: {
       order: 'post',
       async handler(html) {
-        await writeFile('index-spoof.html', html, config);
+        const htmlWithBaseHref = html.replace(
+          '<head>',
+          `<head>\n<base href="http://localhost:${PORT}">`
+        );
+        await writeFile('index.html', htmlWithBaseHref, config);
         return html;
       },
     },

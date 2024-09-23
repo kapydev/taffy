@@ -4,7 +4,6 @@ import cors from 'cors';
 import { WebSocketServer } from 'ws';
 import { fileRouter } from './routers/files';
 import { createContext, router } from './trpc';
-import { watchForChanges } from './files';
 
 // watchForChanges();
 

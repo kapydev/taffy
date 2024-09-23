@@ -25,7 +25,7 @@ export function ChatPanel() {
 
   return (
     <div className="flex flex-col p-4 flex-1">
-      <div className="flex flex-col-reverse overflow-x-scroll flex-1">
+      <div className="flex flex-col-reverse overflow-x-auto flex-1">
         <Messages />
       </div>
       <div className="flex mt-4">
