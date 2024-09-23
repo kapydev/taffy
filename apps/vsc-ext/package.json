@@ -14,17 +14,12 @@
     "onStartupFinished"
   ],
   "contributes": {
-    "commands": [
-      {
-        "command": "cto-ai.start",
-        "title": "Start CTO AI"
-      }
-    ],
+    "commands": [],
     "contributes": {
       "keybindings": [
         {
           "command": "cto-ai.logSelectedTextAndFile",
-          "key": "ctrl+m",
+          "key": "ctrl+k",
           "when": "editorTextFocus"
         }
       ]

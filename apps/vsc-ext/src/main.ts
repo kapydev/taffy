@@ -17,13 +17,52 @@ export const appRouter = router({
 });
 
 export function activate(context: vscode.ExtensionContext) {
-  context.subscriptions.push(
-    vscode.commands.registerCommand('cto-ai.start', () => {
+  // Register the command
+  const disposable = vscode.commands.registerCommand(
+    'cto-ai.logSelectedTextAndFile',
+    () => {
+      // Get the active text editor
+      const editor = vscode.window.activeTextEditor;
+
+      if (!editor) {
+        vscode.window.showInformationMessage('No active editor found');
+        return;
+      }
+      // Get the selected text
+      const selection = editor.selection;
+      const selectedText = editor.document.getText(selection);
+
+      // Get the file name
+      const fileName = editor.document.fileName;
+
+      // Log the information
+      logger.log(`Selected text: ${selectedText}`);
+      logger.log(`File name: ${fileName}`);
+
+      // You can also show the message to the user
+      vscode.window.showInformationMessage(
+        `Selected text: ${selectedText}, File: ${fileName}`
+      );
+
+      // Get all visible text editors
+      const visibleEditors = vscode.window.visibleTextEditors;
+
+      let bestCol: vscode.ViewColumn | undefined = vscode.ViewColumn.Beside;
+      if (visibleEditors.length > 1) {
+        //Use existing view column
+        const newBestCol = visibleEditors.find(
+          (otherEditor) => otherEditor.viewColumn !== editor.viewColumn
+        )?.viewColumn;
+        if (newBestCol) {
+          bestCol = newBestCol;
+        }
+      }
+
       // Create and show a new webview
       const panel = vscode.window.createWebviewPanel(
         'cto-ai', // Identifies the type of the webview. Used internally
         'CTO AI', // Title of the panel displayed to the user
-        vscode.ViewColumn.One, // Editor column to show the new webview panel in.
+        bestCol, // Editor column to show the new webview panel in.
         {
           enableScripts: true,
         } // Webview options. More on these later.
@@ -32,35 +71,6 @@ export function activate(context: vscode.ExtensionContext) {
       panel.webview.html = getWebViewContent();
 
       createVscExtHandler({ panel, context, router: appRouter });
-    })
-  );
-
-  // Register the command
-  const disposable = vscode.commands.registerCommand(
-    'cto-ai.logSelectedTextAndFile',
-    () => {
-      // Get the active text editor
-      const editor = vscode.window.activeTextEditor;
-
-      if (editor) {
-        // Get the selected text
-        const selection = editor.selection;
-        const selectedText = editor.document.getText(selection);
-
-        // Get the file name
-        const fileName = editor.document.fileName;
-
-        // Log the information
-        logger.log(`Selected text: ${selectedText}`);
-        logger.log(`File name: ${fileName}`);
-
-        // You can also show the message to the user
-        vscode.window.showInformationMessage(
-          `Selected text: ${selectedText}, File: ${fileName}`
-        );
-      } else {
-        vscode.window.showInformationMessage('No active editor found');
-      }
     }
   );
 
@@ -70,38 +80,4 @@ export function activate(context: vscode.ExtensionContext) {
 
 function getWebViewContent(): string {
   return html;
-
-  // return `<!DOCTYPE html>
-  // <html lang="en">
-  // <head>
-  // <base href="http://localhost:4200"/>
-  //     <meta charset="UTF-8">
-  //     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  //     <title>Cat Coding</title>
-  // </head>
-  // <body>
-  //     <img src="https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif" width="300" />
-  //     <h1 id="lines-of-code-counter">0</h1>
-
-  //     <script>
-  //         (function() {
-  //             const vscode = acquireVsCodeApi();
-  //             const counter = document.getElementById('lines-of-code-counter');
-
-  //             let count = 0;
-  //             setInterval(() => {
-  //                 counter.textContent = count++;
-
-  //                 // Alert the extension when our cat introduces a bug
-  //                 if (Math.random() < 0.001 * count) {
-  //                     vscode.postMessage({
-  //                         command: 'alert',
-  //                         text: '🐛  on line ' + count
-  //                     })
-  //                 }
-  //             }, 100);
-  //         }())
-  //     </script>
-  // </body>
-  // </html>`
 }
