@@ -27,9 +27,9 @@ export function Messages() {
 }
 
 const MESSAGE_GROUP_COLORS = {
-  assistant: 'text-blue-600',
-  user: 'text-green-600',
-  system: 'text-slate-600',
+  assistant: 'text-vsc-debugTokenExpression-name',
+  user: 'text-vsc-debugTokenExpression-type',
+  system: 'text-vsc-debugTokenExpression-value',
 } satisfies Record<CustomMessage['role'], string>;
 
 /**Wraps an entire group of messages from the same role (system, assistant, user)
