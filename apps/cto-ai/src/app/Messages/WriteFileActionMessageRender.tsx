@@ -26,7 +26,7 @@ export function WriteFileActionMessageRender({
         </pre>
       </AlertDescription>
       <div className="flex gap-2">
-        <Button className="text-red-500">Decline</Button>
+        <Button className="text-vsc-errorForeground">Decline</Button>
         <Button onClick={writeUpdatedFile} className="text-black">
           Approve
         </Button>

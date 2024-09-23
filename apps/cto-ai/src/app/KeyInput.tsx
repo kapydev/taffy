@@ -27,7 +27,7 @@ function KeyInputRow({
   return (
     <>
       {key === '' && (
-        <p className="text-sm text-red-500">Please enter a {keyName} key</p>
+        <p className="text-sm text-vsc-errorForeground">Please enter a {keyName} key</p>
       )}
       <form
         onSubmit={handleSubmit}
