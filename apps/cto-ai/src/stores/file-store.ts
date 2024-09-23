@@ -1,11 +1,10 @@
-import { createBetterStore } from '@cto-ai/shared-helpers';
 import { FilesObj, GeneratedFile } from '@cto-ai/shared-types';
-import { trpc } from '../client';
-import { chatStore, resetChatStore } from './chat-store';
 import { AppRouter } from '@cto-ai/vsc-ext/types';
-import { HumanMessage } from '../llms/messages/HumanMessage';
 import { inferProcedureOutput } from '@trpc/server';
+import { trpc } from '../client';
 import { FileSelectionMessage } from '../llms/messages/FileSelectionMessage';
+import { chatStore, resetChatStore } from './chat-store';
+import { createBetterStore } from './create-better-store';
 
 export const fileStore = createBetterStore({
   files: undefined as FilesObj | undefined,

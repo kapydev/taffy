@@ -1,4 +1,4 @@
-import { createBetterStore } from '@cto-ai/shared-helpers';
+import { createBetterStore } from './create-better-store';
 import { LLM } from '../llms/base-llm';
 import { Claude } from '../llms/claude';
 import { LLMOutputParser } from '../llms/messages/LLMOutputParser';

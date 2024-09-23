@@ -1,2 +1,2 @@
-const vscApi = acquireVsCodeApi();
+const vscApi = acquireVsCodeApi<Record<string, any>>();
 export { vscApi };

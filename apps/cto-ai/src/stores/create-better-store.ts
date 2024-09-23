@@ -1,6 +1,7 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { createJSONStorage, persist } from 'zustand/middleware';
 import { subscribeWithSelector } from 'zustand/middleware';
+import { vscApi } from '../common/vsc-api';
 
 export function createBetterStore<T extends Record<string, any>>(
   storeDefaults: T,
@@ -11,7 +12,22 @@ export function createBetterStore<T extends Record<string, any>>(
   const useStore = opts?.persistKey
     ? create<T>()(
         subscribeWithSelector(
-          persist((set, get) => storeDefaults, { name: opts.persistKey })
+          persist((set, get) => storeDefaults, {
+            name: opts.persistKey,
+            storage: createJSONStorage(() => ({
+              getItem: (name: string) => vscApi.getState()?.[name],
+              setItem: (name: string, value: string) => {
+                vscApi.setState({ ...vscApi.getState(), [name]: value });
+              },
+              removeItem: (name: string) => {
+                const currentState = vscApi.getState();
+                if (currentState) {
+                  const { [name]: _, ...newState } = currentState;
+                  vscApi.setState(newState);
+                }
+              },
+            })),
+          })
         )
       )
     : create<T>()(subscribeWithSelector((set, get) => storeDefaults));
