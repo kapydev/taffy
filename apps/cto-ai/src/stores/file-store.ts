@@ -4,11 +4,14 @@ import { trpc } from '../client';
 import { chatStore, resetChatStore } from './chat-store';
 import { AppRouter } from '@cto-ai/vsc-ext/types';
 import { HumanMessage } from '../llms/messages/HumanMessage';
+import { inferProcedureOutput } from '@trpc/server';
+import { FileSelectionMessage } from '../llms/messages/FileSelectionMessage';
 
 export const fileStore = createBetterStore({
   files: undefined as FilesObj | undefined,
-  selectionData:
-    undefined as AppRouter['files']['onSelectionChange']['_def']['$types']['output'],
+  selectionData: undefined as
+    | inferProcedureOutput<AppRouter['files']['onSelectionChange']>
+    | undefined,
 });
 
 export async function getFileContentsByPath(
@@ -55,10 +58,9 @@ trpc.files.getWorkingDirFilesObj.query().then((fileTree) => {
 
 trpc.files.onSelectionChange.subscribe(undefined, {
   onData: (data) => {
-    console.log(data)
     const curMsgs = chatStore.get('messages');
     fileStore.set('selectionData', data);
-    const userMsg = new HumanMessage(JSON.stringify(data));
-    chatStore.set('messages', [...curMsgs, userMsg]);
+    const fileSelectionMessage = new FileSelectionMessage(data);
+    chatStore.set('messages', [...curMsgs, fileSelectionMessage]);
   },
 });

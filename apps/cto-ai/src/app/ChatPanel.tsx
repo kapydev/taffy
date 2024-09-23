@@ -34,7 +34,6 @@ export function ChatPanel() {
         <Textarea
           value={input}
           onChange={(e) => {
-            trpc.hello.query().then((res) => console.log('SHAHSHHSAHHSA', res));
             setInput(e.target.value);
           }}
           onKeyDown={(e) => {

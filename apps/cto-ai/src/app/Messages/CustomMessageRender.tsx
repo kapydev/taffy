@@ -1,5 +1,6 @@
 import { AssistantMessage } from '../../llms/messages/AssistantMessage';
 import { FileContextMessage } from '../../llms/messages/FileContextMessage';
+import { FileSelectionMessage } from '../../llms/messages/FileSelectionMessage';
 import { HumanMessage } from '../../llms/messages/HumanMessage';
 import { CustomMessage } from '../../llms/messages/Messages';
 import { ReadFileActionMessage } from '../../llms/messages/ReadFileActionMessage';
@@ -8,6 +9,7 @@ import { UpdateFileActionMessage } from '../../llms/messages/UpdateFileActionMes
 import { WriteFileActionMessage } from '../../llms/messages/WriteFileActionMessage';
 import { AssistantMessageRender } from './AssistantMessageRender';
 import { FileContextMessageRender } from './FileContextMessageRender';
+import { FileSelectionMessageRender } from './FileSelectionMessageRender';
 import { HumanMessageRender } from './HumanMessageRender';
 import { ReadFileActionMessageRender } from './ReadFileActionMessageRender';
 import { SystemPromptRender } from './SystemPromptRender';
@@ -29,6 +31,8 @@ export function CustomMessageRender({ message }: { message: CustomMessage }) {
     return <WriteFileActionMessageRender message={message} />;
   } else if (message instanceof UpdateFileActionMessage) {
     return <UpdateFileActionMessageRender message={message} />;
+  } else if (message instanceof FileSelectionMessage) {
+    return <FileSelectionMessageRender message={message} />;
   }
   return <>TODO: {message.constructor.name}</>;
 }

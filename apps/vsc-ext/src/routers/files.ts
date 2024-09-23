@@ -31,19 +31,23 @@ export const fileRouter = router({
       };
     };
 
-    return observable<ReturnType<typeof getSelectionData>>((emit) => {
-      const sendSelectionData = () => {
-        emit.next(getSelectionData(latestActiveEditor));
-      };
+    return observable<NonNullable<ReturnType<typeof getSelectionData>>>(
+      (emit) => {
+        const sendSelectionData = () => {
+          const selectionData = getSelectionData(latestActiveEditor);
+          if (!selectionData) return;
+          emit.next(selectionData);
+        };
 
-      sendSelectionData();
-      
-      ee.on('ctrlKPressed', sendSelectionData);
+        sendSelectionData();
 
-      return () => {
-        ee.removeListener('ctrlKPressed', sendSelectionData);
-      };
-    });
+        ee.on('ctrlKPressed', sendSelectionData);
+
+        return () => {
+          ee.removeListener('ctrlKPressed', sendSelectionData);
+        };
+      }
+    );
   }),
   // getWorkingDirFolderStructure: publicProcedure.query(
   //   (): Promise<GeneratedFolder> => {
