@@ -5,14 +5,15 @@ import { getFilesObj } from '../files';
 import { publicProcedure, router } from '../trpc';
 import { observable } from '@trpc/server/observable';
 import * as vscode from 'vscode';
+import { ee } from '../event-emitter';
+import { latestActiveEditor } from '../main';
 
 export const fileRouter = router({
   getWorkingDirFilesObj: publicProcedure.query(async (): Promise<FilesObj> => {
     return getFilesObj();
   }),
   onSelectionChange: publicProcedure.subscription(() => {
-    const getSelectionData = () => {
-      const editor = vscode.window.activeTextEditor;
+    const getSelectionData = (editor: vscode.TextEditor | undefined) => {
       if (!editor) return undefined;
       const fileName = editor.document.fileName;
       const selection = editor.selection;
@@ -31,13 +32,17 @@ export const fileRouter = router({
     };
 
     return observable<ReturnType<typeof getSelectionData>>((emit) => {
-      emit.next(getSelectionData());
+      const sendSelectionData = () => {
+        emit.next(getSelectionData(latestActiveEditor));
+      };
 
-      const disposable = vscode.window.onDidChangeTextEditorSelection(() => {
-        emit.next(getSelectionData());
-      });
+      sendSelectionData();
+      
+      ee.on('ctrlKPressed', sendSelectionData);
 
-      return () => disposable.dispose()
+      return () => {
+        ee.removeListener('ctrlKPressed', sendSelectionData);
+      };
     });
   }),
   // getWorkingDirFolderStructure: publicProcedure.query(

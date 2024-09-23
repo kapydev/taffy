@@ -18,7 +18,7 @@
     "contributes": {
       "keybindings": [
         {
-          "command": "cto-ai.logSelectedTextAndFile",
+          "command": "cto-ai.init",
           "key": "ctrl+k",
           "when": "editorTextFocus"
         }

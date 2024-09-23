@@ -2,9 +2,13 @@ import { createBetterStore } from '@cto-ai/shared-helpers';
 import { FilesObj, GeneratedFile } from '@cto-ai/shared-types';
 import { trpc } from '../client';
 import { chatStore, resetChatStore } from './chat-store';
+import { AppRouter } from '@cto-ai/vsc-ext/types';
+import { HumanMessage } from '../llms/messages/HumanMessage';
 
 export const fileStore = createBetterStore({
   files: undefined as FilesObj | undefined,
+  selectionData:
+    undefined as AppRouter['files']['onSelectionChange']['_def']['$types']['output'],
 });
 
 export async function getFileContentsByPath(
@@ -50,5 +54,11 @@ trpc.files.getWorkingDirFilesObj.query().then((fileTree) => {
 });
 
 trpc.files.onSelectionChange.subscribe(undefined, {
-  onData: (data) => {},
+  onData: (data) => {
+    console.log(data)
+    const curMsgs = chatStore.get('messages');
+    fileStore.set('selectionData', data);
+    const userMsg = new HumanMessage(JSON.stringify(data));
+    chatStore.set('messages', [...curMsgs, userMsg]);
+  },
 });
