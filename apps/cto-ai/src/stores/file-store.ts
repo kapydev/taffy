@@ -1,5 +1,5 @@
 import { FilesObj, GeneratedFile } from '@cto-ai/shared-types';
-import { AppRouter } from '@cto-ai/vsc-ext/types';
+import type { AppRouter } from '@cto-ai/vsc-ext/types';
 import { inferProcedureOutput } from '@trpc/server';
 import { trpc } from '../client';
 import { FileSelectionMessage } from '../llms/messages/FileSelectionMessage';

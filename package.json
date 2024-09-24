@@ -1,12 +1,36 @@
 {
-  "name": "@cto-ai/source",
+  "name": "cto-ai",
   "version": "0.0.0",
   "license": "MIT",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
   "scripts": {
     "serve": "nx run-many --target=serve --all",
     "init:services": "npx supabase start",
     "db:types": "npx supabase gen types typescript --local > shared/types/src/supabase-types.ts",
-    "db:reset": "supabase db reset && npm run db:types"
+    "db:reset": "supabase db reset && npm run db:types",
+    "build": "nx run cto-ai:build && nx run vsc-ext:build --skip-nx-cache && npx vsce package --allow-missing-repository"
+  },
+  "main": "./dist/apps/vsc-ext/main.cjs",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "files": [
+    "LICENSE.md",
+    "dist/apps/vsc-ext/**/*"
+  ],
+  "contributes": {
+    "commands": [],
+    "contributes": {
+      "keybindings": [
+        {
+          "command": "cto-ai.init",
+          "key": "ctrl+k",
+          "when": "editorTextFocus"
+        }
+      ]
+    }
   },
   "private": true,
   "dependencies": {
@@ -50,12 +74,12 @@
     "vite-plugin-singlefile": "^2.0.2",
     "vite-raw-plugin": "^1.0.2",
     "vsce": "^2.15.0",
-    "vscode": "^1.1.37",
     "ws": "^8.18.0",
     "zod": "^3.23.8",
     "zustand": "^4.5.5"
   },
   "devDependencies": {
+    "vscode": "^1.1.37",
     "@babel/core": "^7.14.5",
     "@babel/preset-react": "^7.14.5",
     "@nx/esbuild": "19.6.2",
