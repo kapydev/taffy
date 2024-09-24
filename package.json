@@ -21,16 +21,13 @@
     "dist/apps/vsc-ext/**/*"
   ],
   "contributes": {
-    "commands": [],
-    "contributes": {
-      "keybindings": [
-        {
-          "command": "cto-ai.init",
-          "key": "ctrl+k",
-          "when": "editorTextFocus"
-        }
-      ]
-    }
+    "keybindings": [
+      {
+        "command": "cto-ai.init",
+        "key": "ctrl+k",
+        "when": "editorTextFocus"
+      }
+    ]
   },
   "private": true,
   "dependencies": {
