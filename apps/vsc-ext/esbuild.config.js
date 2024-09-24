@@ -32,11 +32,9 @@ const rawLoaderPlugin = {
 dotenv.config();
 
 module.exports = {
-  plugins: [
-    rawLoaderPlugin,
-    polyfillNode({ polyfills: { path: true, process: false } }),
-  ],
+  plugins: [rawLoaderPlugin],
   bundle: true,
+  external: ['fs', 'path'],
   define: {
     'process.env.VITE_SUPABASE_URL': JSON.stringify(
       process.env.VITE_SUPABASE_URL
