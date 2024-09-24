@@ -1,7 +1,7 @@
 import { FilesObj, GeneratedFile, GeneratedFolder } from '@cto-ai/shared-types';
 // import fs from 'fs/promises';
 import { z } from 'zod';
-import { getFilesObj } from '../files';
+import { extractWorkspacePath, getFilesObj } from '../files';
 import { publicProcedure, router } from '../trpc';
 import { observable } from '@trpc/server/observable';
 import * as vscode from 'vscode';
@@ -15,7 +15,10 @@ export const fileRouter = router({
   onSelectionChange: publicProcedure.subscription(() => {
     const getSelectionData = (editor: vscode.TextEditor | undefined) => {
       if (!editor) return undefined;
-      const fileName = editor.document.fileName;
+      const fileName = extractWorkspacePath(editor.document.fileName);
+      if (!fileName) {
+        throw new Error('Could not find relative filename!');
+      }
       const selection = editor.selection;
       const selectedText = editor.document.getText(selection);
       const fullFileContents = editor.document.getText();

@@ -21,6 +21,17 @@ const watcher = chokidar.watch(workingDir, {
 });
 watcher.on('ready', () => (watcherReady = true));
 
+export function extractWorkspacePath(fullPath: string): string | undefined {
+  const basePath = workingDir.split(path.sep).join(path.posix.sep);
+  const resolvedFullPath = fullPath.split(path.sep).join(path.posix.sep);
+  if (!resolvedFullPath.includes(basePath)) return undefined;
+  let relPath = resolvedFullPath.replace(basePath, '');
+  if (relPath === '') {
+    relPath = '/';
+  }
+  return relPath;
+}
+
 export const watchForChanges = () => {
   // Watch for file changes and update embeddings
   // watcher.on('change', async (filePath) => {
@@ -50,18 +61,13 @@ export async function getFilesObj(): Promise<FilesObj> {
     if (watcherReady) resolve();
   });
   const watchedPaths = watcher.getWatched();
-  const basePath = workingDir.split(path.sep).join(path.posix.sep);
 
   // Make all paths relative unix paths
   const relUnixPaths: Record<string, string[]> = Object.fromEntries(
     Object.entries(watchedPaths)
       .map(([rawFolderPath, val]) => {
-        const unixPath = rawFolderPath.split(path.sep).join(path.posix.sep);
-        if (!unixPath.includes(basePath)) return undefined;
-        let relPath = unixPath.replace(basePath, '');
-        if (relPath === '') {
-          relPath = '/';
-        }
+        const relPath = extractWorkspacePath(rawFolderPath);
+        if (!relPath) return undefined;
         return [relPath, val];
       })
       .filter(booleanFilter)

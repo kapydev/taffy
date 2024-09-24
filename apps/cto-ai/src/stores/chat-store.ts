@@ -26,14 +26,16 @@ export const keyStore = createBetterStore(
 );
 
 const setLlm = () => {
-  const curLlm = chatStore.get('llm');
+  let curLlm = chatStore.get('llm');
   if (curLlm) return curLlm;
   if (keyStore.get('gptKey')) {
     chatStore.set('llm', new GPT(keyStore.get('gptKey')));
   } else if (keyStore.get('claudeKey')) {
     chatStore.set('llm', new Claude(keyStore.get('claudeKey')));
   }
-  return chatStore.get('llm')!;
+  curLlm = chatStore.get('llm');
+  if (curLlm) return curLlm;
+  throw new Error('Missing LLM Key!');
 };
 
 export async function runPrompts(llm: LLM | null = chatStore.get('llm')) {

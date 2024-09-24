@@ -11,7 +11,7 @@ export function FileSelectionMessageRender({
     <Alert>
       <FilePlus2Icon className="w-4 h-4" />
       <AlertTitle>
-        You are asking a specific question about the following file
+        File Context Added
       </AlertTitle>
       <AlertDescription>
         {message.context.fileName} - Line{' '}
