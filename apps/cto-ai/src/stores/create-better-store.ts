@@ -14,19 +14,6 @@ export function createBetterStore<T extends Record<string, any>>(
         subscribeWithSelector(
           persist((set, get) => storeDefaults, {
             name: opts.persistKey,
-            storage: createJSONStorage(() => ({
-              getItem: (name: string) => vscApi.getState()?.[name],
-              setItem: (name: string, value: string) => {
-                vscApi.setState({ ...vscApi.getState(), [name]: value });
-              },
-              removeItem: (name: string) => {
-                const currentState = vscApi.getState();
-                if (currentState) {
-                  const { [name]: _, ...newState } = currentState;
-                  vscApi.setState(newState);
-                }
-              },
-            })),
           })
         )
       )
