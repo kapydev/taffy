@@ -1,15 +1,30 @@
-import { Button, Input, Textarea } from '@cto-ai/components';
+import { Button, Textarea } from '@cto-ai/components';
 import { Send } from 'lucide-react';
 import { useState } from 'react';
 
+import { useEffect, useRef } from 'react';
 import { HumanMessage } from '../llms/messages/HumanMessage';
 import { chatStore, runPrompts } from '../stores/chat-store';
 import { Messages } from './Messages';
-import { vscApi } from '../common/vsc-api';
-import { trpc } from '../client';
 
 export function ChatPanel() {
   const [input, setInput] = useState('');
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    const handleWindowFocus = () => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    };
+
+    handleWindowFocus()
+    window.addEventListener('focus', handleWindowFocus);
+
+    return () => {
+      window.removeEventListener('focus', handleWindowFocus);
+    };
+  }, []);
 
   const handleSend = () => {
     if (!input.trim()) return;
@@ -32,6 +47,7 @@ export function ChatPanel() {
       </div>
       <div className="flex mt-4">
         <Textarea
+          ref={inputRef}
           value={input}
           onChange={(e) => {
             setInput(e.target.value);
