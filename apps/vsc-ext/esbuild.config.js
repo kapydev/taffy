@@ -34,7 +34,7 @@ dotenv.config();
 module.exports = {
   plugins: [rawLoaderPlugin],
   bundle: true,
-  external: ['fs', 'path'],
+  external: ['fs', 'path', 'vscode'],
   sourcemap: true,
   define: {
     'process.env.VITE_SUPABASE_URL': JSON.stringify(

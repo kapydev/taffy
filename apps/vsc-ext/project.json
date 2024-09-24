@@ -10,15 +10,15 @@
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
-        "platform": "neutral",
+        "platform": "node",
         "outputPath": "dist/apps/vsc-ext",
         "format": ["cjs"],
+        "thirdParty": true,
         "bundle": true,
         "main": "apps/vsc-ext/src/main.ts",
         "tsConfig": "apps/vsc-ext/tsconfig.app.json",
         "assets": ["apps/vsc-ext/src/assets"],
         "esbuildConfig": "apps/vsc-ext/esbuild.config.js",
-        "generatePackageJson": true,
         "external": ["vscode"]
       },
       "configurations": {
