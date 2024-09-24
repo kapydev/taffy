@@ -31,7 +31,7 @@ export async function updateFileContentsByPath(
   lineData?: {
     start: number;
     end: number;
-  },
+  }
 ): Promise<void> {
   await trpc.files.updateFileByPath.mutate({
     filePath,

@@ -60,7 +60,8 @@ export const fileRouter = router({
   getFileByPath: publicProcedure
     .input(z.object({ filePath: z.string() }))
     .query(async (opts) => {
-      const { filePath } = opts.input;
+      const { filePath: rawFilePath } = opts.input;
+      const filePath = getFullPath(rawFilePath);
       try {
         const fileContents = await fs.readFile(filePath, 'utf8');
         const generatedFile: GeneratedFile = {
