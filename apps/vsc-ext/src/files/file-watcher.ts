@@ -49,7 +49,6 @@ export async function getFilesObj(): Promise<FilesObj> {
     watcher.on('ready', resolve);
     if (watcherReady) resolve();
   });
-  debugger;
   const watchedPaths = watcher.getWatched();
   const basePath = workingDir.split(path.sep).join(path.posix.sep);
 
@@ -74,10 +73,11 @@ export async function getFilesObj(): Promise<FilesObj> {
       const filePath = path.posix.join(folder, file);
       const fullPath = path.join(workingDir, filePath);
       if (fs.existsSync(fullPath) && fs.statSync(fullPath).isFile()) {
-        const content = fs.readFileSync(fullPath, 'utf-8');
+        // const content = fs.readFileSync(fullPath, 'utf-8');
         const generatedFile: GeneratedFile = {
           name: file,
-          content: content,
+          // content: content,
+          content: undefined,
           contentEncoding: 'utf8',
         };
         record[filePath] = generatedFile;
