@@ -79,8 +79,8 @@ const indexHtmlSpoofPlugin = (): Plugin => {
   };
 };
 
-const IGNORE_PACKAGES = [];
-const IGNORE_GLOBS = IGNORE_PACKAGES.map((pkg) => `**/packages/${pkg}/**`);
+const IGNORE_PACKAGES = ['vsc-ext'];
+const IGNORE_GLOBS = IGNORE_PACKAGES.map((pkg) => `**/${pkg}/**`);
 
 // FIXME: for some reason just setting IGNORE_GLOBS on watch.ignored is not working
 const unwatchNonPluginFiles = (): Plugin => {

@@ -9,6 +9,6 @@
     "declaration": false
   },
   "files": [],
-  "include": ["./src"],
+  "include": ["src"],
   "extends": "../../tsconfig.base.json"
 }
