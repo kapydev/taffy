@@ -1,6 +1,7 @@
 //@ts-check
 const fs = require('fs');
 const dotenv = require('dotenv');
+const { polyfillNode } = require('esbuild-plugin-polyfill-node');
 
 // Custom plugin for loading raw files
 /**
@@ -31,7 +32,10 @@ const rawLoaderPlugin = {
 dotenv.config();
 
 module.exports = {
-  plugins: [rawLoaderPlugin],
+  plugins: [
+    rawLoaderPlugin,
+    polyfillNode({ polyfills: { path: true, process: false } }),
+  ],
   bundle: true,
   define: {
     'process.env.VITE_SUPABASE_URL': JSON.stringify(

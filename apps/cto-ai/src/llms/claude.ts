@@ -13,7 +13,6 @@ export class Claude extends LLM {
   async *prompt(messages: RawMessage[]): AsyncIterable<string> {
     const client = new Anthropic({
       apiKey: this.apiKey,
-      //URGENT TODO: Fix this
       dangerouslyAllowBrowser: true,
     });
 
