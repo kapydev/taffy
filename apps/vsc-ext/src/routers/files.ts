@@ -1,7 +1,7 @@
 import { FilesObj, GeneratedFile, GeneratedFolder } from '@cto-ai/shared-types';
-// import fs from 'fs/promises';
+import fs from 'fs/promises';
 import { z } from 'zod';
-import { extractWorkspacePath, getFilesObj } from '../files';
+import { extractWorkspacePath, getFilesObj, getFullPath } from '../files';
 import { publicProcedure, router } from '../trpc';
 import { observable } from '@trpc/server/observable';
 import * as vscode from 'vscode';
@@ -62,8 +62,7 @@ export const fileRouter = router({
     .query(async (opts) => {
       const { filePath } = opts.input;
       try {
-        const fileContents = 'TODO TODO TODO';
-        // const fileContents = await fs.readFile(filePath, 'utf8');
+        const fileContents = await fs.readFile(filePath, 'utf8');
         const generatedFile: GeneratedFile = {
           name: filePath.split('/').pop() || '',
           content: fileContents,
@@ -85,31 +84,50 @@ export const fileRouter = router({
           })
           .optional(),
         content: z.string(),
+        preview: z.boolean(),
       })
     )
     .mutation(async (opts) => {
-      const { filePath, lineData, content } = opts.input;
+      const { filePath: rawFilePath, lineData, content, preview } = opts.input;
+      const filePath = getFullPath(rawFilePath);
+      // const openFileInEditor = async (filePath: string, lineNumber: number) => {
+      //   const document = await vscode.workspace.openTextDocument(filePath);
+      //   const editor = await vscode.window.showTextDocument(document);
+      //   const position = new vscode.Position(lineNumber, 0);
+      //   const range = new vscode.Range(position, position);
+      //   editor.revealRange(range, vscode.TextEditorRevealType.InCenter);
+      //   editor.selection = new vscode.Selection(position, position);
+      // };
       if (lineData === undefined) {
-        // await fs.writeFile(filePath, content, 'utf-8');
+        await fs.writeFile(filePath, content, 'utf-8');
         return { success: true };
       } else {
         try {
-          // const fileContents = await fs.readFile(filePath, 'utf8');
-          const fileContents = 'TODO TODO TODO';
+          const fileContents = await fs.readFile(filePath, 'utf8');
           const fileLines = fileContents.split('\n');
           let updatedLines;
           if (lineData) {
             const { start, end } = lineData;
+            const replaceBlock = preview
+              ? [
+                  '<<<<<<< CURRENT',
+                  ...fileLines.slice(start - 1, end),
+                  '=======',
+                  content,
+                  '>>>>>>> SUGGESTION',
+                ]
+              : [content];
+
             updatedLines = [
               ...fileLines.slice(0, start - 1),
-              content,
+              ...replaceBlock,
               ...fileLines.slice(end),
             ];
           } else {
             updatedLines = [content];
           }
 
-          // await fs.writeFile(filePath, updatedLines.join('\n'), 'utf8');
+          await fs.writeFile(filePath, updatedLines.join('\n'), 'utf8');
           return { success: true };
         } catch (error: any) {
           return { success: false, error: error.message };

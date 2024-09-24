@@ -32,6 +32,13 @@ export function extractWorkspacePath(fullPath: string): string | undefined {
   return relPath;
 }
 
+export function getFullPath(relPath: string): string {
+  const basePath = workingDir.split(path.sep).join(path.posix.sep);
+  const relativePath = relPath.split(path.sep).join(path.posix.sep);
+
+  return path.posix.join(basePath, relativePath);
+}
+
 export const watchForChanges = () => {
   // Watch for file changes and update embeddings
   // watcher.on('change', async (filePath) => {

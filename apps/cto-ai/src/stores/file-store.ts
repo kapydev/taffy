@@ -27,15 +27,17 @@ export async function getFileContentsByPath(
 export async function updateFileContentsByPath(
   filePath: string,
   contents: string,
+  preview: boolean,
   lineData?: {
     start: number;
     end: number;
-  }
+  },
 ): Promise<void> {
   await trpc.files.updateFileByPath.mutate({
     filePath,
     lineData,
     content: contents,
+    preview,
   });
   const data = await trpc.files.getFileByPath.query({ filePath });
   if (!data) throw new Error('File not found');

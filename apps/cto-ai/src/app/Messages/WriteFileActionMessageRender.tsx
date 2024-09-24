@@ -10,7 +10,7 @@ export function WriteFileActionMessageRender({
   message: WriteFileActionMessage;
 }) {
   const writeUpdatedFile = async () => {
-    await updateFileContentsByPath(message.props?.filePath, message.body);
+    await updateFileContentsByPath(message.props?.filePath, message.body, true);
   };
 
   return (
@@ -27,7 +27,7 @@ export function WriteFileActionMessageRender({
       </AlertDescription>
       <div className="flex gap-2">
         <Button className="text-vsc-errorForeground">Decline</Button>
-        <Button onClick={writeUpdatedFile} className="text-black">
+        <Button onClick={writeUpdatedFile} className="text-vsc-foreground">
           Approve
         </Button>
       </div>

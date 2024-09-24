@@ -10,7 +10,7 @@ export function UpdateFileActionMessageRender({
   message: UpdateFileActionMessage;
 }) {
   const updateFile = async () => {
-    await updateFileContentsByPath(message.props.filePath, message.body, {
+    await updateFileContentsByPath(message.props.filePath, message.body, true, {
       start: message.props.startLine,
       end: message.props.endLine,
     });
@@ -32,8 +32,8 @@ export function UpdateFileActionMessageRender({
       </AlertDescription>
       <div className="flex gap-2">
         <Button className="text-vsc-errorForeground">Decline</Button>
-        <Button onClick={updateFile} className="text-black">
-          Approve
+        <Button onClick={updateFile} className="text-vsc-foreground">
+          Preview
         </Button>
       </div>
     </Alert>

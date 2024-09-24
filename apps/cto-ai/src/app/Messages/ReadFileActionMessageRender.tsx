@@ -36,7 +36,7 @@ export function ReadFileActionMessageRender({
       </AlertDescription>
       <div className="flex gap-2">
         <Button className="text-vsc-errorForeground">Decline</Button>
-        <Button onClick={addFilesToContext} className="text-black">
+        <Button onClick={addFilesToContext} className="text-vsc-foreground">
           Approve
         </Button>
       </div>
