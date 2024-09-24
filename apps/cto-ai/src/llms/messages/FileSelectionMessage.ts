@@ -1,7 +1,7 @@
 import { RawMessage } from '@cto-ai/shared-types';
 import { BaseMessage } from './BaseMessage';
 import { inferProcedureOutput } from '@trpc/server';
-import { AppRouter } from '@cto-ai/vsc-ext/types';
+import type { AppRouter } from '@cto-ai/vsc-ext/types';
 import { addLineNumbers } from '@cto-ai/shared-helpers';
 
 export class FileSelectionMessage extends BaseMessage {

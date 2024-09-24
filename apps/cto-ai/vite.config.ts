@@ -141,7 +141,7 @@ const finalConfig = defineConfig(({ command }) => {
             tsconfigPath: './tsconfig.json',
           },
         }),
-      indexHtmlSpoofPlugin(),
+      command === 'serve' && indexHtmlSpoofPlugin(),
       viteSingleFile(),
       unwatchNonPluginFiles(),
     ],
