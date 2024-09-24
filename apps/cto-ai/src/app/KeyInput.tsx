@@ -25,10 +25,7 @@ function KeyInputRow({
   };
 
   return (
-    <>
-      {key === '' && (
-        <p className="text-sm text-vsc-errorForeground">Please enter a {keyName} key</p>
-      )}
+    <div className='flex flex-col mb-2'>
       <form
         onSubmit={handleSubmit}
         className="flex items-center space-x-2 mt-2"
@@ -51,7 +48,12 @@ function KeyInputRow({
           {key ? 'Clear' : 'Submit'}
         </Button>
       </form>
-    </>
+      {key === '' && (
+        <p className="text-sm text-vsc-errorForeground">
+          Please enter a {keyName} key
+        </p>
+      )}
+    </div>
   );
 }
 

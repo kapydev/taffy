@@ -10,60 +10,45 @@ import { vscApi } from '../common/vsc-api';
 import { trpc } from '../client';
 
 export function MainChat() {
-  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
-
-  const rootFolder = fileStore.use('files');
-
-  const toggleFile = (path: string) => {
-    setSelectedFiles((prev) =>
-      prev.includes(path) ? prev.filter((f) => f !== path) : [...prev, path]
-    );
-  };
-
-  const renderFileTree = (folder: GeneratedFolder, path = '') => {
-    return folder.subFolders.map((item) => {
-      const currentPath = `${path}/${item.name}`;
-      if (item.subFolders.length > 0 || item.files.length > 0) {
-        return (
-          <div key={currentPath}>
-            <div className="flex items-center">
-              {item.subFolders.length > 0 ? (
-                <ChevronRight className="h-4 w-4" />
-              ) : null}
-              <span>{item.name}</span>
-            </div>
-            <div className="ml-4">{renderFileTree(item, currentPath)}</div>
-          </div>
-        );
-      } else {
-        return (
-          <div key={currentPath} className="flex items-center space-x-2">
-            <Checkbox
-              id={currentPath}
-              checked={selectedFiles.includes(currentPath)}
-              onCheckedChange={() => toggleFile(currentPath)}
-            />
-            <label htmlFor={currentPath}>{item.name}</label>
-          </div>
-        );
-      }
-    });
-  };
-
   return (
     <div className="flex h-full w-full">
-      <div className="w-64 flex flex-col bg-background p-4 overflow-auto flex-shrink-0">
-        <h2 className="text-lg font-semibold mb-4">Repository Files</h2>
-        <ScrollArea className="flex-1">
-          {/* TODO: FILE TREE
-          {rootFolder && renderFileTree(rootFolder)} */}
-        </ScrollArea>
-        <KeyInput />
-        <Button onClick={resetChatStore} className="ml-2">
-          Reset Chat
-        </Button>
-      </div>
+      <LeftPanel />
       <ChatPanel />
+    </div>
+  );
+}
+
+function LeftPanel() {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  if (!isExpanded) {
+    return (
+      <ChevronRight
+        className={`absolute top-2 left-2 cursor-pointer transform transition-transform`}
+        onClick={() => setIsExpanded(!isExpanded)}
+      />
+    );
+  }
+
+  return (
+    <div
+      className={`relative ${
+        isExpanded ? 'w-64' : 'w-8'
+      } flex flex-col bg-background p-4 overflow-auto flex-shrink-0 self-stretch`}
+    >
+      <div className="flex justify-between">
+        <h2 className="text-lg font-semibold mb-4">Options</h2>
+        <ChevronRight
+          className={`cursor-pointer transform transition-transform ${
+            isExpanded ? 'rotate-180' : ''
+          }`}
+          onClick={() => setIsExpanded(!isExpanded)}
+        />
+      </div>
+      <div className="flex flex-col justify-between flex-1">
+        <Button onClick={resetChatStore}>Reset Chat</Button>
+        <KeyInput />
+      </div>
     </div>
   );
 }
