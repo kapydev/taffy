@@ -35,6 +35,7 @@ module.exports = {
   plugins: [rawLoaderPlugin],
   bundle: true,
   external: ['fs', 'path'],
+  sourcemap: true,
   define: {
     'process.env.VITE_SUPABASE_URL': JSON.stringify(
       process.env.VITE_SUPABASE_URL

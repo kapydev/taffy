@@ -49,6 +49,7 @@ export async function getFilesObj(): Promise<FilesObj> {
     watcher.on('ready', resolve);
     if (watcherReady) resolve();
   });
+  debugger;
   const watchedPaths = watcher.getWatched();
   const basePath = workingDir.split(path.sep).join(path.posix.sep);
 
