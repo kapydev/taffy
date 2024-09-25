@@ -42,7 +42,7 @@ export function activate(context: vscode.ExtensionContext) {
     // Create and show a new webview
     currentPanel = vscode.window.createWebviewPanel(
       'cto-ai', // Identifies the type of the webview. Used internally
-      'CTO AI', // Title of the panel displayed to the user
+      'cto-ai', // Title of the panel displayed to the user
       bestCol, // Editor column to show the new webview panel in.
       {
         enableScripts: true,
