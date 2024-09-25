@@ -26,7 +26,7 @@ export class BaseActionMessage<T extends AnyAction> extends BaseMessage {
       try {
         return JSON.parse(actionStartMatch[1]);
       } catch {
-        logger.error("Unable to parse action")
+        logger.error('Unable to parse action');
         return {};
       }
     }

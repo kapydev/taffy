@@ -25,7 +25,7 @@ function KeyInputRow({
   };
 
   return (
-    <div className='flex flex-col mb-2'>
+    <div className="flex flex-col mb-2">
       <form
         onSubmit={handleSubmit}
         className="flex items-center space-x-2 mt-2"

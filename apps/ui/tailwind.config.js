@@ -21,13 +21,20 @@ module.exports = {
         'vsc-input-background': 'var(--vscode-input-background)',
         'vsc-input-foreground': 'var(--vscode-input-foreground)',
         'vsc-descriptionForeground': 'var(--vscode-descriptionForeground)',
-        'vsc-debugTokenExpression-name': 'var(--vscode-debugTokenExpression-name)',
-        'vsc-debugTokenExpression-type': 'var(--vscode-debugTokenExpression-type)',
-        'vsc-debugTokenExpression-value': 'var(--vscode-debugTokenExpression-value)',
-        'vsc-debugTokenExpression-string': 'var(--vscode-debugTokenExpression-string)',
-        'vsc-debugTokenExpression-boolean': 'var(--vscode-debugTokenExpression-boolean)',
-        'vsc-debugTokenExpression-number': 'var(--vscode-debugTokenExpression-number)',
-        'vsc-debugTokenExpression-error': 'var(--vscode-debugTokenExpression-error)',
+        'vsc-debugTokenExpression-name':
+          'var(--vscode-debugTokenExpression-name)',
+        'vsc-debugTokenExpression-type':
+          'var(--vscode-debugTokenExpression-type)',
+        'vsc-debugTokenExpression-value':
+          'var(--vscode-debugTokenExpression-value)',
+        'vsc-debugTokenExpression-string':
+          'var(--vscode-debugTokenExpression-string)',
+        'vsc-debugTokenExpression-boolean':
+          'var(--vscode-debugTokenExpression-boolean)',
+        'vsc-debugTokenExpression-number':
+          'var(--vscode-debugTokenExpression-number)',
+        'vsc-debugTokenExpression-error':
+          'var(--vscode-debugTokenExpression-error)',
       },
     },
   },

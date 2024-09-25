@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import html from '../../../dist/apps/cto-ai/static/index.html?raw';
+import html from '../../../dist/apps/ui/static/index.html?raw';
 import '@cto-ai/shared-types';
 import { createVscExtHandler } from './adapter/createVscExtHandler';
 import { router, publicProcedure } from './trpc';

@@ -23,8 +23,16 @@ export function BaseMessageRender({
       <AlertDescription>{description}</AlertDescription>
       {children}
       <div className="flex gap-2">
-        {onDecline && <button className="text-vsc-errorForeground" onClick={onDecline}>Decline</button>}
-        {onApprove && <button className="text-vsc-foreground" onClick={onApprove}>Approve</button>}
+        {onDecline && (
+          <button className="text-vsc-errorForeground" onClick={onDecline}>
+            Decline
+          </button>
+        )}
+        {onApprove && (
+          <button className="text-vsc-foreground" onClick={onApprove}>
+            Approve
+          </button>
+        )}
       </div>
     </Alert>
   );

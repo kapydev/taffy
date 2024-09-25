@@ -18,7 +18,11 @@ export class FileSelectionMessage extends BaseMessage {
     return [
       {
         role: 'user',
-        content: `I have a specific question about the file ${this.context.fileName} from lines ${this.context.selectedLineNumbers.start} to ${this.context.selectedLineNumbers.end}
+        content: `I have a specific question about the file ${
+          this.context.fileName
+        } from lines ${this.context.selectedLineNumbers.start} to ${
+          this.context.selectedLineNumbers.end
+        }
 
 Here are the latest file contents:
 
