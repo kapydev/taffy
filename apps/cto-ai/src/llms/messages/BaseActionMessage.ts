@@ -2,6 +2,7 @@ import { RawMessage } from '@cto-ai/shared-types';
 import { BaseMessage } from './BaseMessage';
 import { AnyAction } from './actions/Action';
 
+const logger = console;
 export class BaseActionMessage<T extends AnyAction> extends BaseMessage {
   role: 'user' | 'assistant' | 'system' = 'assistant';
   name: T['type'];
@@ -22,7 +23,12 @@ export class BaseActionMessage<T extends AnyAction> extends BaseMessage {
   get props(): T['props'] {
     const actionStartMatch = this.contents.match(/{ACTION \w+ (.*)}/);
     if (actionStartMatch) {
-      return JSON.parse(actionStartMatch[1]);
+      try {
+        return JSON.parse(actionStartMatch[1]);
+      } catch {
+        logger.error("Unable to parse action")
+        return {};
+      }
     }
     return {} as T['props'];
   }
