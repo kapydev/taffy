@@ -24,7 +24,7 @@
     "keybindings": [
       {
         "command": "taffy.init",
-        "key": "ctrl+k",
+        "key": "ctrl+shift+m",
         "when": "editorTextFocus"
       }
     ]
