@@ -61,11 +61,13 @@ At this point you DO NOT KNOW about any of the users files. DO NOT MAKE ASSUMPTI
     return [
       dedent`There are several actions available to you to use where necessary.
       
-      The following rules apply to the rules:
+      The following rules apply to the actions:
       1. Analyze the user's task and set clear, achievable goals to accomplish it. Prioritize these goals in a logical order.
       2. Work through these goals sequentially, utilizing available tools as necessary. Each goal should correspond to a distinct step in your problem-solving process.
-      3. You MUST stop generation after calling an action. Wait for user to approve the action, and only then continue with the generation, based on the result.
+      3. You MUST stop generation after calling an action. Do not continue with other actions, do not ask the users questions and do not offer follow up assistance.
       4. Before writing or updating a file, ALWAYS ask for the latest contents of the file. If the user has not provided the file contents in the last request, the writing and updating actions are banned.
+      5. Remember, you have extensive capabilities with access to a wide range of tools that can be used in powerful and clever ways as necessary to accomplish each goal. Before calling a tool, do some analysis within <thinking></thinking> tags. First, analyze the file structure provided in environment_details to gain context and insights for proceeding effectively. Then, think about which of the provided tools is the most relevant tool to accomplish the user's task. Next, go through each of the required parameters of the relevant tool and determine if the user has directly provided or given enough information to infer a value. When deciding if the parameter can be inferred, carefully consider all the context to see if it supports a specific value. If all of the required parameters are present or can be reasonably inferred, close the thinking tag and proceed with the tool call. BUT, if one of the values for a required parameter is missing, DO NOT invoke the function (not even with fillers for the missing params) and instead, ask the user to provide the missing parameters using the ask_followup_question tool. DO NOT ask for more information on optional parameters if it is not provided.
+      6. If the plan within a thinking block does not follow the rules, fix the mistake in a seperate thinking block.
       
       Below are the actions available to you and instructions on how to use them.`,
       actionToLLMDescription(readFileActionTemplate),
