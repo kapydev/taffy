@@ -4,7 +4,6 @@ import { toast } from 'react-hot-toast';
 export const useErrorCatching = () => {
   useEffect(() => {
     const errorHandler = (event: ErrorEvent | PromiseRejectionEvent) => {
-      console.error('Uncaught error:', event);
       const errorMessage =
         event instanceof ErrorEvent
           ? event.message
