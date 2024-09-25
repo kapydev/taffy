@@ -13,7 +13,7 @@ import { isTRPCRequestWithId } from '@cto-ai/shared-helpers';
 import * as vscode from 'vscode';
 import { getErrorFromUnknown } from './errors';
 
-//Inspired by https://github.com/janek26/trpc-browser?tab=readme-ov-file#createVschandleroptions
+//Inspired by https://github.com/janek26/trpc-browser?tab=readme-ov-file#createchromehandleroptions
 type CreateContextOptions = { req: unknown; res: unknown };
 type CreateHandlerOptions<
   TRouter extends AnyTRPCRouter,
