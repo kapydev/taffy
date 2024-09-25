@@ -91,14 +91,8 @@ export const fileRouter = router({
     .mutation(async (opts) => {
       const { filePath: rawFilePath, lineData, content, preview } = opts.input;
       const filePath = getFullPath(rawFilePath);
-      // const openFileInEditor = async (filePath: string, lineNumber: number) => {
-      //   const document = await vscode.workspace.openTextDocument(filePath);
-      //   const editor = await vscode.window.showTextDocument(document);
-      //   const position = new vscode.Position(lineNumber, 0);
-      //   const range = new vscode.Range(position, position);
-      //   editor.revealRange(range, vscode.TextEditorRevealType.InCenter);
-      //   editor.selection = new vscode.Selection(position, position);
-      // };
+
+      focusInEditor(filePath, lineData?.start);
       if (lineData === undefined) {
         await fs.writeFile(filePath, content, 'utf-8');
         return { success: true };
@@ -136,3 +130,20 @@ export const fileRouter = router({
       }
     }),
 });
+
+const focusInEditor = async (
+  filePath: string,
+  lineNumber: number | undefined
+) => {
+  let editor = latestActiveEditor;
+
+  if (!editor || editor.document.fileName !== filePath) {
+    const document = await vscode.workspace.openTextDocument(filePath);
+    editor = await vscode.window.showTextDocument(document, editor?.viewColumn);
+  }
+
+  const position = new vscode.Position(lineNumber ?? 0, 0);
+  const range = new vscode.Range(position, position);
+  editor.revealRange(range, vscode.TextEditorRevealType.InCenter);
+  editor.selection = new vscode.Selection(position, position);
+};
