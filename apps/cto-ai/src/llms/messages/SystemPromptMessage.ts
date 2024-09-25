@@ -61,11 +61,11 @@ At this point you DO NOT KNOW about any of the users files. DO NOT MAKE ASSUMPTI
     return [
       dedent`There are several actions available to you to use where necessary.
       
-      The actions are used for these cases:
-      1. Request additional context, from the user or other information source
-      2. Prompt the user to make a change to their codebase
-
-      You can request to perform multiple actions at once. 
+      The following rules apply to the rules:
+      1. Analyze the user's task and set clear, achievable goals to accomplish it. Prioritize these goals in a logical order.
+      2. Work through these goals sequentially, utilizing available tools as necessary. Each goal should correspond to a distinct step in your problem-solving process.
+      3. You MUST stop generation after calling an action. Wait for user to approve the action, and only then continue with the generation, based on the result.
+      4. Before writing or updating a file, ALWAYS ask for the latest contents of the file. If the user has not provided the file contents in the last request, the writing and updating actions are banned.
       
       Below are the actions available to you and instructions on how to use them.`,
       actionToLLMDescription(readFileActionTemplate),
