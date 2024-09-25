@@ -1,5 +1,5 @@
 {
-  "name": "cto-ai",
+  "name": "taffy",
   "version": "0.0.0",
   "license": "MIT",
   "engines": {
@@ -10,7 +10,7 @@
     "init:services": "npx supabase start",
     "db:types": "npx supabase gen types typescript --local > shared/types/src/supabase-types.ts",
     "db:reset": "supabase db reset && npm run db:types",
-    "build": "nx run cto-ai:build && nx run vsc-ext:build --skip-nx-cache && npx vsce package --allow-missing-repository"
+    "build": "nx run taffy:build && nx run vsc-ext:build --skip-nx-cache && npx vsce package --allow-missing-repository"
   },
   "main": "./dist/apps/vsc-ext/main.cjs",
   "activationEvents": [
@@ -23,7 +23,7 @@
   "contributes": {
     "keybindings": [
       {
-        "command": "cto-ai.init",
+        "command": "taffy.init",
         "key": "ctrl+k",
         "when": "editorTextFocus"
       }

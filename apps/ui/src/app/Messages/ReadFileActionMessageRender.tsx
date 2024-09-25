@@ -1,4 +1,4 @@
-import { Alert, AlertDescription, AlertTitle } from '@cto-ai/components';
+import { Alert, AlertDescription, AlertTitle } from '@taffy/components';
 import { FilePlus2Icon } from 'lucide-react';
 import { Button } from 'react-day-picker';
 import { FileContextMessage } from '../../llms/messages/FileContextMessage';

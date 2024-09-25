@@ -2,7 +2,7 @@ import {
   TRPCVscMessage,
   TRPCVscResponse,
   TRPCVscRequest,
-} from '@cto-ai/shared-types';
+} from '@taffy/shared-types';
 
 type WithTRPCId<T> = T & { trpc: { id: string } };
 

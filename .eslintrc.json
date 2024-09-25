@@ -12,9 +12,9 @@
           {
             "enforceBuildableLibDependency": true,
             "allow": [
-              "@cto-ai/server/types",
-              "@cto-ai/vsc-ext/types",
-              "../../../dist/apps/cto-ai/static/index.html"
+              "@taffy/server/types",
+              "@taffy/vsc-ext/types",
+              "../../../dist/apps/taffy/static/index.html"
             ],
             "depConstraints": [
               {

@@ -1,8 +1,8 @@
-import { RawMessage } from '@cto-ai/shared-types';
+import { RawMessage } from '@taffy/shared-types';
 import { BaseMessage } from './BaseMessage';
 import { inferProcedureOutput } from '@trpc/server';
-import type { AppRouter } from '@cto-ai/vsc-ext/types';
-import { addLineNumbers } from '@cto-ai/shared-helpers';
+import type { AppRouter } from '@taffy/vsc-ext/types';
+import { addLineNumbers } from '@taffy/shared-helpers';
 
 export class FileSelectionMessage extends BaseMessage {
   role: 'user' | 'assistant' | 'system' = 'user';

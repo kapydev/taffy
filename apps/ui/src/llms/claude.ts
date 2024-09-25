@@ -1,4 +1,4 @@
-import { RawMessage } from '@cto-ai/shared-types';
+import { RawMessage } from '@taffy/shared-types';
 import { LLM } from './base-llm';
 import Anthropic from '@anthropic-ai/sdk';
 

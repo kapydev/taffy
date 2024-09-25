@@ -3,13 +3,13 @@ import { BaseMessage } from './BaseMessage';
 import {
   prettyPrintFilesObj,
   prettyPrintGeneratedFolder,
-} from '@cto-ai/shared-helpers';
+} from '@taffy/shared-helpers';
 import {
   FilesObj,
   GeneratedFile,
   GeneratedFolder,
   RawMessage,
-} from '@cto-ai/shared-types';
+} from '@taffy/shared-types';
 import { readFileActionTemplate } from './actions/readFileAction';
 import { actionToLLMDescription } from './actions/actionToLLMDescription';
 import {
@@ -69,10 +69,10 @@ CRITICAL RULES - MUST BE FOLLOWED AT ALL TIMES:
 For example:
 
 BAD EXAMPLE:
-First, I need to read the contents of \`/apps/cto-ai/src/app/Messages/SystemPromptRender.tsx\` to understand the exact structure that we need to put into the common template.
+First, I need to read the contents of \`/apps/taffy/src/app/Messages/SystemPromptRender.tsx\` to understand the exact structure that we need to put into the common template.
 
 {ACTION READ_FILE}
-apps/cto-ai/src/app/Messages/SystemPromptRender.tsx
+apps/taffy/src/app/Messages/SystemPromptRender.tsx
 {END_ACTION READ_FILE}
 
 Now let's move forward based on the content you provided:
@@ -81,10 +81,10 @@ Now let's move forward based on the content you provided:
 The bad example is bad because after the END_ACTION, the generation continued.
 
 CORRECT EXAMPLE:
-First, I need to read the contents of \`/apps/cto-ai/src/app/Messages/SystemPromptRender.tsx\` to understand the exact structure that we need to put into the common template.
+First, I need to read the contents of \`/apps/taffy/src/app/Messages/SystemPromptRender.tsx\` to understand the exact structure that we need to put into the common template.
 
 {ACTION READ_FILE}
-apps/cto-ai/src/app/Messages/SystemPromptRender.tsx
+apps/taffy/src/app/Messages/SystemPromptRender.tsx
 {END_ACTION READ_FILE}
 ...
 
@@ -95,8 +95,8 @@ I'll need to first create the common base template. Let's name this new componen
 
 I will proceed by writing this new file.
 
-{ACTION WRITE_FILE {"filePath":"/apps/cto-ai/src/app/Messages/BasePromptRender.tsx"}}
-import { Alert, AlertTitle, AlertDescription } from '@cto-ai/components';
+{ACTION WRITE_FILE {"filePath":"/apps/taffy/src/app/Messages/BasePromptRender.tsx"}}
+import { Alert, AlertTitle, AlertDescription } from '@taffy/components';
 import { ReactNode } from 'react';
 import { ServerIcon } from 'lucide-react';
 
@@ -122,7 +122,7 @@ Bad example 2 is bad because the update file action is called, but there is no c
 
 CORRECT EXAMPLE:
 {ACTION READ_FILE}
-apps/cto-ai/src/app/Messages/SystemPromptRender.tsx
+apps/taffy/src/app/Messages/SystemPromptRender.tsx
 {END_ACTION READ_FILE}
 ...
 

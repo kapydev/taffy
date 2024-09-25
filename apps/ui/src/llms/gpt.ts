@@ -1,4 +1,4 @@
-import { RawMessage } from '@cto-ai/shared-types';
+import { RawMessage } from '@taffy/shared-types';
 import OpenAI from 'openai';
 import { LLM } from './base-llm';
 export class GPT extends LLM {

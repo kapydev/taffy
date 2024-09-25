@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import html from '../../../dist/apps/ui/static/index.html?raw';
-import '@cto-ai/shared-types';
+import '@taffy/shared-types';
 import { createVscExtHandler } from './adapter/createVscExtHandler';
 import { router, publicProcedure } from './trpc';
 import { fileRouter } from './routers/files';
@@ -31,7 +31,7 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   // Register the command
-  const disposable = vscode.commands.registerCommand('cto-ai.init', () => {
+  const disposable = vscode.commands.registerCommand('taffy.init', () => {
     const bestCol = getBestColForWebView();
 
     if (currentPanel) {
@@ -41,8 +41,8 @@ export function activate(context: vscode.ExtensionContext) {
 
     // Create and show a new webview
     currentPanel = vscode.window.createWebviewPanel(
-      'cto-ai', // Identifies the type of the webview. Used internally
-      'cto-ai', // Title of the panel displayed to the user
+      'taffy', // Identifies the type of the webview. Used internally
+      'taffy', // Title of the panel displayed to the user
       bestCol, // Editor column to show the new webview panel in.
       {
         enableScripts: true,

@@ -1,4 +1,4 @@
-import { FilesObj, GeneratedFile, GeneratedFolder } from '@cto-ai/shared-types';
+import { FilesObj, GeneratedFile, GeneratedFolder } from '@taffy/shared-types';
 import fs from 'fs/promises';
 import { z } from 'zod';
 import { extractWorkspacePath, getFilesObj, getFullPath } from '../files';

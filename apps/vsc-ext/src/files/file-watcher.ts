@@ -1,8 +1,8 @@
 import {
   booleanFilter,
   folderMapToGeneratedFolder,
-} from '@cto-ai/shared-helpers';
-import { FilesObj, GeneratedFile, GeneratedFolder } from '@cto-ai/shared-types';
+} from '@taffy/shared-helpers';
+import { FilesObj, GeneratedFile, GeneratedFolder } from '@taffy/shared-types';
 import chokidar from 'chokidar';
 import fs from 'fs';
 import path from 'path';

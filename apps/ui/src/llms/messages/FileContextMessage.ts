@@ -1,6 +1,6 @@
-import { GeneratedFile, RawMessage } from '@cto-ai/shared-types';
+import { GeneratedFile, RawMessage } from '@taffy/shared-types';
 import { BaseMessage } from './BaseMessage';
-import { addLineNumbers } from '@cto-ai/shared-helpers';
+import { addLineNumbers } from '@taffy/shared-helpers';
 
 export class FileContextMessage extends BaseMessage {
   role: 'user' | 'assistant' | 'system' = 'user';

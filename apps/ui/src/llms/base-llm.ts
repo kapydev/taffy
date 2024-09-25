@@ -1,4 +1,4 @@
-import { RawMessage } from '@cto-ai/shared-types';
+import { RawMessage } from '@taffy/shared-types';
 
 export abstract class LLM {
   protected maxTokens: number;

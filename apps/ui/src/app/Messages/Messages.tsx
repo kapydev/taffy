@@ -1,6 +1,6 @@
-import { capitalize } from '@cto-ai/shared-helpers';
+import { capitalize } from '@taffy/shared-helpers';
 import { useMemo, useState } from 'react';
-import { Badge } from '@cto-ai/components';
+import { Badge } from '@taffy/components';
 import { CustomMessageRender } from './CustomMessageRender';
 import { CustomMessage } from '../../llms/messages/Messages';
 import { chatStore } from '../../stores/chat-store';

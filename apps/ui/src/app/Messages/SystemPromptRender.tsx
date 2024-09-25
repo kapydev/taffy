@@ -1,4 +1,4 @@
-import { Alert, AlertTitle, AlertDescription } from '@cto-ai/components';
+import { Alert, AlertTitle, AlertDescription } from '@taffy/components';
 import { ServerIcon } from 'lucide-react';
 import { SystemPromptMessage } from '../../llms/messages/SystemPromptMessage';
 

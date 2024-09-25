@@ -1,4 +1,4 @@
-import type { AppRouter } from '@cto-ai/vsc-ext/types';
+import type { AppRouter } from '@taffy/vsc-ext/types';
 import { createTRPCClient } from '@trpc/client';
 import { vscLink } from './link/vsc-link';
 

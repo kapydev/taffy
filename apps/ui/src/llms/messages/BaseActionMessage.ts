@@ -1,4 +1,4 @@
-import { RawMessage } from '@cto-ai/shared-types';
+import { RawMessage } from '@taffy/shared-types';
 import { BaseMessage } from './BaseMessage';
 import { AnyAction } from './actions/Action';
 

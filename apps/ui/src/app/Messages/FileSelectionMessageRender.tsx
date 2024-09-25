@@ -1,4 +1,4 @@
-import { Alert, AlertDescription, AlertTitle } from '@cto-ai/components';
+import { Alert, AlertDescription, AlertTitle } from '@taffy/components';
 import { FilePlus2Icon } from 'lucide-react';
 import { FileSelectionMessage } from '../../llms/messages/FileSelectionMessage';
 import { useCallback } from 'react';

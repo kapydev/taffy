@@ -1,5 +1,5 @@
-import { Button, Checkbox, ScrollArea } from '@cto-ai/components';
-import { GeneratedFolder } from '@cto-ai/shared-types';
+import { Button, Checkbox, ScrollArea } from '@taffy/components';
+import { GeneratedFolder } from '@taffy/shared-types';
 import { ChevronRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { resetChatStore } from '../stores/chat-store';

@@ -3,7 +3,7 @@ import { LLM } from '../llms/base-llm';
 import { Claude } from '../llms/claude';
 import { LLMOutputParser } from '../llms/messages/LLMOutputParser';
 import { CustomMessage } from '../llms/messages/Messages';
-import { RawMessage } from '@cto-ai/shared-types';
+import { RawMessage } from '@taffy/shared-types';
 import { GPT } from '../llms/gpt';
 import { fileStore } from './file-store';
 import { SystemPromptMessage } from '../llms/messages/SystemPromptMessage';

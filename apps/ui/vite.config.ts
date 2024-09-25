@@ -151,7 +151,7 @@ const finalConfig = defineConfig(({ command }) => {
     //  plugins: [ nxViteTsPaths() ],
     // },
     build: {
-      outDir: '../../dist/apps/cto-ai/static',
+      outDir: '../../dist/apps/taffy/static',
       minify: false,
       reportCompressedSize: true,
       rollupOptions: {

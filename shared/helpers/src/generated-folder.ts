@@ -1,4 +1,4 @@
-import { GeneratedFolder, GeneratedFile, FilesObj } from '@cto-ai/shared-types';
+import { GeneratedFolder, GeneratedFile, FilesObj } from '@taffy/shared-types';
 // import path from 'path';
 import archy from 'archy';
 

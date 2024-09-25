@@ -1,4 +1,4 @@
-import { Button, Textarea } from '@cto-ai/components';
+import { Button, Textarea } from '@taffy/components';
 import { Send } from 'lucide-react';
 import { useState } from 'react';
 

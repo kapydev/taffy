@@ -1,4 +1,4 @@
-import { Button, Input } from '@cto-ai/components';
+import { Button, Input } from '@taffy/components';
 import { KeyRound } from 'lucide-react';
 import { useState } from 'react';
 import { keyStore } from '../stores/chat-store';
