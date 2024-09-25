@@ -8,6 +8,7 @@ import { ee } from './event-emitter';
 
 const logger = console;
 export let latestActiveEditor = vscode.window.activeTextEditor;
+let currentPanel: vscode.WebviewPanel | undefined = undefined;
 
 export const appRouter = router({
   files: fileRouter,
@@ -23,7 +24,6 @@ export function activate(context: vscode.ExtensionContext) {
     if (!editor) return;
     latestActiveEditor = editor;
   });
-  let currentPanel: vscode.WebviewPanel | undefined = undefined;
   // Register the command
   const disposable = vscode.commands.registerCommand('cto-ai.init', () => {
     const bestCol = getBestColForWebView();
@@ -69,16 +69,22 @@ function getBestColForWebView(): vscode.ViewColumn {
   const baseCol: vscode.ViewColumn = vscode.ViewColumn.Beside;
 
   // Get all visible text editors
-  const visibleEditors = vscode.window.visibleTextEditors;
+  const visibleColumns = vscode.window.visibleTextEditors.map(
+    (editor) => editor.viewColumn
+  );
 
-  if (visibleEditors.length <= 1) {
+  if (currentPanel?.visible) {
+    visibleColumns.push(currentPanel.viewColumn);
+  }
+
+  if (visibleColumns.length <= 1) {
     return baseCol;
   }
 
   //Use existing view column
-  const bestCol = visibleEditors.find(
-    (otherEditor) => otherEditor.viewColumn !== editor?.viewColumn
-  )?.viewColumn;
+  const bestCol = visibleColumns.find(
+    (otherColumn) => otherColumn !== editor?.viewColumn
+  );
 
   if (bestCol !== undefined) {
     return bestCol;
