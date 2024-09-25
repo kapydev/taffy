@@ -10,15 +10,19 @@ import { Messages } from './Messages';
 export function ChatPanel() {
   const [input, setInput] = useState('');
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleWindowFocus = () => {
       if (inputRef.current) {
         inputRef.current.focus();
       }
+      if (scrollAreaRef.current) {
+        scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+      }
     };
 
-    handleWindowFocus()
+    handleWindowFocus();
     window.addEventListener('focus', handleWindowFocus);
 
     return () => {
@@ -28,9 +32,8 @@ export function ChatPanel() {
 
   const handleSend = () => {
     if (!input.trim()) return;
-    const scrollArea = document.querySelector('.scroll-area');
-    if (scrollArea) {
-      scrollArea.scrollTop = scrollArea.scrollHeight;
+    if (scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
     }
     setInput('');
     chatStore.set('messages', [
@@ -42,7 +45,10 @@ export function ChatPanel() {
 
   return (
     <div className="flex flex-col p-4 flex-1">
-      <div className="flex flex-col-reverse overflow-x-auto flex-1">
+      <div
+        ref={scrollAreaRef}
+        className="flex flex-col-reverse overflow-x-auto flex-1"
+      >
         <Messages />
       </div>
       <div className="flex mt-4">
