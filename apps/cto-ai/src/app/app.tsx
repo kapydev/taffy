@@ -8,7 +8,14 @@ export default function App() {
   return (
     <div className="h-full w-full">
       <MainChat />
-      <Toaster />
+      <Toaster
+        toastOptions={{
+          style: {
+            background: 'var(--vscode-notifications-background)',
+            color: 'var(--vscode-notifications-foreground)',
+          },
+        }}
+      />
     </div>
   );
 }
