@@ -5,6 +5,7 @@ import { createVscExtHandler } from './adapter/createVscExtHandler';
 import { router, publicProcedure } from './trpc';
 import { fileRouter } from './routers/files';
 import { ee } from './event-emitter';
+import { previewFileChange } from './files/preview-file-change';
 
 const logger = console;
 export let latestActiveEditor = vscode.window.activeTextEditor;
@@ -12,6 +13,10 @@ let currentPanel: vscode.WebviewPanel | undefined = undefined;
 
 export const appRouter = router({
   files: fileRouter,
+  testFunc: publicProcedure.query(async () => {
+    await previewFileChange('.gitignore', ':) Hello there');
+    return {};
+  }),
   hello: publicProcedure.query(() => {
     return {
       message: 'Hello, world!',
@@ -24,6 +29,7 @@ export function activate(context: vscode.ExtensionContext) {
     if (!editor) return;
     latestActiveEditor = editor;
   });
+
   // Register the command
   const disposable = vscode.commands.registerCommand('cto-ai.init', () => {
     const bestCol = getBestColForWebView();
@@ -56,6 +62,20 @@ export function activate(context: vscode.ExtensionContext) {
     return;
   });
 
+  //Add the diff view
+  const diffContentProvider = new (class
+    implements vscode.TextDocumentContentProvider
+  {
+    provideTextDocumentContent(uri: vscode.Uri): string {
+      return Buffer.from(uri.query, 'base64').toString('utf-8');
+    }
+  })();
+  context.subscriptions.push(
+    vscode.workspace.registerTextDocumentContentProvider(
+      'diff-view',
+      diffContentProvider
+    )
+  );
   // Push the command to the subscriptions
   context.subscriptions.push(disposable);
 }

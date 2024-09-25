@@ -21,6 +21,10 @@ export function MainChat() {
 function LeftPanel() {
   const [isExpanded, setIsExpanded] = useState(false);
 
+  const runTestFunc = () => {
+    trpc.testFunc.query();
+  };
+
   if (!isExpanded) {
     return (
       <ChevronRight
@@ -47,6 +51,7 @@ function LeftPanel() {
       </div>
       <div className="flex flex-col justify-between flex-1">
         <Button onClick={resetChatStore}>Reset Chat</Button>
+        <Button onClick={runTestFunc}>Test Func</Button>
         <KeyInput />
       </div>
     </div>
