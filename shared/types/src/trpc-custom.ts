@@ -5,23 +5,23 @@ import type {
     TRPCResultMessage,
   } from '@trpc/server/rpc';
   
-  export type TRPCChromeRequest = {
+  export type TRPCVscRequest = {
     trpc: TRPCRequest | TRPCClientOutgoingMessage;
   };
   
-  export type TRPCChromeSuccessResponse = {
+  export type TRPCVscSuccessResponse = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     trpc: TRPCResultMessage<any>;
   };
   
-  export type TRPCChromeErrorResponse = {
+  export type TRPCVscErrorResponse = {
     trpc: TRPCErrorResponse;
   };
   
-  export type TRPCChromeResponse = TRPCChromeSuccessResponse | TRPCChromeErrorResponse;
+  export type TRPCVscResponse = TRPCVscSuccessResponse | TRPCVscErrorResponse;
   
-  export type TRPCChromeMessage = TRPCChromeRequest | TRPCChromeResponse;
-  export type RelayedTRPCMessage = TRPCChromeMessage & { relayed?: true };
+  export type TRPCVscMessage = TRPCVscRequest | TRPCVscResponse;
+  export type RelayedTRPCMessage = TRPCVscMessage & { relayed?: true };
   
   export interface MinimalWindow
     extends Pick<Window, 'postMessage' | 'addEventListener' | 'removeEventListener'> {
@@ -33,9 +33,9 @@ import type {
     Partial<Pick<Window, 'addEventListener' | 'removeEventListener'>>;
   
   export interface MessengerMethods {
-    postMessage: (message: TRPCChromeMessage) => void;
-    addMessageListener: (listener: (message: TRPCChromeMessage) => void) => void;
-    removeMessageListener: (listener: (message: TRPCChromeMessage) => void) => void;
+    postMessage: (message: TRPCVscMessage) => void;
+    addMessageListener: (listener: (message: TRPCVscMessage) => void) => void;
+    removeMessageListener: (listener: (message: TRPCVscMessage) => void) => void;
     addCloseListener: (listener: () => void) => void;
     removeCloseListener: (listener: () => void) => void;
   }

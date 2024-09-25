@@ -1,4 +1,4 @@
-import { TRPCChromeResponse } from '@cto-ai/shared-types';
+import { TRPCVscResponse } from '@cto-ai/shared-types';
 import {
   AnyTRPCProcedure,
   AnyTRPCRouter,
@@ -13,7 +13,7 @@ import { isTRPCRequestWithId } from '@cto-ai/shared-helpers';
 import * as vscode from 'vscode';
 import { getErrorFromUnknown } from './errors';
 
-//Inspired by https://github.com/janek26/trpc-browser?tab=readme-ov-file#createchromehandleroptions
+//Inspired by https://github.com/janek26/trpc-browser?tab=readme-ov-file#createVschandleroptions
 type CreateContextOptions = { req: unknown; res: unknown };
 type CreateHandlerOptions<
   TRouter extends AnyTRPCRouter,
@@ -49,10 +49,10 @@ export function createVscExtHandler<TRouter extends AnyTRPCRouter>(
     if (!isTRPCRequestWithId(message)) return;
 
     const { trpc } = message;
-    const sendResponse = (response: TRPCChromeResponse['trpc']) => {
+    const sendResponse = (response: TRPCVscResponse['trpc']) => {
       panel.webview.postMessage({
         trpc: { id: trpc.id, jsonrpc: trpc.jsonrpc, ...response },
-      } as TRPCChromeResponse);
+      } as TRPCVscResponse);
     };
 
     if (trpc.method === 'subscription.stop') {

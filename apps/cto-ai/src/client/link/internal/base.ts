@@ -6,7 +6,7 @@ import {
 } from '@trpc/client';
 import type { AnyTRPCRouter } from '@trpc/server';
 import { observable } from '@trpc/server/observable';
-import { MessengerMethods, TRPCChromeRequest } from '@cto-ai/shared-types';
+import { MessengerMethods, TRPCVscRequest } from '@cto-ai/shared-types';
 import { isTRPCResponse } from '@cto-ai/shared-helpers';
 
 export const createBaseLink = <TRouter extends AnyTRPCRouter>(
@@ -68,7 +68,7 @@ export const createBaseLink = <TRouter extends AnyTRPCRouter>(
               // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               params: { path, input },
             },
-          } as TRPCChromeRequest);
+          } as TRPCVscRequest);
         } catch (cause) {
           observer.error(
             new TRPCClientError(
@@ -85,7 +85,7 @@ export const createBaseLink = <TRouter extends AnyTRPCRouter>(
                 jsonrpc: undefined,
                 method: 'subscription.stop',
               },
-            } as TRPCChromeRequest);
+            } as TRPCVscRequest);
           }
           listeners.forEach((unsub) => unsub());
         };

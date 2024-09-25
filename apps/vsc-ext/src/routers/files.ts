@@ -44,10 +44,10 @@ export const fileRouter = router({
 
         sendSelectionData();
 
-        ee.on('ctrlKPressed', sendSelectionData);
+        ee.on('mainKeyboardShortcutPresed', sendSelectionData);
 
         return () => {
-          ee.removeListener('ctrlKPressed', sendSelectionData);
+          ee.removeListener('mainKeyboardShortcutPresed', sendSelectionData);
         };
       }
     );
