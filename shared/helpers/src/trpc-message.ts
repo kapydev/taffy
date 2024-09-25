@@ -1,7 +1,7 @@
 import {
-  TRPCChromeMessage,
-  TRPCChromeResponse,
-  TRPCChromeRequest,
+  TRPCVscMessage,
+  TRPCVscResponse,
+  TRPCVscRequest,
 } from '@cto-ai/shared-types';
 
 type WithTRPCId<T> = T & { trpc: { id: string } };
@@ -12,7 +12,7 @@ function isPlainObject(obj: unknown): obj is Record<string, unknown> {
 function isNullOrUndefined(x: unknown): x is null | undefined {
   return x === null || x === undefined;
 }
-export function isTRPCMessage(message: unknown): message is TRPCChromeMessage {
+export function isTRPCMessage(message: unknown): message is TRPCVscMessage {
   return Boolean(
     isPlainObject(message) && 'trpc' in message && isPlainObject(message['trpc'])
   );
@@ -20,7 +20,7 @@ export function isTRPCMessage(message: unknown): message is TRPCChromeMessage {
 
 function isTRPCMessageWithId(
   message: unknown
-): message is WithTRPCId<TRPCChromeMessage> {
+): message is WithTRPCId<TRPCVscMessage> {
   return (
     isTRPCMessage(message) &&
     'id' in message.trpc &&
@@ -31,7 +31,7 @@ function isTRPCMessageWithId(
 // reponse needs error or result
 export function isTRPCResponse(
   message: unknown
-): message is TRPCChromeResponse {
+): message is TRPCVscResponse {
   return (
     isTRPCMessageWithId(message) &&
     ('error' in message.trpc || 'result' in message.trpc)
@@ -39,12 +39,12 @@ export function isTRPCResponse(
 }
 
 // request needs method
-export function isTRPCRequest(message: unknown): message is TRPCChromeRequest {
+export function isTRPCRequest(message: unknown): message is TRPCVscRequest {
   return isTRPCMessageWithId(message) && 'method' in message.trpc;
 }
 
 export function isTRPCRequestWithId(
   message: unknown
-): message is WithTRPCId<TRPCChromeRequest> {
+): message is WithTRPCId<TRPCVscRequest> {
   return isTRPCRequest(message) && isTRPCMessageWithId(message);
 }

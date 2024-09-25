@@ -36,7 +36,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     if (currentPanel) {
       currentPanel.reveal(bestCol);
-      return ee.emit('ctrlKPressed');
+      return ee.emit('mainKeyboardShortcutPresed');
     }
 
     // Create and show a new webview
