@@ -9,7 +9,7 @@ import path from 'path';
 import { getWorkingDir } from '../helpers/get-working-dir';
 import { getGitIgnoredFiles } from './get-ignore-patterns';
 import { generateEmbedding } from '../helpers/generate-embeddings';
-import { supabase } from '../supabaseClient';
+// import { supabase } from '../supabaseClient';
 
 const logger = console;
 
