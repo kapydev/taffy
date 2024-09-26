@@ -5,6 +5,7 @@
   "engines": {
     "vscode": "^1.84.0"
   },
+  "publisher": "firejet",
   "scripts": {
     "serve": "nx run-many --target=serve --all",
     "init:services": "npx supabase start",
@@ -12,7 +13,7 @@
     "db:reset": "supabase db reset && npm run db:types",
     "build": "nx run apps-ui:build && nx run vsc-ext:build --skip-nx-cache",
     "package": "npm run build && npx vsce package --allow-missing-repository",
-    "publish": "npm run build && npx vsce publish"
+    "publish": "npm run build && npx vsce publish patch"
   },
   "main": "./dist/apps/vsc-ext/main.cjs",
   "activationEvents": [
