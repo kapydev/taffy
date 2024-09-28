@@ -77,9 +77,11 @@ export function MessageGroupWrapper({
           {mode}
         </Badge>
       </div>
-      {mode === 'RAW'
-        ? getRaw()
-        : messages.map((message) => <SingleMessage message={message} />)}
+      <div className="flex flex-col gap-2">
+        {mode === 'RAW'
+          ? getRaw()
+          : messages.map((message) => <SingleMessage message={message} />)}
+      </div>
     </div>
   );
 }
