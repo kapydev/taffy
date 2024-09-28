@@ -41,7 +41,7 @@ export function ChatPanel() {
       ...chatStore.get('messages'),
       new ToolMessage(
         toolToToolString('USER_PROMPT', {
-          contents: input,
+          body: input,
           props: {},
         })
       ),
@@ -51,7 +51,7 @@ export function ChatPanel() {
 
   return (
     <div className="flex flex-col p-4 flex-1">
-      <div className='flex-1 relative'>
+      <div className="flex-1 relative">
         <div
           ref={scrollAreaRef}
           className="flex flex-col-reverse overflow-x-auto overflow-y-auto inset-0 absolute"

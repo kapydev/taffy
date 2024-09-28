@@ -6,6 +6,7 @@ import {
   UserIcon,
   WaypointsIcon,
 } from 'lucide-react';
+import { ToolMessage } from '../ToolMessage';
 
 export type MessageIcon = React.ForwardRefExoticComponent<
   Omit<LucideProps, 'ref'> & React.RefAttributes<SVGSVGElement>
@@ -15,15 +16,17 @@ export type ToolType = keyof typeof TOOL_TEMPLATES;
 
 export type Tools = {
   [K in ToolType]: {
-    contents: (typeof TOOL_TEMPLATES)[K]['sampleContents'];
-    props: Record<keyof (typeof TOOL_TEMPLATES)[K]['propDesc'], string>;
+    body: (typeof TOOL_TEMPLATES)[K]['sampleBody'];
+    props:
+      | Record<keyof (typeof TOOL_TEMPLATES)[K]['propDesc'], string>
+      | undefined;
   };
 };
 
 export interface ToolTemplate {
   role: 'assistant' | 'user';
   desc: string;
-  sampleContents: string;
+  sampleBody: string;
   propDesc: Record<string, string>;
   sampleProps: Record<string, string>;
 }
@@ -34,14 +37,14 @@ export const TOOL_TEMPLATES = {
     desc: 'The prompt from the user',
     propDesc: {},
     sampleProps: {},
-    sampleContents: `Stop commiting .env files into the codebase`,
+    sampleBody: `Stop commiting .env files into the codebase`,
   },
   ASSISTANT_INFO: {
     role: 'assistant',
     desc: 'For the assistant to write a response to the user. all messages from the assistant should start with an assistant info block.',
     propDesc: {},
     sampleProps: {},
-    sampleContents:
+    sampleBody:
       'To prevent .env files from being committed into the codebase, we need to update the .gitignore file',
   },
   ASSISTANT_PLANNING: {
@@ -49,7 +52,7 @@ export const TOOL_TEMPLATES = {
     desc: "For the assistant to plan how to tackle the task from the user. There should be a planning block after every assistant info tool block. Reason how to tackle the user's task step by step, placing steps in a logical order. After the planning tool is done, the user will be able to update the plan if required, before the plan is executed. using the read tool or the write tool, for example.",
     propDesc: {},
     sampleProps: {},
-    sampleContents: `Example 1:
+    sampleBody: `Example 1:
     1. Read the .gitignore file using the read tool
     2. Update the .gitignore file using the write tool`,
   },
@@ -57,7 +60,7 @@ export const TOOL_TEMPLATES = {
     desc: "Ask the user for permission to add a file to the context. The contents should be all the files that need to be read, seperated by newlines. DO NOT ask to read non existent files that are not provided in the codebase context. After calling this tool, no other tool calls can be made by the assistant, as we have to wait for the user's response",
     propDesc: {},
     sampleProps: {},
-    sampleContents: 'src/index.ts\nsrc/messages/helloWorld.ts',
+    sampleBody: 'src/index.ts\nsrc/messages/helloWorld.ts',
     role: 'assistant',
   },
   FILE_CONTENTS: {
@@ -73,7 +76,7 @@ export const TOOL_TEMPLATES = {
       endLine: '25',
       filePath: 'src/utils/helloWorld.ts',
     },
-    sampleContents: addLineNumbers(`export default function HelloWorld() {
+    sampleBody: addLineNumbers(`export default function HelloWorld() {
     console.log("Hello World");
   }`),
   },
@@ -87,7 +90,7 @@ export const TOOL_TEMPLATES = {
     sampleProps: {
       filePath: 'src/utils/helloWorld.ts',
     },
-    sampleContents: `export function helloWorld() {
+    sampleBody: `export function helloWorld() {
       ${'console'}.log("Hello World!")
     }`,
   },
@@ -95,8 +98,8 @@ export const TOOL_TEMPLATES = {
 
 export type ToolRenderTemplate<ToolName extends ToolType> = {
   icon: MessageIcon;
-  title: (data: Tools[ToolName]) => React.ReactNode;
-  description: (data: Tools[ToolName]) => React.ReactNode;
+  title: (message: ToolMessage<ToolName>) => React.ReactNode;
+  description: (message: ToolMessage<ToolName>) => React.ReactNode;
 };
 export const TOOL_RENDER_TEMPLATES: {
   [ToolName in ToolType]: ToolRenderTemplate<ToolName>;
@@ -104,27 +107,28 @@ export const TOOL_RENDER_TEMPLATES: {
   USER_PROMPT: {
     icon: UserIcon,
     title: () => 'User Prompt',
-    description: (data) => data.contents,
+    description: (data) => data.body,
   },
   ASSISTANT_INFO: {
     icon: BotIcon,
     title: () => 'Assistant Info',
-    description: (data) => data.contents,
+    description: (data) => data.body,
   },
   ASSISTANT_PLANNING: {
     icon: WaypointsIcon,
     title: () => 'Assistant Planning',
-    description: (data) => data.contents,
+    description: (data) => data.body,
   },
   READ_FILE: {
     icon: FilePlus2Icon,
     title: () => 'Requesting permission to read the following files',
-    description: (data) => data.contents,
+    description: (data) => data.body,
   },
   FILE_CONTENTS: {
     icon: FilePlus2Icon,
     title: () => 'File Context Added',
     description: (data) => {
+      if (!data.props) return;
       return (
         <>
           {data.props.filePath} <br /> Line {data.props.startLine} to Line{' '}
@@ -136,13 +140,16 @@ export const TOOL_RENDER_TEMPLATES: {
   WRITE_FILE: {
     icon: FilePlus2Icon,
     title: () => 'Requesting permission to write the following files',
-    description: (data) => (
-      <>
-        <div>File Path - {data.props.filePath} </div>
-        <pre>
-          <code>{data.contents}</code>
-        </pre>
-      </>
-    ),
+    description: (data) => {
+      if (!data.props) return;
+      return (
+        <>
+          <div>File Path - {data.props.filePath} </div>
+          <pre>
+            <code>{data.body}</code>
+          </pre>
+        </>
+      );
+    },
   },
 };

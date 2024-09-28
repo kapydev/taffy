@@ -53,31 +53,18 @@ export function MessageGroupWrapper({
     throw new Error('MessageGroupWrapper: not all messages have the same role');
   }
 
-  const messageRender = useMemo(() => {
-    const getRaw = () => (
-      <pre>
-        <code>
-          {messages
-            .flatMap((msg) =>
-              msg.toRawMessages().flatMap((rawMsg) => rawMsg.content)
-            )
-            .join('')}
-        </code>
-      </pre>
-    );
-
-    if (mode === 'RAW') {
-      return getRaw();
-    }
-    return messages.map((msg, idx) => {
-      if (msg instanceof SystemPromptMessage) {
-        return <SystemPromptRender message={msg} />;
-      } else if (msg instanceof ToolMessage) {
-        return <ToolMessageRender message={msg} />;
-      }
-      return getRaw();
-    });
-  }, [mode, messages]);
+  const getRaw = () => (
+    <pre>
+      <code>
+        {messages
+          .flatMap((msg) =>
+            msg.toRawMessages().flatMap((rawMsg) => rawMsg.content)
+          )
+          //TODO: Can't just get raw, need to make this a shared func
+          .join('\n')}
+      </code>
+    </pre>
+  );
 
   return (
     <div className={`mb-4 ${MESSAGE_GROUP_COLORS[messages[0].role]}`}>
@@ -90,7 +77,17 @@ export function MessageGroupWrapper({
           {mode}
         </Badge>
       </div>
-      {messageRender}
+      {mode === 'RAW'
+        ? getRaw()
+        : messages.map((message) => <SingleMessage message={message} />)}
     </div>
   );
+}
+
+function SingleMessage({ message }: { message: CustomMessage }) {
+  if (message instanceof SystemPromptMessage) {
+    return <SystemPromptRender message={message} />;
+  } else if (message instanceof ToolMessage) {
+    return <ToolMessageRender message={message} />;
+  }
 }

@@ -59,6 +59,7 @@
     "express": "~4.18.1",
     "input-otp": "^1.2.4",
     "lucide-react": "^0.435.0",
+    "mobx": "^6.13.3",
     "nodemon": "^3.1.4",
     "non.geist": "^1.0.3",
     "openai": "^4.57.0",
@@ -83,7 +84,6 @@
     "zustand": "^4.5.5"
   },
   "devDependencies": {
-    "@types/vscode": "^1.84.0",
     "@babel/core": "^7.14.5",
     "@babel/preset-react": "^7.14.5",
     "@nx/esbuild": "19.6.2",
@@ -132,6 +132,7 @@
     "@types/parse-gitignore": "^1.0.2",
     "@types/react": "18.3.1",
     "@types/react-dom": "18.3.0",
+    "@types/vscode": "^1.84.0",
     "@types/vscode-webview": "^1.57.5",
     "@types/ws": "^8.5.12",
     "@typescript-eslint/eslint-plugin": "^7.16.0",

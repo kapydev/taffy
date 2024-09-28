@@ -62,7 +62,7 @@ trpc.files.onSelectionChange.subscribe(undefined, {
     const curMsgs = chatStore.get('messages');
     fileStore.set('selectionData', data);
     const fileSelectionMessage = createToolMessage('FILE_CONTENTS', {
-      contents: data.fullFileContents,
+      body: data.fullFileContents,
       props: {
         startLine: String(data.selectedLineNumbers.start),
         endLine: String(data.selectedLineNumbers.end),

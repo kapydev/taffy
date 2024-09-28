@@ -12,8 +12,8 @@ export function toolToLLMDescription<T extends ToolType>(
     props: tool.sampleProps as Record<keyof typeof tool.sampleProps, string>,
   } as any;
 
-  if (tool.sampleContents) {
-    sampleTool.contents = tool.sampleContents;
+  if (tool.sampleBody) {
+    sampleTool.body = tool.sampleBody;
   }
 
   return `Name: ${toolName}
@@ -39,8 +39,8 @@ export function toolToToolString<T extends ToolType>(
     result += `}`;
   }
 
-  if (tool.contents !== undefined) {
-    result += '\n' + tool.contents;
+  if (tool.body !== undefined) {
+    result += '\n' + tool.body;
   }
 
   result += `\n{END_TOOL ${toolName}}`;

@@ -74,3 +74,7 @@ export function resetChatStore() {
   if (!rootFolder) return;
   chatStore.set('messages', [new SystemPromptMessage(rootFolder)]);
 }
+
+chatStore.subscribe('messages', (newMsgs) =>
+  console.log('Latest messages', newMsgs)
+);

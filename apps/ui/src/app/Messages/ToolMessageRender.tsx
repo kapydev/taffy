@@ -11,15 +11,14 @@ export function ToolMessageRender<T extends ToolType>({
 }: {
   message: ToolMessage<T>;
 }) {
-  const { type, toolData } = message.data;
-
-  if (!toolData || !type) return;
+  const { type } = message;
+  if (!type) return;
 
   return (
     <BaseMessageRender
       icon={TOOL_RENDER_TEMPLATES[type].icon}
-      title={TOOL_RENDER_TEMPLATES[type].title(toolData)}
-      description={TOOL_RENDER_TEMPLATES[type].description(toolData)}
+      title={TOOL_RENDER_TEMPLATES[type].title(message)}
+      description={TOOL_RENDER_TEMPLATES[type].description(message)}
     />
   );
 }

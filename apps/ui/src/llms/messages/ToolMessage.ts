@@ -1,6 +1,7 @@
 import { RawMessage } from '@taffy/shared-types';
 import { BaseMessage } from './BaseMessage';
 import { TOOL_TEMPLATES, Tools, toolToToolString, ToolType } from './tools';
+import { makeObservable, observable, computed, action } from 'mobx';
 
 const logger = console;
 export class ToolMessage<
@@ -10,22 +11,15 @@ export class ToolMessage<
     return this.type ? TOOL_TEMPLATES[this.type].role : 'assistant';
   }
 
-  get data() {
-    return { toolData: this.toolData, type: this.type };
-  }
-
-  get toolData(): Tools[ToolName] | undefined {
-    if (this.props) {
-      return {
-        props: this.props,
-        contents: this.contents,
-      } as any;
-    }
-    return undefined;
-  }
-
   constructor(contents?: string) {
     super();
+    makeObservable(this, {
+      type: computed,
+      role: computed,
+      props: computed,
+      contents: observable,
+      body: computed,
+    });
     this.contents = contents ?? '';
   }
 
@@ -35,7 +29,7 @@ export class ToolMessage<
     return (toolStartMatch?.[1] as ToolName) ?? undefined;
   }
 
-  get props(): Tools[ToolName]['props'] | undefined {
+  get props(): Tools[ToolName]['props'] {
     const toolStartMatch = this.contents.match(/{TOOL (\w+) (.*)}/);
     if (toolStartMatch) {
       try {
