@@ -1,5 +1,6 @@
 import { Alert, AlertTitle, AlertDescription } from '@taffy/components';
 import { ReactNode } from 'react';
+import { MessageIcon } from '../../llms/messages/tools';
 
 export function BaseMessageRender({
   icon: Icon,
@@ -9,8 +10,8 @@ export function BaseMessageRender({
   onApprove,
   onDecline,
 }: {
-  icon: React.ComponentType<{ className: string }>;
-  title: string;
+  icon: MessageIcon;
+  title: ReactNode;
   description: ReactNode;
   children?: ReactNode;
   onApprove?: () => void;

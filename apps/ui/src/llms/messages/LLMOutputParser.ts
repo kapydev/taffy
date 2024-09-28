@@ -1,23 +1,10 @@
-import { AssistantMessage } from './AssistantMessage';
-import { DeleteFileActionMessage } from './DeleteFileActionMessage';
-import { LLMGeneratedMessage } from './Messages';
-import { ReadFileActionMessage } from './ReadFileActionMessage';
-import { UpdateFileActionMessage } from './UpdateFileActionMessage';
-import { WriteFileActionMessage } from './WriteFileActionMessage';
+import { CustomMessage } from './Messages';
+import { createToolMessage, ToolMessage } from './ToolMessage';
 
 const logger = console;
 
-const actionTypeToMessage: {
-  [key: string]: new (actionType: string) => LLMGeneratedMessage;
-} = {
-  READ_FILE: ReadFileActionMessage,
-  WRITE_FILE: WriteFileActionMessage,
-  DELETE_FILE: DeleteFileActionMessage,
-  UPDATE_FILE: UpdateFileActionMessage,
-};
-
 export class LLMOutputParser {
-  private messages: LLMGeneratedMessage[] = [new AssistantMessage()];
+  private messages: CustomMessage[] = [new ToolMessage()];
 
   async handleTextStream(
     stream: AsyncIterable<string>,
@@ -52,23 +39,18 @@ export class LLMOutputParser {
     const actionStartMatch = line.match(/{ACTION (\w+)(?: (.*))?}/);
     const actionEndMatch = line.match(/{END_ACTION (\w+)}/);
     if (actionStartMatch) {
-      const actionType = actionStartMatch[1];
-      const constructor = actionTypeToMessage[actionType];
-      if (!constructor) {
-        throw new Error('MISSING_CONSTRUCTOR');
-      }
-      this.messages.push(new constructor(actionType));
+      this.messages.push(new ToolMessage());
       this.messages.at(-1)!.contents += `${line}\n`;
     } else if (actionEndMatch) {
       this.messages.at(-1)!.contents += `${line}\n`;
-      const assistantMessage = new AssistantMessage(''); // Create a new assistant message with empty response
+      const assistantMessage = new ToolMessage(); // Create a new assistant message with empty response
       this.messages.push(assistantMessage);
     } else {
       this.messages.at(-1)!.contents += `${line}\n`;
     }
   }
 
-  getMessages(): LLMGeneratedMessage[] {
+  getMessages(): CustomMessage[] {
     return this.messages;
   }
 }

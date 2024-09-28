@@ -1,9 +1,12 @@
 import { capitalize } from '@taffy/shared-helpers';
 import { useMemo, useState } from 'react';
 import { Badge } from '@taffy/components';
-import { CustomMessageRender } from './CustomMessageRender';
 import { CustomMessage } from '../../llms/messages/Messages';
 import { chatStore } from '../../stores/chat-store';
+import { SystemPromptMessage } from '../../llms/messages/SystemPromptMessage';
+import { ToolMessage } from '../../llms/messages/ToolMessage';
+import { SystemPromptRender } from './SystemPromptRender';
+import { ToolMessageRender } from './ToolMessageRender';
 
 export function Messages() {
   const messages = chatStore.use('messages');
@@ -51,22 +54,29 @@ export function MessageGroupWrapper({
   }
 
   const messageRender = useMemo(() => {
+    const getRaw = () => (
+      <pre>
+        <code>
+          {messages
+            .flatMap((msg) =>
+              msg.toRawMessages().flatMap((rawMsg) => rawMsg.content)
+            )
+            .join('')}
+        </code>
+      </pre>
+    );
+
     if (mode === 'RAW') {
-      return (
-        <pre>
-          <code>
-            {messages
-              .flatMap((msg) =>
-                msg.toRawMessages().flatMap((rawMsg) => rawMsg.content)
-              )
-              .join('')}
-          </code>
-        </pre>
-      );
+      return getRaw();
     }
-    return messages.map((msg, idx) => (
-      <CustomMessageRender key={idx} message={msg} />
-    ));
+    return messages.map((msg, idx) => {
+      if (msg instanceof SystemPromptMessage) {
+        return <SystemPromptRender message={msg} />;
+      } else if (msg instanceof ToolMessage) {
+        return <ToolMessageRender message={msg} />;
+      }
+      return getRaw();
+    });
   }, [mode, messages]);
 
   return (

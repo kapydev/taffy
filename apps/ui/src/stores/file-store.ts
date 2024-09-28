@@ -2,9 +2,9 @@ import { FilesObj, GeneratedFile } from '@taffy/shared-types';
 import type { AppRouter } from '@taffy/vsc-ext/types';
 import { inferProcedureOutput } from '@trpc/server';
 import { trpc } from '../client';
-import { FileSelectionMessage } from '../llms/messages/FileSelectionMessage';
 import { chatStore, resetChatStore } from './chat-store';
 import { createBetterStore } from './create-better-store';
+import { createToolMessage } from '../llms/messages/ToolMessage';
 
 export const fileStore = createBetterStore({
   files: undefined as FilesObj | undefined,
@@ -61,7 +61,14 @@ trpc.files.onSelectionChange.subscribe(undefined, {
   onData: (data) => {
     const curMsgs = chatStore.get('messages');
     fileStore.set('selectionData', data);
-    const fileSelectionMessage = new FileSelectionMessage(data);
+    const fileSelectionMessage = createToolMessage('FILE_CONTENTS', {
+      contents: data.fullFileContents,
+      props: {
+        startLine: String(data.selectedLineNumbers.start),
+        endLine: String(data.selectedLineNumbers.end),
+        filePath: data.fileName,
+      },
+    });
     chatStore.set('messages', [...curMsgs, fileSelectionMessage]);
   },
 });

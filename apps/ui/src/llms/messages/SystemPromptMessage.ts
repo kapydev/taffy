@@ -1,22 +1,7 @@
-import dedent from 'dedent-js';
+import { prettyPrintFilesObj } from '@taffy/shared-helpers';
+import { FilesObj, RawMessage } from '@taffy/shared-types';
 import { BaseMessage } from './BaseMessage';
-import {
-  prettyPrintFilesObj,
-  prettyPrintGeneratedFolder,
-} from '@taffy/shared-helpers';
-import {
-  FilesObj,
-  GeneratedFile,
-  GeneratedFolder,
-  RawMessage,
-} from '@taffy/shared-types';
-import { readFileActionTemplate } from './actions/readFileAction';
-import { actionToLLMDescription } from './actions/actionToLLMDescription';
-import {
-  deleteFileActionTemplate,
-  updateFileActionTemplate,
-  writeFileActionTemplate,
-} from './actions';
+import { TOOL_TEMPLATES, toolToLLMDescription } from './tools';
 
 export class SystemPromptMessage extends BaseMessage {
   role: 'user' | 'assistant' | 'system' = 'system';
@@ -27,10 +12,11 @@ export class SystemPromptMessage extends BaseMessage {
     this.prompt = [
       this.addTitle('PERSONA', this.getPersona()),
       this.addTitle('ACTION TUTORIAL', this.getActionTutorial()),
-      this.addTitle('CODEBASE CONTEXT', this.getCodebaseContext(root)),
+      // this.addTitle('CODEBASE CONTEXT', this.getCodebaseContext(root)),
     ].join('\n\n');
   }
 
+  /**Currently unused */
   getCodebaseContext(folder: FilesObj): string {
     return `The following is the user's codebase structure. 
     
@@ -136,10 +122,9 @@ Additional information about actions:
 5. If the plan within a thinking block does not follow the rules, fix the mistake in a seperate thinking block.
 
 Below are the actions available to you and instructions on how to use them.`,
-      actionToLLMDescription(readFileActionTemplate),
-      actionToLLMDescription(writeFileActionTemplate),
-      actionToLLMDescription(updateFileActionTemplate),
-      actionToLLMDescription(deleteFileActionTemplate),
+      ...Object.entries(TOOL_TEMPLATES).map(([toolName, toolTemplate]) =>
+        toolToLLMDescription(toolName as any, toolTemplate)
+      ),
     ].join('\n\n');
   }
 

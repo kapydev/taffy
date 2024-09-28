@@ -3,9 +3,10 @@ import { Send } from 'lucide-react';
 import { useState } from 'react';
 
 import { useEffect, useRef } from 'react';
-import { HumanMessage } from '../llms/messages/HumanMessage';
 import { chatStore, runPrompts } from '../stores/chat-store';
 import { Messages } from './Messages';
+import { ToolMessage } from '../llms/messages/ToolMessage';
+import { toolToToolString } from '../llms/messages/tools';
 
 export function ChatPanel() {
   const [input, setInput] = useState('');
@@ -38,7 +39,12 @@ export function ChatPanel() {
     setInput('');
     chatStore.set('messages', [
       ...chatStore.get('messages'),
-      new HumanMessage(input),
+      new ToolMessage(
+        toolToToolString('USER_PROMPT', {
+          contents: input,
+          props: {},
+        })
+      ),
     ]);
     runPrompts();
   };
