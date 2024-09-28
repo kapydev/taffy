@@ -1,12 +1,14 @@
 import { RawMessage } from '@taffy/shared-types';
 import { BaseMessage } from './BaseMessage';
-import { Tools, toolToToolString, ToolType } from './tools';
+import { TOOL_TEMPLATES, Tools, toolToToolString, ToolType } from './tools';
 
 const logger = console;
 export class ToolMessage<
   ToolName extends ToolType = ToolType
 > extends BaseMessage {
-  role: 'user' | 'assistant' | 'system' = 'assistant';
+  get role(): 'user' | 'assistant' | 'system' {
+    return this.type ? TOOL_TEMPLATES[this.type].role : 'assistant';
+  }
 
   get data() {
     return { toolData: this.toolData, type: this.type };
