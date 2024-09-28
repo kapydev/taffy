@@ -39,10 +39,10 @@ const setLlm = () => {
 };
 
 export async function runPrompts(llm: LLM | null = chatStore.get('llm')) {
+  const curMsgs = chatStore.get('messages');
   if (!llm) {
     llm = setLlm();
   }
-  const curMsgs = chatStore.get('messages');
 
   const rawMessages = getRawMessages();
   const parser = new LLMOutputParser();
@@ -59,7 +59,7 @@ function getRawMessages(): RawMessage[] {
   const concatenatedMessages = rawMsgs.reduce((acc, rawMsg) => {
     const lastMessage = acc[acc.length - 1];
     if (lastMessage && lastMessage.role === rawMsg.role) {
-      lastMessage.content += rawMsg.content;
+      lastMessage.content += '\n' + rawMsg.content;
     } else {
       acc.push(rawMsg);
     }

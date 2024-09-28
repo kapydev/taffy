@@ -30,7 +30,7 @@ export class ToolMessage<
   }
 
   get type(): ToolName | undefined {
-    const toolStartMatch = this.contents.match(/{TOOL (\w+) (.*)}/);
+    const toolStartMatch = this.contents.match(/{TOOL (\w+)(.*)}/);
 
     return (toolStartMatch?.[1] as ToolName) ?? undefined;
   }

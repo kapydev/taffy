@@ -43,8 +43,6 @@ export class LLMOutputParser {
       this.messages.at(-1)!.contents += `${line}\n`;
     } else if (actionEndMatch) {
       this.messages.at(-1)!.contents += `${line}\n`;
-      const assistantMessage = new ToolMessage(); // Create a new assistant message with empty response
-      this.messages.push(assistantMessage);
     } else {
       this.messages.at(-1)!.contents += `${line}\n`;
     }

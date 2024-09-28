@@ -51,11 +51,13 @@ export function ChatPanel() {
 
   return (
     <div className="flex flex-col p-4 flex-1">
-      <div
-        ref={scrollAreaRef}
-        className="flex flex-col-reverse overflow-x-auto flex-1"
-      >
-        <Messages />
+      <div className='flex-1 relative'>
+        <div
+          ref={scrollAreaRef}
+          className="flex flex-col-reverse overflow-x-auto overflow-y-auto inset-0 absolute"
+        >
+          <Messages />
+        </div>
       </div>
       <div className="flex mt-4">
         <Textarea
