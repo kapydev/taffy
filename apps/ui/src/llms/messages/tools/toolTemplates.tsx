@@ -77,7 +77,7 @@ export const TOOL_TEMPLATES = {
       filePath: 'src/utils/helloWorld.ts',
     },
     sampleBody: addLineNumbers(`export default function HelloWorld() {
-    console.log("Hello World");
+    ${'console'}.log("Hello World");
   }`),
   },
   WRITE_FILE: {

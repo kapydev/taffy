@@ -4,12 +4,13 @@ import { Claude } from '../llms/claude';
 import { LLMOutputParser } from '../llms/messages/LLMOutputParser';
 import { RawMessage } from '@taffy/shared-types';
 import { GPT } from '../llms/gpt';
-import { fileStore } from './file-store';
 import { SystemPromptMessage } from '../llms/messages/SystemPromptMessage';
 import { CustomMessage } from '../llms/messages/Messages';
+import { trpc } from '../client';
+import { createToolMessage } from '../llms/messages/ToolMessage';
 
 export const chatStore = createBetterStore({
-  messages: [] as CustomMessage[],
+  messages: [new SystemPromptMessage()] as CustomMessage[],
   llm: null as LLM | null,
 });
 
@@ -70,11 +71,20 @@ function getRawMessages(): RawMessage[] {
 }
 
 export function resetChatStore() {
-  const rootFolder = fileStore.get('files');
-  if (!rootFolder) return;
-  chatStore.set('messages', [new SystemPromptMessage(rootFolder)]);
+  chatStore.set('messages', [new SystemPromptMessage()]);
 }
 
-chatStore.subscribe('messages', (newMsgs) =>
-  console.log('Latest messages', newMsgs)
-);
+trpc.files.onSelectionChange.subscribe(undefined, {
+  onData: (data) => {
+    const curMsgs = chatStore.get('messages');
+    const fileSelectionMessage = createToolMessage('FILE_CONTENTS', {
+      body: data.fullFileContents,
+      props: {
+        startLine: String(data.selectedLineNumbers.start),
+        endLine: String(data.selectedLineNumbers.end),
+        filePath: data.fileName,
+      },
+    });
+    chatStore.set('messages', [...curMsgs, fileSelectionMessage]);
+  },
+});

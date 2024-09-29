@@ -1,7 +1,7 @@
 import { RawMessage } from '@taffy/shared-types';
 import { BaseMessage } from './BaseMessage';
 import { TOOL_TEMPLATES, Tools, toolToToolString, ToolType } from './tools';
-import { makeObservable, observable, computed, action } from 'mobx';
+import { makeObservable, observable, computed } from 'mobx';
 
 const logger = console;
 export class ToolMessage<

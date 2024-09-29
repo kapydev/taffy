@@ -4,6 +4,7 @@ import { createToolMessage, ToolMessage } from './ToolMessage';
 const logger = console;
 
 export class LLMOutputParser {
+  private inTool = false;
   private messages: CustomMessage[] = [new ToolMessage()];
 
   async handleTextStream(
@@ -36,15 +37,18 @@ export class LLMOutputParser {
   }
 
   parseLine(line: string) {
-    const actionStartMatch = line.match(/{ACTION (\w+)(?: (.*))?}/);
-    const actionEndMatch = line.match(/{END_ACTION (\w+)}/);
-    if (actionStartMatch) {
+    const toolStartMatch = line.match(/{TOOL (\w+)(?: (.*))?}/);
+    const toolEndMatch = line.match(/{END_TOOL (\w+)}/);
+    if (toolStartMatch && !this.inTool) {
       this.messages.push(new ToolMessage());
+      this.inTool = true;
+    }
+    if (this.inTool) {
       this.messages.at(-1)!.contents += `${line}\n`;
-    } else if (actionEndMatch) {
-      this.messages.at(-1)!.contents += `${line}\n`;
-    } else {
-      this.messages.at(-1)!.contents += `${line}\n`;
+    }
+
+    if (toolEndMatch) {
+      this.inTool = false;
     }
   }
 
