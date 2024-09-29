@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { chatStore, resetChatStore } from '../stores/chat-store';
 import { ChatPanel } from './ChatPanel';
 import { KeyInput } from './KeyInput';
+import { trpc } from '../client';
 
 export function MainChat() {
   return (

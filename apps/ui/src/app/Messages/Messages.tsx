@@ -54,16 +54,14 @@ export function MessageGroupWrapper({
   }
 
   const getRaw = () => (
-    <pre>
-      <code>
-        {messages
-          .flatMap((msg) =>
-            msg.toRawMessages().flatMap((rawMsg) => rawMsg.content)
-          )
-          //TODO: Can't just get raw, need to make this a shared func
-          .join('\n')}
-      </code>
-    </pre>
+    <code className="break-words whitespace-pre-wrap">
+      {messages
+        .flatMap((msg) =>
+          msg.toRawMessages().flatMap((rawMsg) => rawMsg.content)
+        )
+        //TODO: Can't just get raw, need to make this a shared func
+        .join('\n')}
+    </code>
   );
 
   return (
