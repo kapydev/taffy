@@ -4,6 +4,8 @@ import * as fs from 'fs/promises';
 import { getFullPath } from './file-watcher';
 import { latestActiveEditor } from '../main';
 import { ee } from '../event-emitter';
+import { closeDiffViews } from '../helpers/close-diff-views';
+import { getBestColForEditor } from '../helpers/get-best-col';
 
 export async function previewFileChange(
   filePath: string,
@@ -75,21 +77,7 @@ export async function previewFileChange(
   await updatedDocument.save();
   await vscode.window.showTextDocument(vscode.Uri.file(absolutePath), {
     preview: false,
+    viewColumn: getBestColForEditor(),
   });
-
-  const tabs = (vscode.window as any).tabGroups.all
-    .map((tg: any) => tg.tabs)
-    .flat()
-    .filter(
-      (tab: any) =>
-        tab.input instanceof (vscode as any).TabInputTextDiff &&
-        tab.input?.original?.scheme === 'claude-dev-diff'
-    );
-
-  for (const tab of tabs) {
-    // trying to close dirty views results in save popup
-    if (!tab.isDirty) {
-      await (vscode.window as any).tabGroups.close(tab);
-    }
-  }
+  await closeDiffViews();
 }
