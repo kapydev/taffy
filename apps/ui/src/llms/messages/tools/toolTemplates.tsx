@@ -97,6 +97,13 @@ export const TOOL_TEMPLATES = {
     ${'console'}.log("Hello World");
   }`),
   },
+  USER_AVAILABLE_FILES: {
+    role: 'user',
+    desc: 'Information from the user regarding available files in the repository',
+    propDesc: {},
+    sampleProps: {},
+    sampleBody: 'src/index.ts\nsrc/utils/anotherFile.ts'
+  },
 } satisfies Record<string, ToolTemplate>;
 
 type ToolAction<ToolName extends ToolType> = (
@@ -186,5 +193,10 @@ export const TOOL_RENDER_TEMPLATES: {
         },
       },
     ],
+  },
+  USER_AVAILABLE_FILES: {
+    Icon: FilePlus2Icon,
+    title: () => 'Available Files in Repository',
+    description: (data) => data.body,
   },
 };
