@@ -1,31 +1,42 @@
 import * as vscode from 'vscode';
+import path from 'path';
+import { getGitIgnoredFiles } from './get-ignore-patterns';
+import { toPosix } from '../helpers/to-posix';
+import globToRegexp from 'glob-to-regexp';
 
-export const getFolderStructure = async () => {
+export const getWorkspaceFiles = async () => {
   const workspaceFolders = vscode.workspace.workspaceFolders;
   if (!workspaceFolders) {
     return [];
   }
 
-  const rootFolder = workspaceFolders[0].uri.fsPath;
+  const rootFolder = toPosix(workspaceFolders[0].uri.fsPath);
+  const ignorePatterns = getGitIgnoredFiles(rootFolder);
+  console.log({ ignorePatterns });
 
-  return getFiles(rootFolder);
+  return getFiles(rootFolder, ignorePatterns);
 };
 
-const getFiles = async (folderPath: string) => {
-  const folderUri = vscode.Uri.file(folderPath);
+export const getFiles = async (
+  folderPathPosix: string,
+  ignorePatterns: string[]
+): Promise<string[]> => {
+  const folderUri = vscode.Uri.file(folderPathPosix);
   const files = await vscode.workspace.fs.readDirectory(folderUri);
 
-  const results = 
-    files.map(async ([name, type]) => {
-      const filePath = `${folderPath}/${name}`;
-      if (type === vscode.FileType.Directory) {
-        return {
-          name,
-          type: 'directory',
-          children: await getFiles(filePath),
-        };
-      } else {
-        return { name, type: 'file' };
-      }
-    })
+  let results: string[] = [];
+  for (const [name, type] of files) {
+    const filePath = path.posix.join(folderPathPosix, name);
+    const isIgnored = ignorePatterns.some((ignorePattern) =>
+      globToRegexp(ignorePattern).test(filePath)
+    );
+    if (isIgnored) continue;
+    if (type === vscode.FileType.Directory) {
+      results = results.concat(await getFiles(filePath, ignorePatterns));
+    } else {
+      results.push(filePath);
+    }
+  }
+
+  return results;
 };

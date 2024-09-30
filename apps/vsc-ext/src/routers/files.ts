@@ -8,7 +8,7 @@ import * as vscode from 'vscode';
 import { ee } from '../event-emitter';
 import { latestActiveEditor } from '../main';
 import { previewFileChange } from '../files/preview-file-change';
-import { getFolderStructure } from '../files/get-folder-structure';
+import { getWorkspaceFiles } from '../files/get-folder-structure';
 
 export const fileRouter = router({
   getWorkingDirFilesObj: publicProcedure.query(async (): Promise<FilesObj> => {
@@ -54,11 +54,7 @@ export const fileRouter = router({
       }
     );
   }),
-  // getWorkingDirFolderStructure: publicProcedure.query(
-  //   (): Promise<GeneratedFolder> => {
-  //     return getFolderStructure();
-  //   }
-  // ),
+  getWorkspaceFiles: publicProcedure.query(() => getWorkspaceFiles()),
   getFileByPath: publicProcedure
     .input(z.object({ filePath: z.string() }))
     .query(async (opts) => {

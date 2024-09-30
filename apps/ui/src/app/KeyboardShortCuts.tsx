@@ -1,6 +1,7 @@
 import Mousetrap from 'mousetrap';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { trpc } from '../client';
 
 // Allow Mousetrap to work inside input fields
 Mousetrap.prototype.stopCallback = function () {
@@ -10,8 +11,10 @@ Mousetrap.prototype.stopCallback = function () {
 const handlers = {
   'ctrl+l': {
     name: 'Toggle Codebase Context',
-    action: () => {
+    action: async () => {
       toast('Adding codebase context');
+      const x = await trpc.files.getWorkspaceFiles.query();
+      console.log(x);
     },
   },
 };
@@ -19,7 +22,9 @@ const handlers = {
 export function KeyboardShortCuts() {
   useEffect(() => {
     Object.entries(handlers).forEach(([shortcut, handler]) => {
-      Mousetrap.bind(shortcut, () => handler.action());
+      Mousetrap.bind(shortcut, () => {
+        handler.action();
+      });
     });
     return () => {
       Mousetrap.unbind(Object.keys(handlers));
@@ -28,4 +33,3 @@ export function KeyboardShortCuts() {
 
   return null;
 }
-
