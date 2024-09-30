@@ -45,10 +45,10 @@ export const fileRouter = router({
 
         sendSelectionData();
 
-        ee.on('mainKeyboardShortcutPresed', sendSelectionData);
+        ee.on('mainKeyboardShortcutPressed', sendSelectionData);
 
         return () => {
-          ee.removeListener('mainKeyboardShortcutPresed', sendSelectionData);
+          ee.removeListener('mainKeyboardShortcutPressed', sendSelectionData);
         };
       }
     );
@@ -84,16 +84,16 @@ export const fileRouter = router({
       })
     )
     .mutation(async (opts) => {
-      const { fileName, newContents } = opts.input;
-      await previewFileChange(fileName, newContents);
+      const { fileName, newContents, id } = opts.input;
+      await previewFileChange(fileName, newContents, id);
       return {};
     }),
   approveFileChange: publicProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async (opts) => {
       const { id } = opts.input;
-      console.log("hello")
-      return {}
+      ee.emit('fileChangeApproved', id);
+      return {};
     }),
   updateFileByPath: publicProcedure
     .input(

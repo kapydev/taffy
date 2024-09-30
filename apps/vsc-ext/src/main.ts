@@ -14,7 +14,6 @@ let currentPanel: vscode.WebviewPanel | undefined = undefined;
 export const appRouter = router({
   files: fileRouter,
   testFunc: publicProcedure.query(async () => {
-    await previewFileChange('.gitignore', ':) Hello there');
     return {};
   }),
   hello: publicProcedure.query(() => {
@@ -36,7 +35,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     if (currentPanel) {
       currentPanel.reveal(bestCol);
-      return ee.emit('mainKeyboardShortcutPresed');
+      return ee.emit('mainKeyboardShortcutPressed');
     }
 
     // Create and show a new webview

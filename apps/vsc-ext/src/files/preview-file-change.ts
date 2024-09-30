@@ -3,8 +3,19 @@ import * as path from 'path';
 import * as fs from 'fs/promises';
 import { getFullPath } from './file-watcher';
 import { latestActiveEditor } from '../main';
+import { ee } from '../event-emitter';
 
-export async function previewFileChange(filePath: string, newContents: string) {
+export async function previewFileChange(
+  filePath: string,
+  newContents: string,
+  previewId: string
+) {
+  const fileChangeApproved = new Promise<void>((res) => {
+    ee.on('fileChangeApproved', (approvedId) => {
+      if (approvedId !== previewId) return;
+      res();
+    });
+  });
   const absolutePath = getFullPath(filePath);
   const fileExists = await fs
     .access(absolutePath)
@@ -56,4 +67,29 @@ export async function previewFileChange(filePath: string, newContents: string) {
     edit.replace(updatedDocument.uri, fullRange, newContents);
   }
   await vscode.workspace.applyEdit(edit);
+
+  await fileChangeApproved;
+
+  //TODO: file change declined
+
+  await updatedDocument.save();
+  await vscode.window.showTextDocument(vscode.Uri.file(absolutePath), {
+    preview: false,
+  });
+
+  const tabs = (vscode.window as any).tabGroups.all
+    .map((tg: any) => tg.tabs)
+    .flat()
+    .filter(
+      (tab: any) =>
+        tab.input instanceof (vscode as any).TabInputTextDiff &&
+        tab.input?.original?.scheme === 'claude-dev-diff'
+    );
+
+  for (const tab of tabs) {
+    // trying to close dirty views results in save popup
+    if (!tab.isDirty) {
+      await (vscode.window as any).tabGroups.close(tab);
+    }
+  }
 }
