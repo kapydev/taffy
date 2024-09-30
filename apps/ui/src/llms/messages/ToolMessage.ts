@@ -47,6 +47,7 @@ export class ToolMessage<
 
   get body(): string {
     const bodyMatch = this.contents.match(
+      //We allow the underscore because sometimes it messes up and generates with an undersocre for the end tool
       /{TOOL \w+.*}\n([\s\S]*?)(?:\n{END_TOOL(_| )?\w+}|$)/
     );
     return bodyMatch ? bodyMatch[1] : '';

@@ -102,7 +102,7 @@ export const TOOL_TEMPLATES = {
     desc: 'Information from the user regarding available files in the repository',
     propDesc: {},
     sampleProps: {},
-    sampleBody: 'src/index.ts\nsrc/utils/anotherFile.ts'
+    sampleBody: 'src/index.ts\nsrc/utils/anotherFile.ts',
   },
 } satisfies Record<string, ToolTemplate>;
 
