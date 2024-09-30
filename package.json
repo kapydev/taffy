@@ -16,7 +16,7 @@
     "db:types": "npx supabase gen types typescript --local > shared/types/src/supabase-types.ts",
     "db:reset": "supabase db reset && npm run db:types",
     "build": "nx run apps-ui:build && nx run vsc-ext:build --skip-nx-cache",
-    "package": "npm run build && npx vsce package --allow-missing-repository",
+    "package": "npm run build && npx vsce package",
     "publish": "npm run build && npx vsce publish"
   },
   "main": "./dist/apps/vsc-ext/main.cjs",
