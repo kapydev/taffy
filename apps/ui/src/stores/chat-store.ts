@@ -7,11 +7,12 @@ import { GPT } from '../llms/gpt';
 import { SystemPromptMessage } from '../llms/messages/SystemPromptMessage';
 import { CustomMessage } from '../llms/messages/Messages';
 import { trpc } from '../client';
-import { createToolMessage } from '../llms/messages/ToolMessage';
+import { createToolMessage, ToolMessage } from '../llms/messages/ToolMessage';
 
 export const chatStore = createBetterStore({
   messages: [new SystemPromptMessage()] as CustomMessage[],
   llm: null as LLM | null,
+  mode: 'normal' as 'normal' | 'edit',
 });
 
 //@ts-expect-error for debugging
@@ -89,4 +90,16 @@ trpc.files.onSelectionChange.subscribe(undefined, {
     });
     chatStore.set('messages', [...curMsgs, fileSelectionMessage]);
   },
+});
+
+chatStore.subscribe('messages', (messages) => {
+  const latestMsg = messages.at(-1);
+  if (
+    latestMsg instanceof ToolMessage &&
+    latestMsg.type === 'ASSISTANT_WRITE_FILE'
+  ) {
+    chatStore.set('mode', 'edit');
+  } else {
+    chatStore.set('mode', 'normal');
+  }
 });

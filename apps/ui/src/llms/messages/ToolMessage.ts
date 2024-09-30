@@ -53,6 +53,16 @@ export class ToolMessage<
     return bodyMatch ? bodyMatch[1] : '';
   }
 
+  set body(newBody: string) {
+    if (!this.type) {
+      throw new Error("Can't set for undefined type!");
+    }
+    this.contents = toolToToolString(this.type, {
+      body: newBody,
+      props: this.props,
+    } as any);
+  }
+
   toRawMessages(): RawMessage[] {
     return [
       {
