@@ -20,7 +20,6 @@ export function ToolMessageRender<T extends ToolType>({
   const renderTemplate = TOOL_RENDER_TEMPLATES[type];
 
   const description = useMemo(() => {
-    console.log("UPdating desc!")
     return renderTemplate.description(message);
   }, [message.contents]);
 
@@ -28,7 +27,9 @@ export function ToolMessageRender<T extends ToolType>({
     <Alert>
       <renderTemplate.Icon className="w-4 h-4" />
       <AlertTitle>{renderTemplate.title(message)}</AlertTitle>
-      <AlertDescription>{description}</AlertDescription>
+      <AlertDescription className="break-words whitespace-pre-wrap">
+        {description}
+      </AlertDescription>
       <div className={`flex gap-2 ${message.loading && 'hidden'}`}>
         <button className="text-vsc-errorForeground" onClick={remove}>
           Remove
