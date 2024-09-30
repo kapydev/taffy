@@ -77,7 +77,7 @@ export function resetChatStore() {
 trpc.files.onSelectionChange.subscribe(undefined, {
   onData: (data) => {
     const curMsgs = chatStore.get('messages');
-    const fileSelectionMessage = createToolMessage('FILE_CONTENTS', {
+    const fileSelectionMessage = createToolMessage('USER_FILE_CONTENTS', {
       body: data.fullFileContents,
       props: {
         startLine: String(data.selectedLineNumbers.start),

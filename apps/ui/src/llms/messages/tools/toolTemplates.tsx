@@ -33,13 +33,7 @@ export interface ToolTemplate {
 }
 
 export const TOOL_TEMPLATES = {
-  USER_PROMPT: {
-    role: 'user',
-    desc: 'The prompt from the user',
-    propDesc: {},
-    sampleProps: {},
-    sampleBody: `Stop commiting .env files into the codebase`,
-  },
+  //ASSISTANT TOOLS
   ASSISTANT_INFO: {
     role: 'assistant',
     desc: 'For the assistant to write a response to the user. all messages from the assistant should start with an assistant info block.',
@@ -50,21 +44,43 @@ export const TOOL_TEMPLATES = {
   },
   ASSISTANT_PLANNING: {
     role: 'assistant',
-    desc: "For the assistant to plan how to tackle the task from the user. There should be a planning block after every assistant info tool block. Reason how to tackle the user's task step by step, placing steps in a logical order. After the planning tool is done, execute the plan.",
+    desc: "For the assistant to plan how to tackle the task from the user. There should be a planning block after every assistant info tool block. Reason how to tackle the user's task step by step, placing steps in a logical order. After the planning tool is done, execute the plan. In each step, indicate what tool you will use, and how you will use it",
     propDesc: {},
     sampleProps: {},
     sampleBody: `Example 1:
-    1. Read the .gitignore file using the read tool
-    2. Update the .gitignore file using the write tool`,
+    1. Read the .gitignore file using ASSISTANT_READ_FILE
+    2. Update the .gitignore file using ASSISTANT_WRITE_FILE`,
   },
-  READ_FILE: {
+  ASSISTANT_WRITE_FILE: {
+    role: 'assistant',
+    desc: 'Ask the user for permission to create/overwrite a file. The contents should be the full file contents, seperated by newlines.',
+    propDesc: {
+      filePath:
+        "The path to which the file is written. If the file path doesn't exist, directories will be recursively created until we are able to create the file.",
+    },
+    sampleProps: {
+      filePath: 'src/utils/helloWorld.ts',
+    },
+    sampleBody: `export function helloWorld() {
+      ${'console'}.log("Hello World!")
+    }`,
+  },
+  ASSISTANT_READ_FILE: {
+    role: 'assistant',
     desc: "Ask the user for permission to add a file to the context. The contents of the tool call should be all the files that need to be read, seperated by newlines. After calling this tool, no other tool calls can be made by the assistant, as we have to wait for the user's response",
     propDesc: {},
     sampleProps: {},
     sampleBody: 'src/index.ts\nsrc/messages/helloWorld.ts',
-    role: 'assistant',
   },
-  FILE_CONTENTS: {
+  //USER TOOLS
+  USER_PROMPT: {
+    role: 'user',
+    desc: 'The prompt from the user',
+    propDesc: {},
+    sampleProps: {},
+    sampleBody: `Stop commiting .env files into the codebase`,
+  },
+  USER_FILE_CONTENTS: {
     role: 'user',
     desc: 'Information from the user regarding the contents of a file. If there are multiple FILE_CONTENTS tool responses, the latest one should be considered as the correct one. Line numbers, are NOT part of the file, every line number is followed by a space, which contains the actual contents of the file.',
     propDesc: {
@@ -80,20 +96,6 @@ export const TOOL_TEMPLATES = {
     sampleBody: addLineNumbers(`export default function HelloWorld() {
     ${'console'}.log("Hello World");
   }`),
-  },
-  WRITE_FILE: {
-    role: 'assistant',
-    desc: 'Ask the user for permission to create/overwrite a file. The contents should be the full file contents, seperated by newlines.',
-    propDesc: {
-      filePath:
-        "The path to which the file is written. If the file path doesn't exist, directories will be recursively created until we are able to create the file.",
-    },
-    sampleProps: {
-      filePath: 'src/utils/helloWorld.ts',
-    },
-    sampleBody: `export function helloWorld() {
-      ${'console'}.log("Hello World!")
-    }`,
   },
 } satisfies Record<string, ToolTemplate>;
 
@@ -130,7 +132,7 @@ export const TOOL_RENDER_TEMPLATES: {
     title: () => 'Assistant Planning',
     description: (data) => data.body,
   },
-  READ_FILE: {
+  ASSISTANT_READ_FILE: {
     Icon: FilePlus2Icon,
     title: () => 'Requesting permission to read the following files',
     description: (data) => data.body,
@@ -141,7 +143,7 @@ export const TOOL_RENDER_TEMPLATES: {
       },
     ],
   },
-  FILE_CONTENTS: {
+  USER_FILE_CONTENTS: {
     Icon: FilePlus2Icon,
     title: () => 'File Context Added',
     description: (data) => {
@@ -154,7 +156,7 @@ export const TOOL_RENDER_TEMPLATES: {
       );
     },
   },
-  WRITE_FILE: {
+  ASSISTANT_WRITE_FILE: {
     Icon: FilePlus2Icon,
     title: () => 'Requesting permission to write the following files',
     description: (data) => {
