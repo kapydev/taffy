@@ -8,6 +8,7 @@ import { SystemPromptMessage } from '../llms/messages/SystemPromptMessage';
 import { CustomMessage } from '../llms/messages/Messages';
 import { trpc } from '../client';
 import { createToolMessage, ToolMessage } from '../llms/messages/ToolMessage';
+import { addLineNumbers } from '@taffy/shared-helpers';
 
 export const chatStore = createBetterStore({
   messages: [new SystemPromptMessage()] as CustomMessage[],
@@ -81,7 +82,7 @@ trpc.files.onSelectionChange.subscribe(undefined, {
     resetChatStore();
     const curMsgs = chatStore.get('messages');
     const fileSelectionMessage = createToolMessage('USER_FILE_CONTENTS', {
-      body: data.fullFileContents,
+      body: addLineNumbers(data.fullFileContents),
       props: {
         startLine: String(data.selectedLineNumbers.start),
         endLine: String(data.selectedLineNumbers.end),

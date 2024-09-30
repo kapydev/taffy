@@ -11,9 +11,6 @@ export async function closeDiffViews() {
     );
 
   for (const tab of tabs) {
-    // trying to close dirty views results in save popup
-    if (!tab.isDirty) {
-      await vscode.window.tabGroups.close(tab);
-    }
+    await vscode.window.tabGroups.close(tab);
   }
 }

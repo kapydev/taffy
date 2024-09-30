@@ -82,12 +82,15 @@ export async function previewFileChange(
   getCurWebView()?.reveal(getBestColForWebView());
 
   fileChangeRemoved.then(async () => {
+    debugger;
     await vscode.window.showTextDocument(vscode.Uri.file(absolutePath), {
       preview: false,
       viewColumn: getBestColForEditor(),
     });
     //Must come after
     vscode.commands.executeCommand('workbench.action.files.revert');
+
+    await closeDiffViews();
   });
   await fileChangeApproved;
 
