@@ -16,24 +16,29 @@ export function ToolMessageRender<T extends ToolType>({
       ...chatStore.get('messages').filter((someMsg) => someMsg !== message),
     ]);
   };
-  const Icon = TOOL_RENDER_TEMPLATES[type].icon;
-  const title = TOOL_RENDER_TEMPLATES[type].title(message);
-  const description = TOOL_RENDER_TEMPLATES[type].description(message);
+  const renderTemplate = TOOL_RENDER_TEMPLATES[type];
+
+  console.log(renderTemplate, message);
 
   return (
     <Alert>
-      <Icon className="w-4 h-4" />
-      <AlertTitle>{title}</AlertTitle>
-      <AlertDescription>{description}</AlertDescription>
+      <renderTemplate.Icon className="w-4 h-4" />
+      <AlertTitle>{renderTemplate.title(message)}</AlertTitle>
+      <AlertDescription>{renderTemplate.description(message)}</AlertDescription>
       <div className="flex gap-2">
         <button className="text-vsc-errorForeground" onClick={remove}>
           Remove
         </button>
-        {/* {onApprove && (
-          <button className="text-vsc-foreground" onClick={onApprove}>
-            Approve
-          </button>
-        )} */}
+        {renderTemplate.actions?.map((meta) => {
+          return (
+            <button
+              className="text-vsc-foreground"
+              onClick={() => meta.action(message)}
+            >
+              {meta.name}
+            </button>
+          );
+        })}
       </div>
     </Alert>
   );

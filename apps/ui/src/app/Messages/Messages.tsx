@@ -78,7 +78,9 @@ export function MessageGroupWrapper({
       <div className="flex flex-col gap-2">
         {mode === 'RAW'
           ? getRaw()
-          : messages.map((message) => <SingleMessage message={message} />)}
+          : messages.map((message) => (
+              <SingleMessage key={message.contents} message={message} />
+            ))}
       </div>
     </div>
   );

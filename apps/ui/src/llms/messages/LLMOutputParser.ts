@@ -1,5 +1,6 @@
 import { CustomMessage } from './Messages';
 import { createToolMessage, ToolMessage } from './ToolMessage';
+import { TOOL_RENDER_TEMPLATES } from './tools';
 
 const logger = console;
 
@@ -43,12 +44,24 @@ export class LLMOutputParser {
       this.messages.push(new ToolMessage());
       this.inTool = true;
     }
+
+    const latestMsg = this.messages.at(-1);
+    if (!latestMsg) {
+      throw new Error('Expected at least one message!');
+    }
     if (this.inTool) {
-      this.messages.at(-1)!.contents += `${line}\n`;
+      latestMsg.contents += `${line}\n`;
     }
 
     if (toolEndMatch) {
       this.inTool = false;
+      if (latestMsg instanceof ToolMessage) {
+        if (!latestMsg.type) return
+        const renderTemplate = TOOL_RENDER_TEMPLATES[latestMsg.type];
+        if (!renderTemplate) return
+        if (!renderTemplate.onFocus) return
+        renderTemplate.onFocus(latestMsg as any)
+      }
     }
   }
 

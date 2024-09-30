@@ -7,6 +7,7 @@ import { observable } from '@trpc/server/observable';
 import * as vscode from 'vscode';
 import { ee } from '../event-emitter';
 import { latestActiveEditor } from '../main';
+import { previewFileChange } from '../files/preview-file-change';
 
 export const fileRouter = router({
   getWorkingDirFilesObj: publicProcedure.query(async (): Promise<FilesObj> => {
@@ -73,6 +74,13 @@ export const fileRouter = router({
       } catch (error) {
         return undefined;
       }
+    }),
+  previewFileChange: publicProcedure
+    .input(z.object({ fileName: z.string(), newContents: z.string() }))
+    .query(async (opts) => {
+      const { fileName, newContents } = opts.input;
+      await previewFileChange(fileName, newContents);
+      return {};
     }),
   updateFileByPath: publicProcedure
     .input(

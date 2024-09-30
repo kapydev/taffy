@@ -7,6 +7,7 @@ import {
   WaypointsIcon,
 } from 'lucide-react';
 import { ToolMessage } from '../ToolMessage';
+import { trpc } from '../../../client';
 
 export type MessageIcon = React.ForwardRefExoticComponent<
   Omit<LucideProps, 'ref'> & React.RefAttributes<SVGSVGElement>
@@ -49,7 +50,7 @@ export const TOOL_TEMPLATES = {
   },
   ASSISTANT_PLANNING: {
     role: 'assistant',
-    desc: "For the assistant to plan how to tackle the task from the user. There should be a planning block after every assistant info tool block. Reason how to tackle the user's task step by step, placing steps in a logical order. After the planning tool is done, the user will be able to update the plan if required, before the plan is executed. using the read tool or the write tool, for example.",
+    desc: "For the assistant to plan how to tackle the task from the user. There should be a planning block after every assistant info tool block. Reason how to tackle the user's task step by step, placing steps in a logical order. After the planning tool is done, execute the plan.",
     propDesc: {},
     sampleProps: {},
     sampleBody: `Example 1:
@@ -57,7 +58,7 @@ export const TOOL_TEMPLATES = {
     2. Update the .gitignore file using the write tool`,
   },
   READ_FILE: {
-    desc: "Ask the user for permission to add a file to the context. The contents should be all the files that need to be read, seperated by newlines. DO NOT ask to read non existent files that are not provided in the codebase context. After calling this tool, no other tool calls can be made by the assistant, as we have to wait for the user's response",
+    desc: "Ask the user for permission to add a file to the context. The contents of the tool call should be all the files that need to be read, seperated by newlines. After calling this tool, no other tool calls can be made by the assistant, as we have to wait for the user's response",
     propDesc: {},
     sampleProps: {},
     sampleBody: 'src/index.ts\nsrc/messages/helloWorld.ts',
@@ -65,7 +66,7 @@ export const TOOL_TEMPLATES = {
   },
   FILE_CONTENTS: {
     role: 'user',
-    desc: 'Information from the user regarding the contents of a file. If there are multiple FILE_CONTENTS tool responses, the latest one should be considered as the correct one. Line numbers, if any are NOT part of the file, every line number is followed by a space, which contains the actual contents of the file',
+    desc: 'Information from the user regarding the contents of a file. If there are multiple FILE_CONTENTS tool responses, the latest one should be considered as the correct one. Line numbers, are NOT part of the file, every line number is followed by a space, which contains the actual contents of the file.',
     propDesc: {
       startLine: 'The start line of the specific area to focus on',
       endLine: 'The end line of the specific area to focus on',
@@ -96,36 +97,52 @@ export const TOOL_TEMPLATES = {
   },
 } satisfies Record<string, ToolTemplate>;
 
+type ToolAction<ToolName extends ToolType> = (
+  message: ToolMessage<ToolName>
+) => void;
+
+export type ToolActionMeta<ToolName extends ToolType> = {
+  name: string;
+  action: ToolAction<ToolName>;
+};
 export type ToolRenderTemplate<ToolName extends ToolType> = {
-  icon: MessageIcon;
+  Icon: MessageIcon;
   title: (message: ToolMessage<ToolName>) => React.ReactNode;
   description: (message: ToolMessage<ToolName>) => React.ReactNode;
+  onFocus?: ToolAction<ToolName>;
+  actions?: ToolActionMeta<ToolName>[];
 };
 export const TOOL_RENDER_TEMPLATES: {
   [ToolName in ToolType]: ToolRenderTemplate<ToolName>;
 } = {
   USER_PROMPT: {
-    icon: UserIcon,
+    Icon: UserIcon,
     title: () => 'User Prompt',
     description: (data) => data.body,
   },
   ASSISTANT_INFO: {
-    icon: BotIcon,
+    Icon: BotIcon,
     title: () => 'Assistant Info',
     description: (data) => data.body,
   },
   ASSISTANT_PLANNING: {
-    icon: WaypointsIcon,
+    Icon: WaypointsIcon,
     title: () => 'Assistant Planning',
     description: (data) => data.body,
   },
   READ_FILE: {
-    icon: FilePlus2Icon,
+    Icon: FilePlus2Icon,
     title: () => 'Requesting permission to read the following files',
     description: (data) => data.body,
+    actions: [
+      {
+        name: 'approve',
+        action: () => {},
+      },
+    ],
   },
   FILE_CONTENTS: {
-    icon: FilePlus2Icon,
+    Icon: FilePlus2Icon,
     title: () => 'File Context Added',
     description: (data) => {
       if (!data.props) return;
@@ -138,7 +155,7 @@ export const TOOL_RENDER_TEMPLATES: {
     },
   },
   WRITE_FILE: {
-    icon: FilePlus2Icon,
+    Icon: FilePlus2Icon,
     title: () => 'Requesting permission to write the following files',
     description: (data) => {
       if (!data.props) return;
@@ -151,5 +168,13 @@ export const TOOL_RENDER_TEMPLATES: {
         </>
       );
     },
+    onFocus: (message) => {
+      if (!message.props) return;
+      trpc.files.previewFileChange.query({
+        fileName: message.props.filePath,
+        newContents: message.body,
+      });
+    },
+    actions: [],
   },
 };
