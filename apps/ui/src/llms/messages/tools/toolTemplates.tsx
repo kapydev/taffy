@@ -204,6 +204,9 @@ export const TOOL_RENDER_TEMPLATES: {
   USER_AVAILABLE_FILES: {
     Icon: FilePlus2Icon,
     title: () => 'Available Files in Repository',
-    description: (data) => data.body,
+    description: (data) => {
+      const numFiles = data.body.split('\n').length;
+      return `${numFiles} filenames added to context`;
+    },
   },
 };

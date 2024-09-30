@@ -21,7 +21,8 @@ export function ToolMessageRender<T extends ToolType>({
   };
 
   const description = useMemo(() => {
-    return renderTemplate.description(message);
+    const result = renderTemplate.description(message);
+    return result;
   }, [message.contents]);
 
   return (
