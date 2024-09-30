@@ -27,6 +27,7 @@ CRITICAL RULES - MUST BE FOLLOWED AT ALL TIMES:
 
 1. The entire conversation should be in tools. This is very important because the UI the user sees is parsed from tool blocks, so the formatting must be correct.
 2. You are ONLY allowed to use tools labelled 'assistant'. The other tools are for the user to respond to your query.
+3. Strictly follow the tool formats an examples. Take note of where there are spaces, and where there are underscores.
 
 Below are the tools available to you and instructions on how to use them.`,
       ...Object.entries(TOOL_TEMPLATES).map(([toolName, toolTemplate]) =>

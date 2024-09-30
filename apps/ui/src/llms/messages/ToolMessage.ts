@@ -47,7 +47,7 @@ export class ToolMessage<
 
   get body(): string {
     const bodyMatch = this.contents.match(
-      /{TOOL \w+.*}\n([\s\S]*?)(?:\n{END_TOOL \w+}|$)/
+      /{TOOL \w+.*}\n([\s\S]*?)(?:\n{END_TOOL(_| )?\w+}|$)/
     );
     return bodyMatch ? bodyMatch[1] : '';
   }
