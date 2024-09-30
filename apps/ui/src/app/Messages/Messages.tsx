@@ -79,7 +79,7 @@ export function MessageGroupWrapper({
         {mode === 'RAW'
           ? getRaw()
           : messages.map((message) => (
-              <SingleMessage key={message.contents} message={message} />
+              <SingleMessage key={message.id} message={message} />
             ))}
       </div>
     </div>
