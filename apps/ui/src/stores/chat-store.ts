@@ -76,6 +76,8 @@ export function resetChatStore() {
 
 trpc.files.onSelectionChange.subscribe(undefined, {
   onData: (data) => {
+    //TODO: If taffy window is still active, we should probably add to context instead of completely new
+    resetChatStore();
     const curMsgs = chatStore.get('messages');
     const fileSelectionMessage = createToolMessage('USER_FILE_CONTENTS', {
       body: data.fullFileContents,

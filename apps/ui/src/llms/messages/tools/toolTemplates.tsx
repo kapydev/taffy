@@ -53,7 +53,7 @@ export const TOOL_TEMPLATES = {
   },
   ASSISTANT_WRITE_FILE: {
     role: 'assistant',
-    desc: 'Ask the user for permission to create/overwrite a file. The contents should be the full file contents, seperated by newlines.',
+    desc: 'Ask the user for permission to create/overwrite a file. You will need to provide the FULL FILE CONTENTS, because the action suggested to the user will be a full override of the existing file.',
     propDesc: {
       filePath:
         "The path to which the file is written. If the file path doesn't exist, directories will be recursively created until we are able to create the file.",

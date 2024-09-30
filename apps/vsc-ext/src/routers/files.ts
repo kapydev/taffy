@@ -8,6 +8,7 @@ import * as vscode from 'vscode';
 import { ee } from '../event-emitter';
 import { latestActiveEditor } from '../main';
 import { previewFileChange } from '../files/preview-file-change';
+import { getFolderStructure } from '../files/get-folder-structure';
 
 export const fileRouter = router({
   getWorkingDirFilesObj: publicProcedure.query(async (): Promise<FilesObj> => {
