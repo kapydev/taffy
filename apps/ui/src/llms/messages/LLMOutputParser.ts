@@ -1,5 +1,6 @@
+import { sleep } from '@taffy/shared-helpers';
 import { CustomMessage } from './Messages';
-import { createToolMessage, ToolMessage } from './ToolMessage';
+import { ToolMessage } from './ToolMessage';
 import { TOOL_RENDER_TEMPLATES } from './tools';
 
 const logger = console;
@@ -51,16 +52,21 @@ export class LLMOutputParser {
     }
     if (this.inTool) {
       latestMsg.contents += `${line}\n`;
+      if (latestMsg instanceof ToolMessage) {
+        latestMsg.loading = true;
+      }
     }
 
     if (toolEndMatch) {
       this.inTool = false;
       if (latestMsg instanceof ToolMessage) {
-        if (!latestMsg.type) return
+        latestMsg.loading = false;
+        if (!latestMsg.type) return;
         const renderTemplate = TOOL_RENDER_TEMPLATES[latestMsg.type];
-        if (!renderTemplate) return
-        if (!renderTemplate.onFocus) return
-        renderTemplate.onFocus(latestMsg as any)
+        if (!renderTemplate) return;
+        if (!renderTemplate.onFocus) return;
+        renderTemplate.onFocus(latestMsg as any);
+        //TODO: Stop parsing until user finishes focus action
       }
     }
   }

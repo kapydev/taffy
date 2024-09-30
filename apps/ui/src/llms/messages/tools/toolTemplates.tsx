@@ -170,11 +170,19 @@ export const TOOL_RENDER_TEMPLATES: {
     },
     onFocus: (message) => {
       if (!message.props) return;
-      trpc.files.previewFileChange.query({
+      trpc.files.previewFileChange.mutate({
         fileName: message.props.filePath,
         newContents: message.body,
+        id: message.id,
       });
     },
-    actions: [],
+    actions: [
+      {
+        name: 'Approve Change',
+        action: (message) => {
+          trpc.files.approveFileChange.mutate({ id: message.id });
+        },
+      },
+    ],
   },
 };

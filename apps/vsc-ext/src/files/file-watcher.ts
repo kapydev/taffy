@@ -1,14 +1,10 @@
-import {
-  booleanFilter,
-  folderMapToGeneratedFolder,
-} from '@taffy/shared-helpers';
-import { FilesObj, GeneratedFile, GeneratedFolder } from '@taffy/shared-types';
+import { booleanFilter } from '@taffy/shared-helpers';
+import { FilesObj, GeneratedFile } from '@taffy/shared-types';
 import chokidar from 'chokidar';
 import fs from 'fs';
 import path from 'path';
 import { getWorkingDir } from '../helpers/get-working-dir';
 import { getGitIgnoredFiles } from './get-ignore-patterns';
-import { generateEmbedding } from '../helpers/generate-embeddings';
 // import { supabase } from '../supabaseClient';
 
 const logger = console;

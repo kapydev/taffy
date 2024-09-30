@@ -21,7 +21,7 @@
   },
   "main": "./dist/apps/vsc-ext/main.cjs",
   "activationEvents": [
-    "onStartupFinished"
+    "*"
   ],
   "files": [
     "LICENSE.md",

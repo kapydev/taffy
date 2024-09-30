@@ -2,6 +2,7 @@ import { Alert, AlertDescription, AlertTitle } from '@taffy/components';
 import { ToolMessage } from '../../llms/messages/ToolMessage';
 import { TOOL_RENDER_TEMPLATES, ToolType } from '../../llms/messages/tools';
 import { chatStore } from '../../stores/chat-store';
+import { useMemo } from 'react';
 
 export function ToolMessageRender<T extends ToolType>({
   message,
@@ -18,14 +19,17 @@ export function ToolMessageRender<T extends ToolType>({
   };
   const renderTemplate = TOOL_RENDER_TEMPLATES[type];
 
-  console.log(renderTemplate, message);
+  const description = useMemo(() => {
+    console.log("UPdating desc!")
+    return renderTemplate.description(message);
+  }, [message.contents]);
 
   return (
     <Alert>
       <renderTemplate.Icon className="w-4 h-4" />
       <AlertTitle>{renderTemplate.title(message)}</AlertTitle>
-      <AlertDescription>{renderTemplate.description(message)}</AlertDescription>
-      <div className="flex gap-2">
+      <AlertDescription>{description}</AlertDescription>
+      <div className={`flex gap-2 ${message.loading && 'hidden'}`}>
         <button className="text-vsc-errorForeground" onClick={remove}>
           Remove
         </button>

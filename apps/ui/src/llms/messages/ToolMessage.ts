@@ -7,6 +7,8 @@ const logger = console;
 export class ToolMessage<
   ToolName extends ToolType = ToolType
 > extends BaseMessage {
+  loading: boolean = false;
+
   get role(): 'user' | 'assistant' | 'system' {
     return this.type ? TOOL_TEMPLATES[this.type].role : 'assistant';
   }
@@ -19,6 +21,7 @@ export class ToolMessage<
       props: computed,
       contents: observable,
       body: computed,
+      loading: observable,
     });
     this.contents = contents ?? '';
   }
@@ -44,7 +47,7 @@ export class ToolMessage<
 
   get body(): string {
     const bodyMatch = this.contents.match(
-      /{TOOL \w+.*}\n([\s\S]*?)\n{END_TOOL \w+}/
+      /{TOOL \w+.*}\n([\s\S]*?)(?:\n{END_TOOL \w+}|$)/
     );
     return bodyMatch ? bodyMatch[1] : '';
   }

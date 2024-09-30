@@ -76,11 +76,24 @@ export const fileRouter = router({
       }
     }),
   previewFileChange: publicProcedure
-    .input(z.object({ fileName: z.string(), newContents: z.string() }))
-    .query(async (opts) => {
+    .input(
+      z.object({
+        fileName: z.string(),
+        newContents: z.string(),
+        id: z.string(),
+      })
+    )
+    .mutation(async (opts) => {
       const { fileName, newContents } = opts.input;
       await previewFileChange(fileName, newContents);
       return {};
+    }),
+  approveFileChange: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async (opts) => {
+      const { id } = opts.input;
+      console.log("hello")
+      return {}
     }),
   updateFileByPath: publicProcedure
     .input(
