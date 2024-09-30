@@ -2,10 +2,13 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs/promises';
 import { getFullPath } from './file-watcher';
-import { latestActiveEditor } from '../main';
+import { getCurWebView, latestActiveEditor } from '../main';
 import { ee } from '../event-emitter';
 import { closeDiffViews } from '../helpers/close-diff-views';
-import { getBestColForEditor } from '../helpers/get-best-col';
+import {
+  getBestColForEditor,
+  getBestColForWebView,
+} from '../helpers/get-best-col';
 
 export async function previewFileChange(
   filePath: string,
@@ -15,6 +18,12 @@ export async function previewFileChange(
   const fileChangeApproved = new Promise<void>((res) => {
     ee.on('fileChangeApproved', (approvedId) => {
       if (approvedId !== previewId) return;
+      res();
+    });
+  });
+  const fileChangeRemoved = new Promise<void>((res) => {
+    ee.on('fileChangeRemoved', (removedId) => {
+      if (removedId !== previewId) return;
       res();
     });
   });
@@ -69,7 +78,17 @@ export async function previewFileChange(
     edit.replace(updatedDocument.uri, fullRange, newContents);
   }
   await vscode.workspace.applyEdit(edit);
+  //Refocus taffy
+  getCurWebView()?.reveal(getBestColForWebView());
 
+  fileChangeRemoved.then(async () => {
+    await vscode.window.showTextDocument(vscode.Uri.file(absolutePath), {
+      preview: false,
+      viewColumn: getBestColForEditor(),
+    });
+    //Must come after
+    vscode.commands.executeCommand('workbench.action.files.revert');
+  });
   await fileChangeApproved;
 
   //TODO: file change declined

@@ -118,6 +118,7 @@ export type ToolRenderTemplate<ToolName extends ToolType> = {
   Icon: MessageIcon;
   title: (message: ToolMessage<ToolName>) => React.ReactNode;
   description: (message: ToolMessage<ToolName>) => React.ReactNode;
+  onRemove?: ToolAction<ToolName>;
   onFocus?: ToolAction<ToolName>;
   actions?: ToolActionMeta<ToolName>[];
 };
@@ -182,6 +183,12 @@ export const TOOL_RENDER_TEMPLATES: {
       trpc.files.previewFileChange.mutate({
         fileName: message.props.filePath,
         newContents: message.body,
+        id: message.id,
+      });
+    },
+    onRemove: (message) => {
+      if (!message.props) return;
+      trpc.files.removeFileChange.mutate({
         id: message.id,
       });
     },

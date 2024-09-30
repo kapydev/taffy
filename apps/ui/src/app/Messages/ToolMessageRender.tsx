@@ -11,13 +11,14 @@ export function ToolMessageRender<T extends ToolType>({
 }) {
   const { type } = message;
   if (!type) return;
+  const renderTemplate = TOOL_RENDER_TEMPLATES[type];
 
   const remove = () => {
     chatStore.set('messages', [
       ...chatStore.get('messages').filter((someMsg) => someMsg !== message),
     ]);
+    renderTemplate.onRemove?.(message);
   };
-  const renderTemplate = TOOL_RENDER_TEMPLATES[type];
 
   const description = useMemo(() => {
     return renderTemplate.description(message);

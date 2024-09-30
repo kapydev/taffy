@@ -96,6 +96,13 @@ export const fileRouter = router({
       ee.emit('fileChangeApproved', id);
       return {};
     }),
+  removeFileChange: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async (opts) => {
+      const { id } = opts.input;
+      ee.emit('fileChangeRemoved', id);
+      return {};
+    }),
   updateFileByPath: publicProcedure
     .input(
       z.object({
