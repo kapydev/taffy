@@ -35,17 +35,12 @@ export function getBestColForEditor(): vscode.ViewColumn {
   const baseCol: vscode.ViewColumn = vscode.ViewColumn.Beside; // Default column
 
   // If there is an active editor, return its view column
-  if (editor) {
+  if (editor?.viewColumn) {
     return editor.viewColumn ?? baseCol;
   }
 
   // Get all visible view columns
   const visibleColumns = vscode.window.tabGroups.all.map((tg) => tg.viewColumn);
-
-  // If there is only the webview open, return its column
-  if (visibleColumns.length === 1 && curWebView) {
-    return curWebView.viewColumn ?? baseCol;
-  }
 
   // Find the first column that is not occupied by the current webview
   const bestCol = visibleColumns.find((col) => col !== curWebView?.viewColumn);
