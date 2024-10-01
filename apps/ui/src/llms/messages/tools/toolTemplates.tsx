@@ -172,9 +172,7 @@ export const TOOL_RENDER_TEMPLATES: {
       return (
         <>
           <div>File Path - {data.props.filePath} </div>
-          <pre>
-            <code>{data.body}</code>
-          </pre>
+          <code className="break-word whitespace-pre-wrap">{data.body}</code>
         </>
       );
     },

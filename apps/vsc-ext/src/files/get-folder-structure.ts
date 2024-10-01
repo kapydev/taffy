@@ -12,29 +12,32 @@ export const getWorkspaceFiles = async () => {
 
   const rootFolder = toPosix(workspaceFolders[0].uri.fsPath);
   const ignorePatterns = getGitIgnoredFiles(rootFolder);
-  console.log({ ignorePatterns });
 
   return getFiles(rootFolder, ignorePatterns);
 };
 
 export const getFiles = async (
-  folderPathPosix: string,
-  ignorePatterns: string[]
+  basePath: string,
+  ignorePatterns: string[],
+  pathFromBase: string = ''
 ): Promise<string[]> => {
-  const folderUri = vscode.Uri.file(folderPathPosix);
+  const curPath = path.posix.join(basePath, pathFromBase);
+  const folderUri = vscode.Uri.file(curPath);
   const files = await vscode.workspace.fs.readDirectory(folderUri);
 
   let results: string[] = [];
   for (const [name, type] of files) {
-    const filePath = path.posix.join(folderPathPosix, name);
+    const curPathFromPath = path.posix.join(pathFromBase, name);
     const isIgnored = ignorePatterns.some((ignorePattern) =>
-      globToRegexp(ignorePattern).test(filePath)
+      globToRegexp(ignorePattern).test(curPathFromPath)
     );
     if (isIgnored) continue;
     if (type === vscode.FileType.Directory) {
-      results = results.concat(await getFiles(filePath, ignorePatterns));
+      results = results.concat(
+        await getFiles(basePath, ignorePatterns, curPathFromPath)
+      );
     } else {
-      results.push(filePath);
+      results.push(curPathFromPath);
     }
   }
 
