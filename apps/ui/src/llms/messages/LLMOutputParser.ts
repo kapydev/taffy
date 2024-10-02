@@ -41,7 +41,7 @@ export class LLMOutputParser {
   parseLine(line: string) {
     //The tool matches are more fuzzy than the actual instructions given to the models, to try to render as far as possible.
     const toolStartMatch = line.match(/{TOOL (\w+)(?: (.*))?}/);
-    const toolEndMatch = line.match(/{END_TOOL\s?(\w+)}/);
+    const toolEndMatch = line.match(/{END_TOOL\s?(\w*)}/);
     if (toolStartMatch && !this.inTool) {
       this.messages.push(new ToolMessage());
       this.inTool = true;
