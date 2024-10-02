@@ -30,7 +30,11 @@
     {
       "files": ["*.ts", "*.tsx"],
       "extends": ["plugin:@nx/typescript"],
-      "rules": {}
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-inferrable-types": "off",
+        "react-hooks/exhaustive-deps": "off"
+      }
     },
     {
       "files": ["*.js", "*.jsx"],

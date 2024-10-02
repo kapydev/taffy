@@ -1,14 +1,11 @@
-import {
-  booleanFilter,
-  folderMapToGeneratedFolder,
-} from '@taffy/shared-helpers';
-import { FilesObj, GeneratedFile, GeneratedFolder } from '@taffy/shared-types';
+import { booleanFilter } from '@taffy/shared-helpers';
+import { FilesObj, GeneratedFile } from '@taffy/shared-types';
 import chokidar from 'chokidar';
 import fs from 'fs';
 import path from 'path';
 import { getWorkingDir } from '../helpers/get-working-dir';
 import { getGitIgnoredFiles } from './get-ignore-patterns';
-import { generateEmbedding } from '../helpers/generate-embeddings';
+import { toPosix } from '../helpers/to-posix';
 // import { supabase } from '../supabaseClient';
 
 const logger = console;
@@ -22,8 +19,8 @@ const watcher = chokidar.watch(workingDir, {
 watcher.on('ready', () => (watcherReady = true));
 
 export function extractWorkspacePath(fullPath: string): string | undefined {
-  const basePath = workingDir.split(path.sep).join(path.posix.sep);
-  const resolvedFullPath = fullPath.split(path.sep).join(path.posix.sep);
+  const basePath = toPosix(workingDir);
+  const resolvedFullPath = toPosix(fullPath);
   if (!resolvedFullPath.includes(basePath)) return undefined;
   let relPath = resolvedFullPath.replace(basePath, '');
   if (relPath === '') {
@@ -33,8 +30,8 @@ export function extractWorkspacePath(fullPath: string): string | undefined {
 }
 
 export function getFullPath(relPath: string): string {
-  const basePath = workingDir.split(path.sep).join(path.posix.sep);
-  const relativePath = relPath.split(path.sep).join(path.posix.sep);
+  const basePath = toPosix(workingDir);
+  const relativePath = toPosix(relPath);
 
   return path.posix.join(basePath, relativePath);
 }
@@ -84,7 +81,7 @@ export async function getFilesObj(): Promise<FilesObj> {
   for (const [folder, files] of Object.entries(relUnixPaths)) {
     for (const file of files) {
       const filePath = path.posix.join(folder, file);
-      const fullPath = path.join(workingDir, filePath);
+      const fullPath = path.posix.join(workingDir, filePath);
       if (fs.existsSync(fullPath) && fs.statSync(fullPath).isFile()) {
         // const content = fs.readFileSync(fullPath, 'utf-8');
         const generatedFile: GeneratedFile = {

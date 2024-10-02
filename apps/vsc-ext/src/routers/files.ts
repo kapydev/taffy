@@ -7,6 +7,8 @@ import { observable } from '@trpc/server/observable';
 import * as vscode from 'vscode';
 import { ee } from '../event-emitter';
 import { latestActiveEditor } from '../main';
+import { previewFileChange } from '../files/preview-file-change';
+import { getWorkspaceFiles } from '../files/get-folder-structure';
 
 export const fileRouter = router({
   getWorkingDirFilesObj: publicProcedure.query(async (): Promise<FilesObj> => {
@@ -44,19 +46,15 @@ export const fileRouter = router({
 
         sendSelectionData();
 
-        ee.on('mainKeyboardShortcutPresed', sendSelectionData);
+        ee.on('mainKeyboardShortcutPressed', sendSelectionData);
 
         return () => {
-          ee.removeListener('mainKeyboardShortcutPresed', sendSelectionData);
+          ee.removeListener('mainKeyboardShortcutPressed', sendSelectionData);
         };
       }
     );
   }),
-  // getWorkingDirFolderStructure: publicProcedure.query(
-  //   (): Promise<GeneratedFolder> => {
-  //     return getFolderStructure();
-  //   }
-  // ),
+  getWorkspaceFiles: publicProcedure.query(() => getWorkspaceFiles()),
   getFileByPath: publicProcedure
     .input(z.object({ filePath: z.string() }))
     .query(async (opts) => {
@@ -73,6 +71,33 @@ export const fileRouter = router({
       } catch (error) {
         return undefined;
       }
+    }),
+  previewFileChange: publicProcedure
+    .input(
+      z.object({
+        fileName: z.string(),
+        newContents: z.string(),
+        id: z.string(),
+      })
+    )
+    .mutation(async (opts) => {
+      const { fileName, newContents, id } = opts.input;
+      await previewFileChange(fileName, newContents, id);
+      return {};
+    }),
+  approveFileChange: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async (opts) => {
+      const { id } = opts.input;
+      ee.emit('fileChangeApproved', id);
+      return {};
+    }),
+  removeFileChange: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async (opts) => {
+      const { id } = opts.input;
+      ee.emit('fileChangeRemoved', id);
+      return {};
     }),
   updateFileByPath: publicProcedure
     .input(

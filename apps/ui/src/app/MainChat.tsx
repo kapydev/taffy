@@ -1,12 +1,9 @@
-import { Button, Checkbox, ScrollArea } from '@taffy/components';
-import { GeneratedFolder } from '@taffy/shared-types';
+import { Button } from '@taffy/components';
 import { ChevronRight } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { resetChatStore } from '../stores/chat-store';
-import { fileStore } from '../stores/file-store';
-import { KeyInput } from './KeyInput';
+import { useState } from 'react';
+import { chatStore, resetChatStore } from '../stores/chat-store';
 import { ChatPanel } from './ChatPanel';
-import { vscApi } from '../common/vsc-api';
+import { KeyInput } from './KeyInput';
 import { trpc } from '../client';
 
 export function MainChat() {

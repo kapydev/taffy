@@ -1,9 +1,12 @@
 import { capitalize } from '@taffy/shared-helpers';
 import { useMemo, useState } from 'react';
 import { Badge } from '@taffy/components';
-import { CustomMessageRender } from './CustomMessageRender';
 import { CustomMessage } from '../../llms/messages/Messages';
 import { chatStore } from '../../stores/chat-store';
+import { SystemPromptMessage } from '../../llms/messages/SystemPromptMessage';
+import { ToolMessage } from '../../llms/messages/ToolMessage';
+import { SystemPromptRender } from './SystemPromptRender';
+import { ToolMessageRender } from './ToolMessageRender';
 
 export function Messages() {
   const messages = chatStore.use('messages');
@@ -50,24 +53,16 @@ export function MessageGroupWrapper({
     throw new Error('MessageGroupWrapper: not all messages have the same role');
   }
 
-  const messageRender = useMemo(() => {
-    if (mode === 'RAW') {
-      return (
-        <pre>
-          <code>
-            {messages
-              .flatMap((msg) =>
-                msg.toRawMessages().flatMap((rawMsg) => rawMsg.content)
-              )
-              .join('')}
-          </code>
-        </pre>
-      );
-    }
-    return messages.map((msg, idx) => (
-      <CustomMessageRender key={idx} message={msg} />
-    ));
-  }, [mode, messages]);
+  const getRaw = () => (
+    <code className="break-words whitespace-pre-wrap">
+      {messages
+        .flatMap((msg) =>
+          msg.toRawMessages().flatMap((rawMsg) => rawMsg.content)
+        )
+        //TODO: Can't just get raw, need to make this a shared func
+        .join('\n')}
+    </code>
+  );
 
   return (
     <div className={`mb-4 ${MESSAGE_GROUP_COLORS[messages[0].role]}`}>
@@ -80,7 +75,21 @@ export function MessageGroupWrapper({
           {mode}
         </Badge>
       </div>
-      {messageRender}
+      <div className="flex flex-col gap-2">
+        {mode === 'RAW'
+          ? getRaw()
+          : messages.map((message) => (
+              <SingleMessage key={message.id} message={message} />
+            ))}
+      </div>
     </div>
   );
+}
+
+function SingleMessage({ message }: { message: CustomMessage }) {
+  if (message instanceof SystemPromptMessage) {
+    return <SystemPromptRender message={message} />;
+  } else if (message instanceof ToolMessage) {
+    return <ToolMessageRender message={message} />;
+  }
 }

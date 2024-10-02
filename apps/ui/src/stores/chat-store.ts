@@ -2,15 +2,19 @@ import { createBetterStore } from './create-better-store';
 import { LLM } from '../llms/base-llm';
 import { Claude } from '../llms/claude';
 import { LLMOutputParser } from '../llms/messages/LLMOutputParser';
-import { CustomMessage } from '../llms/messages/Messages';
 import { RawMessage } from '@taffy/shared-types';
 import { GPT } from '../llms/gpt';
-import { fileStore } from './file-store';
 import { SystemPromptMessage } from '../llms/messages/SystemPromptMessage';
+import { CustomMessage } from '../llms/messages/Messages';
+import { trpc } from '../client';
+import { createToolMessage, ToolMessage } from '../llms/messages/ToolMessage';
+import { addLineNumbers } from '@taffy/shared-helpers';
+import { TOOL_RENDER_TEMPLATES, ToolType } from '../llms/messages/tools';
 
 export const chatStore = createBetterStore({
-  messages: [] as CustomMessage[],
+  messages: [new SystemPromptMessage()] as CustomMessage[],
   llm: null as LLM | null,
+  mode: 'normal' as 'normal' | 'edit',
 });
 
 //@ts-expect-error for debugging
@@ -39,10 +43,10 @@ const setLlm = () => {
 };
 
 export async function runPrompts(llm: LLM | null = chatStore.get('llm')) {
+  const curMsgs = chatStore.get('messages');
   if (!llm) {
     llm = setLlm();
   }
-  const curMsgs = chatStore.get('messages');
 
   const rawMessages = getRawMessages();
   const parser = new LLMOutputParser();
@@ -59,7 +63,7 @@ function getRawMessages(): RawMessage[] {
   const concatenatedMessages = rawMsgs.reduce((acc, rawMsg) => {
     const lastMessage = acc[acc.length - 1];
     if (lastMessage && lastMessage.role === rawMsg.role) {
-      lastMessage.content += rawMsg.content;
+      lastMessage.content += '\n' + rawMsg.content;
     } else {
       acc.push(rawMsg);
     }
@@ -70,7 +74,50 @@ function getRawMessages(): RawMessage[] {
 }
 
 export function resetChatStore() {
-  const rootFolder = fileStore.get('files');
-  if (!rootFolder) return;
-  chatStore.set('messages', [new SystemPromptMessage(rootFolder)]);
+  chatStore.set('messages', [new SystemPromptMessage()]);
+}
+
+trpc.files.onSelectionChange.subscribe(undefined, {
+  onData: (data) => {
+    //TODO: If taffy window is still active, we should probably add to context instead of completely new
+    resetChatStore();
+    const curMsgs = chatStore.get('messages');
+    const fileSelectionMessage = createToolMessage('USER_FILE_CONTENTS', {
+      body: addLineNumbers(data.fullFileContents),
+      props: {
+        startLine: String(data.selectedLineNumbers.start),
+        endLine: String(data.selectedLineNumbers.end),
+        filePath: data.fileName,
+      },
+    });
+    chatStore.set('messages', [...curMsgs, fileSelectionMessage]);
+  },
+});
+
+chatStore.subscribe('messages', (messages) => {
+  const latestMsg = messages.at(-1);
+  /**TODO: Allow editing in multi file mode - right now there are the following edge cases:
+   * 1. After the edit, the diff view is quite strange
+   * 2. Need to add state for edits that have already been accepted and those who have not been
+   */
+  if (
+    messages.filter(
+      (m) => m instanceof ToolMessage && m.type === 'ASSISTANT_WRITE_FILE'
+    ).length === 1 &&
+    latestMsg instanceof ToolMessage &&
+    latestMsg.type === 'ASSISTANT_WRITE_FILE'
+  ) {
+    chatStore.set('mode', 'edit');
+  } else {
+    chatStore.set('mode', 'normal');
+  }
+});
+
+export function removeMessage<T extends ToolType>(message: ToolMessage<T>) {
+  chatStore.set('messages', [
+    ...chatStore.get('messages').filter((someMsg) => someMsg !== message),
+  ]);
+  if (!message.type) return;
+  const renderTemplate = TOOL_RENDER_TEMPLATES[message.type];
+  renderTemplate.onRemove?.(message);
 }
