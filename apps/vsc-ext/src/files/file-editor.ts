@@ -2,24 +2,41 @@ import path from 'path';
 import { getBestColForEditor } from '../helpers/get-best-col';
 import { toUtf8 } from '../helpers/to-utf8';
 import { getFullPath } from './file-watcher';
+import fs from 'fs/promises';
 import * as vscode from 'vscode';
 
 export class FileEditor {
+  private tab: vscode.Tab | undefined;
   private _doc: vscode.TextDocument | undefined;
+  private contentsBeforeDiff: string | undefined;
 
   constructor(public filePath: string) {}
 
-  get fullPath() {
+  get absPath() {
     return getFullPath(this.filePath);
   }
 
   get uri() {
-    return vscode.Uri.file(this.fullPath);
+    return vscode.Uri.file(this.absPath);
   }
 
   /**Just the file name without preceeding folder names */
   get fileName() {
     return path.basename(this.filePath);
+  }
+
+  async exists() {
+    return await fs
+      .access(this.absPath)
+      .then(() => true)
+      .catch(() => false);
+  }
+
+  /**Create the file if it does not exist */
+  async createIfNotExists() {
+    if (await this.exists()) return;
+    await fs.mkdir(path.dirname(this.absPath), { recursive: true });
+    await fs.writeFile(this.absPath, '');
   }
 
   async getDoc(): Promise<vscode.TextDocument | undefined> {
@@ -39,35 +56,116 @@ export class FileEditor {
   async getContents(): Promise<string | undefined> {
     const document = await this.getDoc();
     return document?.getText();
+
+    //Previously there's this code but I'm not sure if 100% necessary - its to prevent git from showing weird eol warnings
+    // const fileExists =
+    // let originalContent = '';
+    // if (fileExists) {
+    //   originalContent = await fs.readFile(absolutePath, 'utf-8');
+    //   const eol = originalContent.includes('\r\n') ? '\r\n' : '\n';
+    //   if (originalContent.endsWith(eol) && !newContents.endsWith(eol)) {
+    //     newContents += eol;
+    //   }
+    // }
   }
 
-  async createReadonlyUri(): Promise<vscode.Uri> {
-    const curContents = await this.getContents();
-    return vscode.Uri.parse(`readonly-view:${this.fileName}`).with({
-      query: curContents,
+  async createReadonlyUri(): Promise<{
+    uri: vscode.Uri;
+    contents: string | undefined;
+  }> {
+    const contents = await this.getContents();
+    const encodedContents = Buffer.from(contents || '').toString('base64');
+    const uri = vscode.Uri.parse(`readonly-view:${this.fileName}`).with({
+      query: encodedContents,
     });
+    return { uri, contents };
   }
 
-  async showDiffView(newContents: string) {
-    const openOpts: vscode.TextDocumentShowOptions = {
-      viewColumn: getBestColForEditor(),
-    };
+  async setDocContents(contents: string) {
     const doc = await this.getDoc();
     if (!doc) return;
-    await vscode.commands.executeCommand(
-      'vscode.diff',
-      await this.createReadonlyUri(),
-      doc.uri,
-      `${this.fileName}: Suggested Changes`,
-      openOpts
-    );
     const edit = new vscode.WorkspaceEdit();
     const fullRange = new vscode.Range(
       doc.positionAt(0),
       doc.positionAt(doc.getText().length)
     );
+    if (!fullRange.isEmpty) {
+      edit.replace(doc.uri, fullRange, contents);
+    } else {
+      edit.insert(doc.uri, new vscode.Position(0, 0), contents);
+    }
+    vscode.workspace.applyEdit(edit);
+  }
 
-    // edit.insert(doc.uri);
+  //TODO: Stream diff view - easier for users to see what is changing when it is streaming
+  async showDiffView(newContents: string) {
+    const { uri: readonlyUri, contents: contentsBeforeDiff } =
+      await this.createReadonlyUri();
+    this.contentsBeforeDiff = contentsBeforeDiff;
+    this.createIfNotExists();
+    const doc = await this.getDoc();
+    if (!doc) {
+      throw new Error('Doc creation unsuccessful!');
+    }
+    const openOpts: vscode.TextDocumentShowOptions = {
+      viewColumn: getBestColForEditor(),
+    };
+    await vscode.commands.executeCommand(
+      'vscode.diff',
+      readonlyUri,
+      doc.uri,
+      `${this.fileName}: Suggested Changes`,
+      openOpts
+    );
+    await this.setDocContents(newContents);
+    //Find the corresponding tab and store it
+    const tabs = vscode.window.tabGroups.all
+      .map((tg) => tg.tabs)
+      .flat()
+      .filter(
+        (tab) =>
+          tab.input instanceof vscode.TabInputTextDiff &&
+          tab.input?.original?.scheme === 'readonly-view' &&
+          tab.input.original.toString() === readonlyUri.toString()
+      );
+
+    if (tabs.length !== 1) {
+      throw new Error(
+        'Expected exactly one tab to have the specific readonly uri!'
+      );
+    }
+
+    this.tab = tabs[0];
+  }
+
+  async closeDiff() {
+    if (!this.tab) return;
+    await vscode.window.tabGroups.close(this.tab);
+  }
+
+  async declineDiff() {
+    const doc = await this.getDoc();
+    if (!doc) return;
+    if (this.contentsBeforeDiff === undefined) {
+      //Remove file
+      await fs.unlink(this.absPath);
+    } else {
+      //Return file to original state
+      await this.setDocContents(this.contentsBeforeDiff);
+    }
+    //TODO: Edge case where user ignores taffy, makes changes to the file, then declines taffy much later is not accounted for - it will revert to state before talking to taffy
+    doc.save();
+    await this.closeDiff();
+  }
+
+  async acceptDiff() {
+    const doc = await this.getDoc();
+    if (!doc) return;
+    doc.save();
+    await vscode.window.showTextDocument(vscode.Uri.file(this.absPath), {
+      preview: false,
+      viewColumn: getBestColForEditor(),
+    });
+    await this.closeDiff();
   }
 }
-

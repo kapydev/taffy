@@ -21,8 +21,7 @@ export const appRouter = router({
   files: fileRouter,
   testFunc: publicProcedure.query(async () => {
     const xxx = new FileEditor('.gitignore');
-    const yyy = await xxx.getContents();
-    debugger;
+    const yyy = await xxx.showDiffView('Hello World');
     return {};
   }),
   hello: publicProcedure.query(() => {
