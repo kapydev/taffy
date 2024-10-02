@@ -1,9 +1,8 @@
 import { Badge, Button, Textarea } from '@taffy/components';
 import { Send } from 'lucide-react';
 import { useState } from 'react';
-
 import { useEffect, useRef } from 'react';
-import { chatStore, runPrompts } from '../stores/chat-store';
+import { chatStore, removeMessage, runPrompts } from '../stores/chat-store';
 import { Messages } from './Messages';
 import { ToolMessage } from '../llms/messages/ToolMessage';
 import { toolToToolString } from '../llms/messages/tools';
@@ -22,10 +21,8 @@ export function ChatPanel() {
         scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
       }
     };
-
     handleWindowFocus();
     window.addEventListener('focus', handleWindowFocus);
-
     return () => {
       window.removeEventListener('focus', handleWindowFocus);
     };
@@ -55,12 +52,15 @@ export function ChatPanel() {
         );
       if (!latestUserPrompt) return;
       if (!(latestUserPrompt instanceof ToolMessage)) return;
-      latestUserPrompt.body += '.' + input;
+      latestUserPrompt.body += ',' + input;
 
-      const newMessages = [
-        ...messages.slice(0, messages.indexOf(latestUserPrompt) + 1),
-      ];
-      chatStore.set('messages', newMessages);
+      const messagesAfterPrompt = messages.slice(
+        messages.indexOf(latestUserPrompt) + 1
+      );
+      messagesAfterPrompt.forEach((msg) => {
+        if (!(msg instanceof ToolMessage)) return;
+        removeMessage(msg);
+      });
     }
     setInput('');
     runPrompts();

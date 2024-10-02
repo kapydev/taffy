@@ -9,8 +9,8 @@ import * as vscode from 'vscode';
 export class FileEditor {
   //Only have one readonlyuri per class
   private _readonlyUri: vscode.Uri | undefined;
+  private contentsBeforeReadonlyUri: string | undefined;
   private _doc: vscode.TextDocument | undefined;
-  private contentsBeforeDiff: string | undefined;
 
   constructor(public filePath: string) {}
 
@@ -73,14 +73,16 @@ export class FileEditor {
   }
 
   async getReadonlyUri(): Promise<vscode.Uri> {
-    if (this._readonlyUri) return this._readonlyUri;
     const contents = await this.getContents();
+    if (this._readonlyUri) return this._readonlyUri;
+    this.contentsBeforeReadonlyUri = contents;
     const encodedContents = Buffer.from(contents || '').toString('base64');
     const uri = vscode.Uri.parse(`readonly-view:${this.fileName}-${v4()}`).with(
       {
         query: encodedContents,
       }
     );
+    this._readonlyUri = uri;
     return uri;
   }
 
@@ -103,9 +105,6 @@ export class FileEditor {
   //TODO: Stream diff view - easier for users to see what is changing when it is streaming
   async showDiffView(newContents: string) {
     const readonlyUri = await this.getReadonlyUri();
-    this.contentsBeforeDiff = (
-      await vscode.workspace.openTextDocument(readonlyUri)
-    ).getText();
     await this.createIfNotExists();
     const doc = await this.getDoc();
     if (!doc) {
@@ -125,17 +124,18 @@ export class FileEditor {
     //Find the corresponding tab and store it
   }
 
-  async getTab() {
+  async getTab(): Promise<vscode.Tab | undefined> {
     const uri = await this.getReadonlyUri();
     const tabs = vscode.window.tabGroups.all
       .map((tg) => tg.tabs)
       .flat()
-      .filter(
-        (tab) =>
-          tab.input instanceof vscode.TabInputTextDiff &&
-          tab.input?.original?.scheme === 'readonly-view' &&
-          tab.input.original.toString() === uri.toString()
-      );
+      .filter((tab) => {
+        if (!(tab.input instanceof vscode.TabInputTextDiff)) return;
+        if (tab.input?.original?.scheme !== 'readonly-view') return;
+        const ogUri = tab.input.original.toString();
+        const readonlyUri = uri.toString();
+        return ogUri === readonlyUri;
+      });
 
     if (tabs.length > 1) {
       throw new Error(
@@ -149,13 +149,7 @@ export class FileEditor {
   async closeDiff() {
     const tab = await this.getTab();
     if (!tab) return;
-    try {
-      await vscode.window.tabGroups.close(tab);
-    } catch (e) {
-      const tabs = vscode.window.tabGroups.all;
-      console.log({ e, tabs });
-      debugger;
-    }
+    await vscode.window.tabGroups.close(tab);
   }
 
   async declineDiff() {
@@ -164,12 +158,12 @@ export class FileEditor {
     //Save first so the editor is not dirty and we can close it
     await doc.save();
     await this.closeDiff();
-    if (this.contentsBeforeDiff === undefined) {
+    if (this.contentsBeforeReadonlyUri === undefined) {
       //Remove file and recursively remove empty parent directories
       await unlinkFileAndParents(this.absPath);
     } else {
       //Return file to original state
-      await this.setDocContents(this.contentsBeforeDiff);
+      await this.setDocContents(this.contentsBeforeReadonlyUri);
     }
     //TODO: Edge case where user ignores taffy, makes changes to the file, then declines taffy much later is not accounted for - it will revert to state before talking to taffy
   }

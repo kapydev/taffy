@@ -1,7 +1,7 @@
 import { Alert, AlertDescription, AlertTitle } from '@taffy/components';
 import { ToolMessage } from '../../llms/messages/ToolMessage';
 import { TOOL_RENDER_TEMPLATES, ToolType } from '../../llms/messages/tools';
-import { chatStore } from '../../stores/chat-store';
+import { chatStore, removeMessage } from '../../stores/chat-store';
 import { useMemo } from 'react';
 
 export function ToolMessageRender<T extends ToolType>({
@@ -12,13 +12,6 @@ export function ToolMessageRender<T extends ToolType>({
   const { type } = message;
   if (!type) return;
   const renderTemplate = TOOL_RENDER_TEMPLATES[type];
-
-  const remove = () => {
-    chatStore.set('messages', [
-      ...chatStore.get('messages').filter((someMsg) => someMsg !== message),
-    ]);
-    renderTemplate.onRemove?.(message);
-  };
 
   const description = useMemo(() => {
     const result = renderTemplate.description(message);
@@ -33,7 +26,10 @@ export function ToolMessageRender<T extends ToolType>({
         {description}
       </AlertDescription>
       <div className={`flex gap-2 ${message.loading && 'hidden'}`}>
-        <button className="text-vsc-errorForeground" onClick={remove}>
+        <button
+          className="text-vsc-errorForeground"
+          onClick={() => removeMessage(message)}
+        >
           Remove
         </button>
         {renderTemplate.actions?.map((meta) => {

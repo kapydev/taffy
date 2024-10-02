@@ -9,6 +9,7 @@ import { CustomMessage } from '../llms/messages/Messages';
 import { trpc } from '../client';
 import { createToolMessage, ToolMessage } from '../llms/messages/ToolMessage';
 import { addLineNumbers } from '@taffy/shared-helpers';
+import { TOOL_RENDER_TEMPLATES, ToolType } from '../llms/messages/tools';
 
 export const chatStore = createBetterStore({
   messages: [new SystemPromptMessage()] as CustomMessage[],
@@ -95,7 +96,14 @@ trpc.files.onSelectionChange.subscribe(undefined, {
 
 chatStore.subscribe('messages', (messages) => {
   const latestMsg = messages.at(-1);
+  /**TODO: Allow editing in multi file mode - right now there are the following edge cases:
+   * 1. After the edit, the diff view is quite strange
+   * 2. Need to add state for edits that have already been accepted and those who have not been
+   */
   if (
+    messages.filter(
+      (m) => m instanceof ToolMessage && m.type === 'ASSISTANT_WRITE_FILE'
+    ).length === 1 &&
     latestMsg instanceof ToolMessage &&
     latestMsg.type === 'ASSISTANT_WRITE_FILE'
   ) {
@@ -104,3 +112,12 @@ chatStore.subscribe('messages', (messages) => {
     chatStore.set('mode', 'normal');
   }
 });
+
+export function removeMessage<T extends ToolType>(message: ToolMessage<T>) {
+  chatStore.set('messages', [
+    ...chatStore.get('messages').filter((someMsg) => someMsg !== message),
+  ]);
+  if (!message.type) return;
+  const renderTemplate = TOOL_RENDER_TEMPLATES[message.type];
+  renderTemplate.onRemove?.(message);
+}
