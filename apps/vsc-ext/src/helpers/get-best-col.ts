@@ -5,11 +5,6 @@ export function getBestColForWebView(): vscode.ViewColumn {
   const editor = vscode.window.activeTextEditor;
   const baseCol: vscode.ViewColumn = vscode.ViewColumn.Beside;
 
-  const curWebView = getCurWebView();
-  if (curWebView?.viewColumn !== undefined) {
-    return curWebView.viewColumn;
-  }
-
   // Get all visible text editors
   const visibleColumns = vscode.window.tabGroups.all.map((tg) => tg.viewColumn);
 

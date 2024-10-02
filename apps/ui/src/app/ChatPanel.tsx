@@ -1,11 +1,9 @@
 import { Badge, Button, Textarea } from '@taffy/components';
 import { Send } from 'lucide-react';
-import { useState } from 'react';
-import { useEffect, useRef } from 'react';
-import { chatStore, removeMessage, runPrompts } from '../stores/chat-store';
+import { useEffect, useRef, useState } from 'react';
+import { chatStore, continuePrompt } from '../stores/chat-store';
+import { runPrompt } from '../stores/run-prompt';
 import { Messages } from './Messages';
-import { ToolMessage } from '../llms/messages/ToolMessage';
-import { toolToToolString } from '../llms/messages/tools';
 
 export function ChatPanel() {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -33,37 +31,9 @@ export function ChatPanel() {
     if (scrollAreaRef.current) {
       scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
     }
-    if (mode === 'normal') {
-      chatStore.set('messages', [
-        ...chatStore.get('messages'),
-        new ToolMessage(
-          toolToToolString('USER_PROMPT', {
-            body: input,
-            props: {},
-          })
-        ),
-      ]);
-    } else if (mode === 'edit') {
-      const messages = chatStore.get('messages');
-      const latestUserPrompt = [...messages]
-        .reverse()
-        .find(
-          (msg) => msg instanceof ToolMessage && msg.type === 'USER_PROMPT'
-        );
-      if (!latestUserPrompt) return;
-      if (!(latestUserPrompt instanceof ToolMessage)) return;
-      latestUserPrompt.body += ',' + input;
-
-      const messagesAfterPrompt = messages.slice(
-        messages.indexOf(latestUserPrompt) + 1
-      );
-      messagesAfterPrompt.forEach((msg) => {
-        if (!(msg instanceof ToolMessage)) return;
-        removeMessage(msg);
-      });
-    }
+    runPrompt(input);
     setInput('');
-    runPrompts();
+    continuePrompt();
   };
 
   return (

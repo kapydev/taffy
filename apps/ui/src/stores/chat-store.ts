@@ -1,20 +1,25 @@
-import { createBetterStore } from './create-better-store';
+import { addLineNumbers } from '@taffy/shared-helpers';
+import { RawMessage } from '@taffy/shared-types';
+import { trpc } from '../client';
 import { LLM } from '../llms/base-llm';
 import { Claude } from '../llms/claude';
-import { LLMOutputParser } from '../llms/messages/LLMOutputParser';
-import { RawMessage } from '@taffy/shared-types';
 import { GPT } from '../llms/gpt';
-import { SystemPromptMessage } from '../llms/messages/SystemPromptMessage';
+import { LLMOutputParser } from '../llms/messages/LLMOutputParser';
 import { CustomMessage } from '../llms/messages/Messages';
-import { trpc } from '../client';
+import { SystemPromptMessage } from '../llms/messages/SystemPromptMessage';
 import { createToolMessage, ToolMessage } from '../llms/messages/ToolMessage';
-import { addLineNumbers } from '@taffy/shared-helpers';
 import { TOOL_RENDER_TEMPLATES, ToolType } from '../llms/messages/tools';
+import { createBetterStore } from './create-better-store';
 
 export const chatStore = createBetterStore({
   messages: [new SystemPromptMessage()] as CustomMessage[],
   llm: null as LLM | null,
-  mode: 'normal' as 'normal' | 'edit',
+  /**
+   * full - Can edit multiple files, and full files
+   * edit - For fixing a previous prompt
+   * inline - For editing a specific part of the code
+   */
+  mode: 'inline' as 'full' | 'edit' | 'inline',
 });
 
 //@ts-expect-error for debugging
@@ -42,7 +47,7 @@ const setLlm = () => {
   throw new Error('Missing LLM Key!');
 };
 
-export async function runPrompts(llm: LLM | null = chatStore.get('llm')) {
+export async function continuePrompt(llm: LLM | null = chatStore.get('llm')) {
   const curMsgs = chatStore.get('messages');
   if (!llm) {
     llm = setLlm();
@@ -109,7 +114,7 @@ chatStore.subscribe('messages', (messages) => {
   ) {
     chatStore.set('mode', 'edit');
   } else {
-    chatStore.set('mode', 'normal');
+    chatStore.set('mode', 'full');
   }
 });
 
