@@ -7,6 +7,7 @@ import { fileRouter } from './routers/files';
 import { ee } from './event-emitter';
 import { previewFileChange } from './files/preview-file-change';
 import { getBestColForWebView } from './helpers/get-best-col';
+import { FileEditor } from './files/file-editor';
 
 const logger = console;
 export let latestActiveEditor = vscode.window.activeTextEditor;
@@ -19,6 +20,9 @@ export function getCurWebView() {
 export const appRouter = router({
   files: fileRouter,
   testFunc: publicProcedure.query(async () => {
+    const xxx = new FileEditor('.gitignore');
+    const yyy = await xxx.getContents();
+    debugger;
     return {};
   }),
   hello: publicProcedure.query(() => {
@@ -76,7 +80,7 @@ export function activate(context: vscode.ExtensionContext) {
   })();
   context.subscriptions.push(
     vscode.workspace.registerTextDocumentContentProvider(
-      'diff-view',
+      'readonly-view',
       diffContentProvider
     )
   );

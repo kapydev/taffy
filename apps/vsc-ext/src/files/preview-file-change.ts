@@ -59,7 +59,7 @@ export async function previewFileChange(
 
   await vscode.commands.executeCommand(
     'vscode.diff',
-    vscode.Uri.parse(`diff-view:${fileName}`).with({
+    vscode.Uri.parse(`readonly-view:${fileName}`).with({
       query: Buffer.from(originalContent).toString('base64'),
     }),
     updatedDocument.uri,
@@ -82,7 +82,6 @@ export async function previewFileChange(
   getCurWebView()?.reveal(getBestColForWebView());
 
   fileChangeRemoved.then(async () => {
-    debugger;
     await vscode.window.showTextDocument(vscode.Uri.file(absolutePath), {
       preview: false,
       viewColumn: getBestColForEditor(),
@@ -103,3 +102,13 @@ export async function previewFileChange(
   });
   await closeDiffViews();
 }
+
+/**
+ * File changer class?
+ *
+ * 1. Suggesting the change
+ * 2. Case 1 - File dont exist (Make it reach the file exists state)
+ * 3. Case 2 - File exists
+ * 4. Apply the change
+ * 5. Approved - Make File reexist
+ */

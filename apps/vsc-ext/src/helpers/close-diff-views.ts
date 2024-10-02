@@ -7,7 +7,7 @@ export async function closeDiffViews() {
     .filter(
       (tab) =>
         tab.input instanceof vscode.TabInputTextDiff &&
-        tab.input?.original?.scheme === 'diff-view'
+        tab.input?.original?.scheme === 'readonly-view'
     );
 
   for (const tab of tabs) {
