@@ -172,7 +172,9 @@ export const TOOL_RENDER_TEMPLATES: {
       return (
         <>
           <div>File Path - {data.props.filePath} </div>
-          <code className="break-word whitespace-pre-wrap">{data.body}</code>
+          {data.loading
+            ? `${data.body.length} characters loaded so far`
+            : 'Loading complete!'}
         </>
       );
     },

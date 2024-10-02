@@ -1,6 +1,10 @@
 import { sleep } from '@taffy/shared-helpers';
 import { CustomMessage } from './Messages';
-import { ToolMessage } from './ToolMessage';
+import {
+  TOOL_END_MATCH_REGEX,
+  TOOL_START_MATCH_REGEX,
+  ToolMessage,
+} from './ToolMessage';
 import { TOOL_RENDER_TEMPLATES } from './tools';
 
 const logger = console;
@@ -40,8 +44,8 @@ export class LLMOutputParser {
 
   parseLine(line: string) {
     //The tool matches are more fuzzy than the actual instructions given to the models, to try to render as far as possible.
-    const toolStartMatch = line.match(/{TOOL (\w+)(?: (.*))?}/);
-    const toolEndMatch = line.match(/{END_TOOL\s?(\w*)}/);
+    const toolStartMatch = line.match(TOOL_START_MATCH_REGEX);
+    const toolEndMatch = line.match(TOOL_END_MATCH_REGEX);
     if (toolStartMatch && !this.inTool) {
       this.messages.push(new ToolMessage());
       this.inTool = true;
