@@ -11,33 +11,15 @@ import { previewFileChange } from '../files/preview-file-change';
 import { getWorkspaceFiles } from '../files/get-folder-structure';
 import { FileEditor } from '../files/file-editor';
 
+function getIndentLen(line: string) {
+  return (line.match(/^\s*/)?.[0] ?? '').replace(/\t/g, '    ').length;
+}
+
 export const fileRouter = router({
   getWorkingDirFilesObj: publicProcedure.query(async (): Promise<FilesObj> => {
     return getFilesObj();
   }),
   onSelectionChange: publicProcedure.subscription(() => {
-    const getSelectionData = (editor: vscode.TextEditor | undefined) => {
-      
-      if (!editor) return undefined;
-      const fileName = extractWorkspacePath(editor.document.fileName);
-      if (!fileName) {
-        throw new Error('Could not find relative filename!');
-      }
-      const selection = editor.selection;
-      const selectedText = editor.document.getText(selection);
-      const fullFileContents = editor.document.getText();
-      const selectedLineNumbers = {
-        start: selection.start.line + 1,
-        end: selection.end.line + 1,
-      };
-      return {
-        fullFileContents,
-        selectedLineNumbers,
-        selectedText,
-        fileName,
-      };
-    };
-
     return observable<NonNullable<ReturnType<typeof getSelectionData>>>(
       (emit) => {
         const sendSelectionData = () => {
@@ -182,4 +164,61 @@ const focusInEditor = async (
   const range = new vscode.Range(position, position);
   editor.revealRange(range, vscode.TextEditorRevealType.InCenter);
   editor.selection = new vscode.Selection(position, position);
+};
+
+const getSelectionData = (editor: vscode.TextEditor | undefined) => {
+  console.log('GETTING SELECTION DATA');
+  if (!editor) return undefined;
+  const fileName = extractWorkspacePath(editor.document.fileName);
+  if (!fileName) {
+    throw new Error('Could not find relative filename!');
+  }
+  const selectedText = editor.document.getText(editor.selection);
+  const fullFileContents = editor.document.getText();
+  const allLines = fullFileContents.split('\n');
+  const lines = fullFileContents
+    .split('\n')
+    .slice(editor.selection.start.line, editor.selection.end.line + 1);
+
+  //TODO: switch to using folding ranges for greater accuracy
+  // Find the smallest indentation level in the selection
+  let minIndent = Number.MAX_VALUE;
+
+  for (const line of lines) {
+    const currentIndent = getIndentLen(line);
+    minIndent = Math.min(minIndent, currentIndent);
+  }
+  //TODO: Find average indent in file to get better selection
+  minIndent -= 2;
+
+  // Expand selection
+  let startLine = editor.selection.start.line;
+  let endLine = editor.selection.end.line;
+
+  while (startLine > 0 && getIndentLen(allLines[startLine - 1]) >= minIndent) {
+    startLine--;
+  }
+  while (
+    endLine < allLines.length - 1 &&
+    getIndentLen(allLines[endLine + 1]) >= minIndent
+  ) {
+    endLine++;
+  }
+
+  editor.selection = new vscode.Selection(
+    new vscode.Position(startLine, 0),
+    new vscode.Position(endLine, allLines[endLine].length)
+  );
+
+  const selectedLineNumbers = {
+    start: startLine + 1,
+    end: endLine + 1,
+  };
+
+  return {
+    fullFileContents,
+    selectedLineNumbers,
+    selectedText,
+    fileName,
+  };
 };

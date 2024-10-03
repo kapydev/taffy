@@ -15,9 +15,6 @@ export function ChatPanel() {
       if (inputRef.current) {
         inputRef.current.focus();
       }
-      if (scrollAreaRef.current) {
-        scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
-      }
     };
     handleWindowFocus();
     window.addEventListener('focus', handleWindowFocus);
