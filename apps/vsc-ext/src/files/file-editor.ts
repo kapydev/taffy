@@ -4,13 +4,23 @@ import { v4 } from 'uuid';
 import * as vscode from 'vscode';
 import { getBestColForEditor } from '../helpers/get-best-col';
 import { getFullPath } from './file-watcher';
+import { toUtf8 } from '../helpers/to-utf8';
 
 const allFileEditors: Set<FileEditor> = new Set();
 
+async function createReadonlyUri(
+  contents: string,
+  viewName: string
+): Promise<vscode.Uri> {
+  const encodedContents = Buffer.from(contents).toString('base64');
+  return vscode.Uri.parse(`readonly-view:${viewName}`).with({
+    query: encodedContents,
+  });
+}
 export class FileEditor {
   //Only have one readonlyuri per class
   private _readonlyUri: vscode.Uri | undefined;
-  private contentsBeforeReadonlyUri: string | undefined;
+  private modifiedContents: string | undefined;
   private _doc: vscode.TextDocument | undefined;
 
   constructor(public filePath: string) {
@@ -75,18 +85,14 @@ export class FileEditor {
     // }
   }
 
-  async getReadonlyUri(): Promise<vscode.Uri> {
+  async getFileReadonlyUri(): Promise<vscode.Uri> {
     const contents = await this.getContents();
     if (this._readonlyUri) return this._readonlyUri;
-    this.contentsBeforeReadonlyUri = contents;
-    const encodedContents = Buffer.from(contents || '').toString('base64');
-    const uri = vscode.Uri.parse(`readonly-view:${this.fileName}-${v4()}`).with(
-      {
-        query: encodedContents,
-      }
+    this._readonlyUri = await createReadonlyUri(
+      contents || '',
+      `${this.fileName}-${v4()}`
     );
-    this._readonlyUri = uri;
-    return uri;
+    return this._readonlyUri;
   }
 
   async setDocContents(contents: string) {
@@ -107,28 +113,26 @@ export class FileEditor {
 
   //TODO: Stream diff view - easier for users to see what is changing when it is streaming
   async showDiffView(newContents: string) {
-    const readonlyUri = await this.getReadonlyUri();
-    await this.createIfNotExists();
-    const doc = await this.getDoc();
-    if (!doc) {
-      throw new Error('Doc creation unsuccessful!');
-    }
+    const curReadonlyUri = await this.getFileReadonlyUri();
+    const newReadonlyUri = await createReadonlyUri(
+      newContents,
+      `${this.fileName}-new-${v4()}`
+    );
     const openOpts: vscode.TextDocumentShowOptions = {
       viewColumn: getBestColForEditor(),
     };
     await vscode.commands.executeCommand(
       'vscode.diff',
-      readonlyUri,
-      doc.uri,
+      curReadonlyUri,
+      newReadonlyUri,
       `${this.fileName}: Suggested Changes`,
       openOpts
     );
-    await this.setDocContents(newContents);
-    //Find the corresponding tab and store it
+    this.modifiedContents = newContents;
   }
 
   async getTab(): Promise<vscode.Tab | undefined> {
-    const uri = await this.getReadonlyUri();
+    const uri = await this.getFileReadonlyUri();
     const tabs = vscode.window.tabGroups.all
       .map((tg) => tg.tabs)
       .flat()
@@ -152,30 +156,25 @@ export class FileEditor {
   async closeDiff() {
     const tab = await this.getTab();
     if (!tab) return;
+    if (tab.isDirty) {
+      throw new Error('Cannot close dirty tab without showing user prompt');
+    }
     await vscode.window.tabGroups.close(tab);
   }
 
   async declineDiff() {
-    const doc = await this.getDoc();
-    if (!doc) return;
-    //Save first so the editor is not dirty and we can close it
-    await doc.save();
     await this.closeDiff();
-    if (this.contentsBeforeReadonlyUri === undefined) {
-      //Remove file and recursively remove empty parent directories
-      await unlinkFileAndParents(this.absPath);
-    } else {
-      //Return file to original state
-      await this.setDocContents(this.contentsBeforeReadonlyUri);
-    }
     // Remove this instance from the set
     allFileEditors.delete(this);
-    //TODO: Edge case where user ignores taffy, makes changes to the file, then declines taffy much later is not accounted for - it will revert to state before talking to taffy
   }
 
   async acceptDiff() {
     const doc = await this.getDoc();
     if (!doc) return;
+    if (this.modifiedContents === undefined) {
+      throw new Error('No modified contents yet!');
+    }
+    await this.setDocContents(this.modifiedContents);
     await doc.save();
     await vscode.window.showTextDocument(vscode.Uri.file(this.absPath), {
       preview: false,
