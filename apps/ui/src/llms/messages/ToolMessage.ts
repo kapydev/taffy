@@ -6,7 +6,7 @@ import { makeObservable, observable, computed } from 'mobx';
 export const TOOL_START_MATCH_REGEX = /{TOOL (\w+)(?: (.*))?}/;
 export const TOOL_END_MATCH_REGEX = /{END_TOOL\s?(\w*)}/;
 export const THINKING_START_MATCH_REGEX =
-  /\n{THINKING_START}\n(.*?)\n(?:{THINKING_END})?/g;
+  /\n?{THINKING_START}\n([\s\S]*?)\n{THINKING_END}/gm;
 
 const logger = console;
 

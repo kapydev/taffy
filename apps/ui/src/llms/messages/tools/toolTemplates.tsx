@@ -1,13 +1,6 @@
-import { addLineNumbers } from '@taffy/shared-helpers';
-import {
-  BotIcon,
-  FilePlus2Icon,
-  LucideProps,
-  UserIcon,
-  WaypointsIcon,
-} from 'lucide-react';
-import { ToolMessage } from '../ToolMessage';
+import { BotIcon, FilePlus2Icon, LucideProps, UserIcon } from 'lucide-react';
 import { trpc } from '../../../client';
+import { ToolMessage } from '../ToolMessage';
 
 export type MessageIcon = React.ForwardRefExoticComponent<
   Omit<LucideProps, 'ref'> & React.RefAttributes<SVGSVGElement>
@@ -109,7 +102,7 @@ The hello world function should log hello world.
   },
   USER_FILE_CONTENTS: {
     role: 'user',
-    desc: 'Information from the user regarding the contents of a file. If there are multiple FILE_CONTENTS tool responses, the latest one should be considered as the correct one. Line numbers, are NOT part of the file, every line number is followed by a space, which contains the actual contents of the file.',
+    desc: 'Information from the user regarding the contents of a file. If there are multiple FILE_CONTENTS tool responses, the latest one should be considered as the correct one. Questions from the user should be focused on parts of the code within a FOCUS fence block ',
     propDesc: {
       startLine: 'The start line of the specific area to focus on',
       endLine: 'The end line of the specific area to focus on',
@@ -120,9 +113,12 @@ The hello world function should log hello world.
       endLine: '25',
       filePath: 'src/utils/helloWorld.ts',
     },
-    sampleBody: addLineNumbers(`export default function HelloWorld() {
+    sampleBody: `export default function HelloWorld() {
+{FOCUS_START}
+    const name = 'Thomas';
+{FOCUS_END}
     ${'console'}.log("Hello World");
-  }`),
+  }`,
   },
   USER_AVAILABLE_FILES: {
     role: 'user',

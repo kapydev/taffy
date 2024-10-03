@@ -1,4 +1,3 @@
-import { addLineNumbers } from '@taffy/shared-helpers';
 import { RawMessage } from '@taffy/shared-types';
 import { trpc } from '../client';
 import { LLM } from '../llms/base-llm';
@@ -106,6 +105,30 @@ export function getRawMessages(messages: CustomMessage[]): RawMessage[] {
 
   return concatenatedMessages;
 }
+export function getSelectionDetails(
+  fullContents: string,
+  startLine: number,
+  endLine: number
+) {
+  const preSelection =
+    fullContents
+      .split('\n')
+      .slice(0, startLine - 1)
+      .join('\n') ?? '';
+  const selection =
+    fullContents
+      .split('\n')
+      .slice(startLine - 1, endLine)
+      .join('\n') ?? '';
+  const postSelection =
+    fullContents.split('\n').slice(endLine).join('\n') ?? '';
+
+  return {
+    preSelection,
+    selection,
+    postSelection,
+  };
+}
 
 export async function getLatestFileContent() {
   const fileContextMsg = [...getToolMessages()]
@@ -122,17 +145,11 @@ export async function getLatestFileContent() {
   const startLine = +fileContextMsg.props.startLine;
   const endLine = +fileContextMsg.props.endLine;
 
-  const preSelection =
-    curContents
-      .split('\n')
-      .slice(0, startLine - 1)
-      .join('\n') ?? '';
-  const selection =
-    curContents
-      .split('\n')
-      .slice(startLine - 1, endLine)
-      .join('\n') ?? '';
-  const postSelection = curContents.split('\n').slice(endLine).join('\n') ?? '';
+  const { preSelection, selection, postSelection } = getSelectionDetails(
+    curContents,
+    startLine,
+    endLine
+  );
 
   return {
     fullContents: curContents,
@@ -152,8 +169,19 @@ trpc.files.onSelectionChange.subscribe(undefined, {
     //TODO: If taffy window is still active, we should probably add to context instead of completely new
     resetChatStore();
     const curMsgs = chatStore.get('messages');
+    const selectionDetails = getSelectionDetails(
+      data.fullFileContents,
+      data.selectedLineNumbers.start,
+      data.selectedLineNumbers.end
+    );
+    const fullContents =
+      selectionDetails.preSelection +
+      '\n{FOCUS_START}\n' +
+      selectionDetails.selection +
+      '\n{FOCUS_END}\n' +
+      selectionDetails.postSelection;
     const fileSelectionMessage = createToolMessage('USER_FILE_CONTENTS', {
-      body: addLineNumbers(data.fullFileContents),
+      body: fullContents,
       props: {
         startLine: String(data.selectedLineNumbers.start),
         endLine: String(data.selectedLineNumbers.end),
