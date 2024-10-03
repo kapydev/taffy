@@ -129,9 +129,19 @@ export class FileEditor {
       openOpts
     );
     this.modifiedContents = newContents;
+    const originalTab = await this.getOriginalDocTab();
+    const activeEditor = vscode.window.activeTextEditor;
+    if (originalTab && activeEditor) {
+      const visibleRanges = activeEditor.visibleRanges;
+
+      if (visibleRanges.length > 0) {
+        const range = visibleRanges[0];
+        activeEditor.revealRange(range, vscode.TextEditorRevealType.AtTop);
+      }
+    }
   }
 
-  async getTab(): Promise<vscode.Tab | undefined> {
+  async getDiffTab(): Promise<vscode.Tab | undefined> {
     const uri = await this.getFileReadonlyUri();
     const tabs = vscode.window.tabGroups.all
       .map((tg) => tg.tabs)
@@ -153,8 +163,22 @@ export class FileEditor {
     return tabs[0];
   }
 
+  async getOriginalDocTab(): Promise<vscode.Tab | undefined> {
+    const uri = this.uri.toString();
+    const tabs = vscode.window.tabGroups.all
+      .map((tg) => tg.tabs)
+      .flat()
+      .filter((tab) => {
+        if (!(tab.input instanceof vscode.TabInputText)) return;
+        const tabUri = tab.input.uri.toString();
+        return tabUri === uri;
+      });
+
+    return tabs[0];
+  }
+
   async closeDiff() {
-    const tab = await this.getTab();
+    const tab = await this.getDiffTab();
     if (!tab) return;
     if (tab.isDirty) {
       throw new Error('Cannot close dirty tab without showing user prompt');
