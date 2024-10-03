@@ -49,6 +49,27 @@ const setLlm = () => {
   throw new Error('Missing LLM Key!');
 };
 
+export async function getInlineStopSequence(): Promise<string | undefined> {
+  const latestFile = await getLatestFileContent();
+  if (!latestFile) {
+    throw new Error('Could not find latest file for inline prompting');
+  }
+
+  const getTrimmedLines = (str: string) => {
+    return str.split('\n').map((line) => line.trim());
+  };
+
+  const allLines = getTrimmedLines(latestFile.fullContents);
+  const postSelectionLines = getTrimmedLines(latestFile.postSelection);
+
+  for (const line of postSelectionLines) {
+    if (allLines.filter((l) => l === line).length !== 1) continue;
+    return line;
+  }
+
+  return undefined;
+}
+
 export async function continuePrompt(
   mode: CompletionMode,
   llm: LLM | null = chatStore.get('llm')
@@ -59,18 +80,16 @@ export async function continuePrompt(
 
   const rawMessages = getRawMessages(chatStore.get('messages'));
   const parser = new LLMOutputParser();
-  let stopSequences: string[] = [];
+  const stopSequences: string[] = [];
   if (mode === 'inline') {
-    const latestFile = await getLatestFileContent();
-    if (!latestFile) {
-      throw new Error('Could not find latest file for inline prompting');
+    const additionalStopSeq = await getInlineStopSequence();
+    if (additionalStopSeq) {
+      stopSequences.push(additionalStopSeq);
     }
-    //TODO: Need to make sure stop sequence is unique, otherwise when there is repeating code might have issues stopping
-    stopSequences = [latestFile.postSelection.split('\n')[0].trim()];
   }
   const stream = llm.prompt(rawMessages, stopSequences);
 
-  await parser.handleTextStream(stream);
+  await parser.handleTextStream(stream, mode);
 }
 
 export function getRawMessages(messages: CustomMessage[]): RawMessage[] {
@@ -116,6 +135,7 @@ export async function getLatestFileContent() {
   const postSelection = curContents.split('\n').slice(endLine).join('\n') ?? '';
 
   return {
+    fullContents: curContents,
     preSelection,
     selection,
     postSelection,

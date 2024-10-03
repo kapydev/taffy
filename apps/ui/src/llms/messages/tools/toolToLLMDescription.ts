@@ -34,22 +34,35 @@ export function toolToToolString<T extends ToolType>(
   tool: Tools[T],
   opts?: ToolToToolStringOpts
 ): string {
-  const samplePropsStr = JSON.stringify(tool.props);
+  const propsStr = JSON.stringify(tool.props);
 
-  let result = `{TOOL ${toolName}`;
-
-  if (tool.props && Object.keys(tool.props).length > 0) {
-    result += ` ${samplePropsStr}}`;
-  } else {
-    result += `}`;
-  }
+  let result = getToolStartString(toolName, propsStr);
 
   if (tool.body !== undefined) {
     result += '\n' + tool.body;
   }
 
   if (!opts?.excludeEnd) {
-    result += `\n{END_TOOL ${toolName}}`;
+    result += '\n' + getToolEndString(toolName);
   }
   return result;
+}
+
+export function getToolStartString<T extends ToolType>(
+  toolName: T,
+  propsStr: string
+): string {
+  if (
+    propsStr &&
+    JSON.parse(propsStr) &&
+    Object.keys(JSON.parse(propsStr)).length > 0
+  ) {
+    return `{TOOL ${toolName} ${propsStr}}`;
+  } else {
+    return `{TOOL ${toolName}}`;
+  }
+}
+
+export function getToolEndString<T extends ToolType>(toolName: T): string {
+  return `{END_TOOL ${toolName}}`;
 }

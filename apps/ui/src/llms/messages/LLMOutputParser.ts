@@ -1,18 +1,21 @@
-import { chatStore, getToolMessages } from '../../stores/chat-store';
+import {
+  chatStore,
+  CompletionMode,
+  getInlineStopSequence,
+  getLatestFileContent,
+  getToolMessages,
+} from '../../stores/chat-store';
 import {
   TOOL_END_MATCH_REGEX,
   TOOL_START_MATCH_REGEX,
   ToolMessage,
 } from './ToolMessage';
-import { TOOL_RENDER_TEMPLATES } from './tools';
+import { getToolEndString, TOOL_RENDER_TEMPLATES } from './tools';
 
 const logger = console;
 
 export class LLMOutputParser {
-  async handleTextStream(
-    stream: AsyncIterable<string>,
-    onMsgUpdate?: () => void
-  ) {
+  async handleTextStream(stream: AsyncIterable<string>, mode: CompletionMode) {
     let curLine = '';
     for await (const textChunk of stream) {
       curLine += textChunk;
@@ -20,13 +23,27 @@ export class LLMOutputParser {
       const lines = curLine.split('\n');
       curLine = lines.pop() || '';
       this.parseLines(lines);
-      logger.log(lines.join('\n'));
-      onMsgUpdate?.();
+    }
+    //If we completed generation in inline mode need to auto complete the remaining text
+    if (mode === 'inline') {
+      const inlineStopSeq = await getInlineStopSequence();
+      if (inlineStopSeq) {
+        const latestFileContent = await getLatestFileContent();
+        if (!latestFileContent) {
+          throw new Error('Expected latest file content');
+        }
+        const remainder =
+          inlineStopSeq +
+          latestFileContent.postSelection
+            .split(inlineStopSeq)
+            .slice(1)
+            .join(inlineStopSeq);
+        curLine += remainder;
+        curLine += getToolEndString('ASSISTANT_WRITE_FILE');
+      }
     }
     if (curLine) {
       this.parse(curLine);
-      logger.log(curLine);
-      onMsgUpdate?.();
     }
   }
 
