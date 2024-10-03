@@ -7,7 +7,7 @@ import { fileRouter } from './routers/files';
 import { ee } from './event-emitter';
 import { previewFileChange } from './files/preview-file-change';
 import { getBestColForWebView } from './helpers/get-best-col';
-import { FileEditor } from './files/file-editor';
+import { FileEditor, removeAllEditors } from './files/file-editor';
 
 const logger = console;
 export let latestActiveEditor = vscode.window.activeTextEditor;
@@ -62,6 +62,7 @@ export function activate(context: vscode.ExtensionContext) {
     currentWebview.onDidDispose(
       () => {
         currentWebview = undefined;
+        removeAllEditors();
       },
       null,
       context.subscriptions

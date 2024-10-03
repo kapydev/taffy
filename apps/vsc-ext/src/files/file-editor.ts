@@ -6,13 +6,17 @@ import fs from 'fs/promises';
 import { v4 } from 'uuid';
 import * as vscode from 'vscode';
 
+const allFileEditors: Set<FileEditor> = new Set();
+
 export class FileEditor {
   //Only have one readonlyuri per class
   private _readonlyUri: vscode.Uri | undefined;
   private contentsBeforeReadonlyUri: string | undefined;
   private _doc: vscode.TextDocument | undefined;
 
-  constructor(public filePath: string) {}
+  constructor(public filePath: string) {
+    allFileEditors.add(this);
+  }
 
   get absPath() {
     return getFullPath(this.filePath);
@@ -165,6 +169,8 @@ export class FileEditor {
       //Return file to original state
       await this.setDocContents(this.contentsBeforeReadonlyUri);
     }
+    // Remove this instance from the set
+    allFileEditors.delete(this);
     //TODO: Edge case where user ignores taffy, makes changes to the file, then declines taffy much later is not accounted for - it will revert to state before talking to taffy
   }
 
@@ -177,6 +183,8 @@ export class FileEditor {
       viewColumn: getBestColForEditor(),
     });
     await this.closeDiff();
+    // Remove this instance from the set
+    allFileEditors.delete(this);
   }
 }
 
@@ -195,4 +203,8 @@ async function unlinkFileAndParents(filePath: string) {
     }
     currentPath = parentPath;
   }
+}
+
+export async function removeAllEditors() {
+  await Promise.all([...allFileEditors].map(async (e) => e.declineDiff()));
 }
