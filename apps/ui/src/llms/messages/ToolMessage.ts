@@ -5,14 +5,14 @@ import { makeObservable, observable, computed } from 'mobx';
 
 export const TOOL_START_MATCH_REGEX = /{TOOL (\w+)(?: (.*))?}/;
 export const TOOL_END_MATCH_REGEX = /{END_TOOL\s?(\w*)}/;
+export const THINKING_START_MATCH_REGEX =
+  /{THINKING_START}\n(.*?)\n(?:{THINKING_END})?/g;
 
 const logger = console;
 
 export class ToolMessage<
   ToolName extends ToolType = ToolType
 > extends BaseMessage {
-  loading: boolean = false;
-
   get role(): 'user' | 'assistant' | 'system' {
     return this.type ? TOOL_TEMPLATES[this.type].role : 'assistant';
   }
@@ -25,7 +25,7 @@ export class ToolMessage<
       props: computed,
       contents: observable,
       body: computed,
-      loading: observable,
+      loading: computed,
     });
     this.contents = contents ?? '';
   }
@@ -34,6 +34,11 @@ export class ToolMessage<
   isType<T extends ToolType>(type: T): this is ToolMessage<T> {
     const curType = this.type;
     return (curType as any) === type;
+  }
+
+  get loading(): boolean {
+    const ended = Boolean(this.contents.match(TOOL_END_MATCH_REGEX));
+    return !ended;
   }
 
   //TODO: Memoize
@@ -59,7 +64,8 @@ export class ToolMessage<
   get body(): string {
     let bodyMatch = this.contents
       .replace(TOOL_START_MATCH_REGEX, '')
-      .replace(TOOL_END_MATCH_REGEX, '');
+      .replace(TOOL_END_MATCH_REGEX, '')
+      .replace(THINKING_START_MATCH_REGEX, '');
     if (bodyMatch.startsWith('\n')) {
       bodyMatch = bodyMatch.substring(1);
     }
@@ -77,6 +83,15 @@ export class ToolMessage<
       body: newBody,
       props: this.props,
     } as any);
+  }
+
+  get thoughts(): string | undefined {
+    const thoughtMatches = this.contents.matchAll(THINKING_START_MATCH_REGEX);
+    const thoughts: string[] = [];
+    for (const match of thoughtMatches) {
+      thoughts.push(match[1].trim());
+    }
+    return thoughts.join('\n');
   }
 
   toRawMessages(): RawMessage[] {

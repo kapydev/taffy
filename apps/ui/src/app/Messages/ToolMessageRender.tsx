@@ -13,17 +13,12 @@ export function ToolMessageRender<T extends ToolType>({
   if (!type) return;
   const renderTemplate = TOOL_RENDER_TEMPLATES[type];
 
-  const description = useMemo(() => {
-    const result = renderTemplate.description(message);
-    return result;
-  }, [message.contents]);
-
   return (
     <Alert>
       <renderTemplate.Icon className="w-4 h-4" />
       <AlertTitle>{renderTemplate.title(message)}</AlertTitle>
       <AlertDescription className="break-words whitespace-pre-wrap">
-        {description}
+        {renderTemplate.description(message)}
       </AlertDescription>
       <div className={`flex gap-2 ${message.loading && 'hidden'}`}>
         <button

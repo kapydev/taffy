@@ -38,7 +38,7 @@ async function updateChatInline(input: string) {
   });
   const startLine = +fileContextMsg.props.startLine;
   let preContents =
-    curContents?.split('\n').slice(0, startLine).join('\n') ?? '';
+    curContents?.split('\n').slice(0, startLine - 1).join('\n') ?? '';
   preContents += '\n{THINKING_START}\n';
 
   const preAssistantPrompt = new ToolMessage(

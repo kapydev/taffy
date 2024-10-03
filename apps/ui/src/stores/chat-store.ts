@@ -48,7 +48,6 @@ const setLlm = () => {
 };
 
 export async function continuePrompt(llm: LLM | null = chatStore.get('llm')) {
-  const curMsgs = chatStore.get('messages');
   if (!llm) {
     llm = setLlm();
   }
@@ -57,9 +56,7 @@ export async function continuePrompt(llm: LLM | null = chatStore.get('llm')) {
   const parser = new LLMOutputParser();
   const stream = llm.prompt(rawMessages);
 
-  await parser.handleTextStream(stream, () => {
-    chatStore.set('messages', [...curMsgs, ...parser.getMessages()]);
-  });
+  await parser.handleTextStream(stream);
 }
 
 function getRawMessages(): RawMessage[] {

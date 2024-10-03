@@ -1,5 +1,4 @@
-import { sleep } from '@taffy/shared-helpers';
-import { CustomMessage } from './Messages';
+import { chatStore, getToolMessages } from '../../stores/chat-store';
 import {
   TOOL_END_MATCH_REGEX,
   TOOL_START_MATCH_REGEX,
@@ -10,9 +9,6 @@ import { TOOL_RENDER_TEMPLATES } from './tools';
 const logger = console;
 
 export class LLMOutputParser {
-  private inTool = false;
-  private messages: ToolMessage[] = [new ToolMessage()];
-
   async handleTextStream(
     stream: AsyncIterable<string>,
     onMsgUpdate?: () => void
@@ -46,23 +42,21 @@ export class LLMOutputParser {
     //The tool matches are more fuzzy than the actual instructions given to the models, to try to render as far as possible.
     const toolStartMatch = line.match(TOOL_START_MATCH_REGEX);
     const toolEndMatch = line.match(TOOL_END_MATCH_REGEX);
-    if (toolStartMatch && !this.inTool) {
-      this.messages.push(new ToolMessage());
-      this.inTool = true;
+    if (toolStartMatch) {
+      chatStore.set('messages', [
+        ...chatStore.get('messages'),
+        new ToolMessage(),
+      ]);
     }
 
-    const latestMsg = this.messages.at(-1);
+    const latestMsg = getToolMessages().at(-1);
     if (!latestMsg) {
       throw new Error('Expected at least one message!');
     }
-    if (this.inTool) {
-      latestMsg.contents += `${line}\n`;
-      latestMsg.loading = true;
-    }
+
+    latestMsg.contents += `${line}\n`;
 
     if (toolEndMatch) {
-      this.inTool = false;
-      latestMsg.loading = false;
       if (!latestMsg.type) return;
       const renderTemplate = TOOL_RENDER_TEMPLATES[latestMsg.type];
       if (!renderTemplate) return;
@@ -70,9 +64,8 @@ export class LLMOutputParser {
       renderTemplate.onFocus(latestMsg as any);
       //TODO: Stop parsing until user finishes focus action
     }
-  }
 
-  getMessages(): CustomMessage[] {
-    return this.messages;
+    //Trigger rerender, cos I'm not sure how else to ensure proper updating
+    chatStore.set('messages', [...chatStore.get('messages')]);
   }
 }

@@ -52,17 +52,32 @@ export const TOOL_TEMPLATES = {
   //   1. Read the .gitignore file using ASSISTANT_READ_FILE
   //   2. Update the .gitignore file using ASSISTANT_WRITE_FILE`,
   // },
+  //   ASSISTANT_WRITE_FILE: {
+  //     role: 'assistant',
+  //     desc: `Ask the user for permission to create/overwrite a file. You will need to provide the FULL FILE CONTENTS, because the action suggested to the user will be a full override of the existing file. DO NOT INCLUDE LINE NUMBERS IN THE OUTPUT.`,
+  //     propDesc: {
+  //       filePath:
+  //         "The path to which the file is written. If the file path doesn't exist, directories will be recursively created until we are able to create the file.",
+  //     },
+  //     sampleProps: {
+  //       filePath: 'src/utils/helloWorld.ts',
+  //     },
+  //     sampleBody: `export function helloWorld() {
+  // ${'console'}.log("Hello World!");
+  // }`,
+  //   },
+  //I'm not sure about the thinking start version
   ASSISTANT_WRITE_FILE: {
     role: 'assistant',
     desc: `Ask the user for permission to create/overwrite a file. You will need to provide the FULL FILE CONTENTS, because the action suggested to the user will be a full override of the existing file. DO NOT INCLUDE LINE NUMBERS IN THE OUTPUT. Before tackling a challenging part of the code, you can walk yourself through the coding process in a THINKING block
 
-{THINKING_START}
-In order to write this function, I will need to...
-{THINKING_END}
+  {THINKING_START}
+  In order to write this function, I will need to...
+  {THINKING_END}
 
-The thinking blocks will not be included in the outputted code.
-Within the thinking blocks, consider the user's existing code style and practices and follow those.
-`,
+  The thinking blocks will not be included in the outputted code.
+  Within the thinking blocks, consider the user's existing code style and practices and follow those.
+  `,
     propDesc: {
       filePath:
         "The path to which the file is written. If the file path doesn't exist, directories will be recursively created until we are able to create the file.",
@@ -72,7 +87,7 @@ Within the thinking blocks, consider the user's existing code style and practice
     },
     sampleBody: `export function helloWorld() {
 {THINKING_START}
-The hello world function should log hello world. 
+The hello world function should log hello world.
 {THINKING_END}
   ${'console'}.log("Hello World!");
 }`,
@@ -181,12 +196,15 @@ export const TOOL_RENDER_TEMPLATES: {
     title: () => 'Requesting permission to write the following files',
     description: (data) => {
       if (!data.props) return;
+      const thoughtsString = data.thoughts ? `💡${data.thoughts}` : '';
+      const infoString = data.loading
+        ? `${data.body.length} characters loaded so far`
+        : 'Loading Complete!';
+      const fullStr = infoString + '\n\n' + thoughtsString;
       return (
         <>
           <div>File Path - {data.props.filePath} </div>
-          {data.loading
-            ? `${data.body.length} characters loaded so far`
-            : 'Loading complete!'}
+          {fullStr}
         </>
       );
     },
