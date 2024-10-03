@@ -2,7 +2,7 @@ import Mousetrap from 'mousetrap';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { trpc } from '../client';
-import { chatStore } from '../stores/chat-store';
+import { chatStore, getToolMessages } from '../stores/chat-store';
 import { ToolMessage } from '../llms/messages/ToolMessage';
 import { toolToToolString } from '../llms/messages/tools';
 
@@ -16,12 +16,9 @@ const handlers = {
     name: 'Toggle Codebase Context',
     action: async () => {
       const workspaceFiles = await trpc.files.getWorkspaceFiles.query();
-      const curMessages = chatStore.get('messages');
+      const curMessages = getToolMessages();
       const latestMsg = curMessages.at(-1);
-      if (
-        latestMsg instanceof ToolMessage &&
-        latestMsg.type === 'USER_AVAILABLE_FILES'
-      ) {
+      if (latestMsg?.type === 'USER_AVAILABLE_FILES') {
         chatStore.set('messages', curMessages.slice(0, -1));
         return;
       }

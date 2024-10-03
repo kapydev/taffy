@@ -1,20 +1,64 @@
 import { ToolMessage } from '../llms/messages/ToolMessage';
-import { chatStore, removeMessage } from './chat-store';
+import { chatStore, getToolMessages, removeMessage } from './chat-store';
 import { toolToToolString } from '../llms/messages/tools';
+import { trpc } from '../client';
 
-export function runPrompt(input: string, mode = chatStore.get('mode')) {
+export async function runPrompt(input: string, mode = chatStore.get('mode')) {
+  //We can't do inline mode if there is no codebase context
+
   if (mode === 'full') {
-    runPromptFull(input);
+    return await runPromptFull(input);
   } else if (mode === 'edit') {
-    runPromptEdit(input);
+    return await runPromptEdit(input);
   } else if (mode === 'inline') {
-    runPrompInline(input);
+    return await runPromptInline(input);
   }
 }
 
-function runPrompInline(input: string) {}
+async function runPromptInline(input: string) {
+  const curMessages = getToolMessages();
 
-function runPromptFull(input: string) {
+  const fileContextMsg = [...curMessages]
+    .reverse()
+    .find((msg) => msg.type === 'USER_FILE_CONTENTS');
+
+  if (
+    !fileContextMsg?.isType('USER_FILE_CONTENTS') ||
+    fileContextMsg.props === undefined
+  ) {
+    throw new Error('No USER_FILE_CONTENTS message found');
+  }
+
+  const userPromptMessage = new ToolMessage(
+    toolToToolString('USER_PROMPT', {
+      body: input,
+      props: {},
+    })
+  );
+  const curContents = await trpc.files.getFileContents.query({
+    filePath: fileContextMsg.props.filePath,
+  });
+  const startLine = +fileContextMsg.props.startLine;
+  let preContents = curContents?.slice(0, startLine) ?? '';
+  preContents += '\n{THINKING_START}\n';
+
+  const preAssistantPrompt = new ToolMessage(
+    toolToToolString('ASSISTANT_WRITE_FILE', {
+      props: {
+        filePath: fileContextMsg.props.filePath,
+      },
+      body: preContents,
+    })
+  );
+
+  chatStore.set('messages', [
+    ...chatStore.get('messages'),
+    userPromptMessage,
+    preAssistantPrompt,
+  ]);
+}
+
+async function runPromptFull(input: string) {
   chatStore.set('messages', [
     ...chatStore.get('messages'),
     new ToolMessage(
@@ -26,20 +70,18 @@ function runPromptFull(input: string) {
   ]);
 }
 
-function runPromptEdit(input: string) {
-  const messages = chatStore.get('messages');
+async function runPromptEdit(input: string) {
+  const messages = getToolMessages();
   const latestUserPrompt = [...messages]
     .reverse()
-    .find((msg) => msg instanceof ToolMessage && msg.type === 'USER_PROMPT');
+    .find((msg) => msg.type === 'USER_PROMPT');
   if (!latestUserPrompt) return;
-  if (!(latestUserPrompt instanceof ToolMessage)) return;
   latestUserPrompt.body += ',' + input;
 
   const messagesAfterPrompt = messages.slice(
     messages.indexOf(latestUserPrompt) + 1
   );
   messagesAfterPrompt.forEach((msg) => {
-    if (!(msg instanceof ToolMessage)) return;
     removeMessage(msg);
   });
 }

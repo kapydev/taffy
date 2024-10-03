@@ -100,17 +100,16 @@ trpc.files.onSelectionChange.subscribe(undefined, {
 });
 
 chatStore.subscribe('messages', (messages) => {
-  const latestMsg = messages.at(-1);
+  const toolMessages = getToolMessages();
+  const latestMsg = toolMessages.at(-1);
   /**TODO: Allow editing in multi file mode - right now there are the following edge cases:
    * 1. After the edit, the diff view is quite strange
    * 2. Need to add state for edits that have already been accepted and those who have not been
    */
   if (
-    messages.filter(
-      (m) => m instanceof ToolMessage && m.type === 'ASSISTANT_WRITE_FILE'
-    ).length === 1 &&
-    latestMsg instanceof ToolMessage &&
-    latestMsg.type === 'ASSISTANT_WRITE_FILE'
+    toolMessages.filter((m) => m.type === 'ASSISTANT_WRITE_FILE').length ===
+      1 &&
+    latestMsg?.type === 'ASSISTANT_WRITE_FILE'
   ) {
     chatStore.set('mode', 'edit');
   } else {
@@ -125,4 +124,9 @@ export function removeMessage<T extends ToolType>(message: ToolMessage<T>) {
   if (!message.type) return;
   const renderTemplate = TOOL_RENDER_TEMPLATES[message.type];
   renderTemplate.onRemove?.(message);
+}
+
+export function getToolMessages(): ToolMessage[] {
+  const allMessages = chatStore.get('messages');
+  return allMessages.filter((msg) => msg instanceof ToolMessage);
 }

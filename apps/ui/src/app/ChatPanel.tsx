@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { chatStore, continuePrompt } from '../stores/chat-store';
 import { runPrompt } from '../stores/run-prompt';
 import { Messages } from './Messages';
+import toast from 'react-hot-toast';
 
 export function ChatPanel() {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -31,7 +32,7 @@ export function ChatPanel() {
     if (scrollAreaRef.current) {
       scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
     }
-    runPrompt(input);
+    runPrompt(input)
     setInput('');
     continuePrompt();
   };

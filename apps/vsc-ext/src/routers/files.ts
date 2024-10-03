@@ -9,6 +9,7 @@ import { ee } from '../event-emitter';
 import { latestActiveEditor } from '../main';
 import { previewFileChange } from '../files/preview-file-change';
 import { getWorkspaceFiles } from '../files/get-folder-structure';
+import { FileEditor } from '../files/file-editor';
 
 export const fileRouter = router({
   getWorkingDirFilesObj: publicProcedure.query(async (): Promise<FilesObj> => {
@@ -55,7 +56,7 @@ export const fileRouter = router({
     );
   }),
   getWorkspaceFiles: publicProcedure.query(() => getWorkspaceFiles()),
-  getFileByPath: publicProcedure
+  getFileDiskContentsByPath: publicProcedure
     .input(z.object({ filePath: z.string() }))
     .query(async (opts) => {
       const { filePath: rawFilePath } = opts.input;
@@ -71,6 +72,15 @@ export const fileRouter = router({
       } catch (error) {
         return undefined;
       }
+    }),
+  /**Gets the file contents currently, even if the file is still being edited */
+  getFileContents: publicProcedure
+    .input(z.object({ filePath: z.string() }))
+    .query(async (opts) => {
+      const { filePath } = opts.input;
+      const editor = new FileEditor(filePath);
+      const contents = await editor.getContents();
+      return contents;
     }),
   previewFileChange: publicProcedure
     .input(

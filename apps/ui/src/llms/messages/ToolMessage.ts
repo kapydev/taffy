@@ -7,6 +7,7 @@ export const TOOL_START_MATCH_REGEX = /{TOOL (\w+)(?: (.*))?}/;
 export const TOOL_END_MATCH_REGEX = /{END_TOOL\s?(\w*)}/;
 
 const logger = console;
+
 export class ToolMessage<
   ToolName extends ToolType = ToolType
 > extends BaseMessage {
@@ -29,6 +30,13 @@ export class ToolMessage<
     this.contents = contents ?? '';
   }
 
+  /**For type assertion */
+  isType<T extends ToolType>(type: T): this is ToolMessage<T> {
+    const curType = this.type;
+    return (curType as any) === type;
+  }
+
+  //TODO: Memoize
   get type(): ToolName | undefined {
     const toolStartMatch = this.contents.match(TOOL_START_MATCH_REGEX);
 
@@ -86,4 +94,11 @@ export function createToolMessage<T extends ToolType>(
   toolData: Tools[T]
 ): ToolMessage {
   return new ToolMessage(toolToToolString(toolName, toolData));
+}
+
+export function isToolMessageType<T extends ToolType>(
+  toolMessage: ToolMessage,
+  type: T
+): toolMessage is ToolMessage<T> {
+  return toolMessage.type === type;
 }

@@ -11,7 +11,7 @@ const logger = console;
 
 export class LLMOutputParser {
   private inTool = false;
-  private messages: CustomMessage[] = [new ToolMessage()];
+  private messages: ToolMessage[] = [new ToolMessage()];
 
   async handleTextStream(
     stream: AsyncIterable<string>,
@@ -57,22 +57,18 @@ export class LLMOutputParser {
     }
     if (this.inTool) {
       latestMsg.contents += `${line}\n`;
-      if (latestMsg instanceof ToolMessage) {
-        latestMsg.loading = true;
-      }
+      latestMsg.loading = true;
     }
 
     if (toolEndMatch) {
       this.inTool = false;
-      if (latestMsg instanceof ToolMessage) {
-        latestMsg.loading = false;
-        if (!latestMsg.type) return;
-        const renderTemplate = TOOL_RENDER_TEMPLATES[latestMsg.type];
-        if (!renderTemplate) return;
-        if (!renderTemplate.onFocus) return;
-        renderTemplate.onFocus(latestMsg as any);
-        //TODO: Stop parsing until user finishes focus action
-      }
+      latestMsg.loading = false;
+      if (!latestMsg.type) return;
+      const renderTemplate = TOOL_RENDER_TEMPLATES[latestMsg.type];
+      if (!renderTemplate) return;
+      if (!renderTemplate.onFocus) return;
+      renderTemplate.onFocus(latestMsg as any);
+      //TODO: Stop parsing until user finishes focus action
     }
   }
 
