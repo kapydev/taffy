@@ -32,6 +32,9 @@ async function updateChatInline(input: string) {
     })
   );
 
+  const thinkingStartFence =
+    (preSelection.length > 0 ? '\n' : '') + '{THINKING_START}\n';
+
   const preAssistantPrompt = new ToolMessage(
     toolToToolString(
       'ASSISTANT_WRITE_FILE',
@@ -39,7 +42,7 @@ async function updateChatInline(input: string) {
         props: {
           filePath: props.filePath,
         },
-        body: preSelection + '\n{THINKING_START}\n',
+        body: preSelection + thinkingStartFence,
       },
       { excludeEnd: true }
     )

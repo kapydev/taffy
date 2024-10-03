@@ -17,6 +17,7 @@ export const fileRouter = router({
   }),
   onSelectionChange: publicProcedure.subscription(() => {
     const getSelectionData = (editor: vscode.TextEditor | undefined) => {
+      
       if (!editor) return undefined;
       const fileName = extractWorkspacePath(editor.document.fileName);
       if (!fileName) {
