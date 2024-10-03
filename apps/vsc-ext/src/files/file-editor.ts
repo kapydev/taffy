@@ -1,10 +1,9 @@
-import path from 'path';
-import { getBestColForEditor } from '../helpers/get-best-col';
-import { toUtf8 } from '../helpers/to-utf8';
-import { getFullPath } from './file-watcher';
 import fs from 'fs/promises';
+import path from 'path';
 import { v4 } from 'uuid';
 import * as vscode from 'vscode';
+import { getBestColForEditor } from '../helpers/get-best-col';
+import { getFullPath } from './file-watcher';
 
 const allFileEditors: Set<FileEditor> = new Set();
 
@@ -206,5 +205,5 @@ async function unlinkFileAndParents(filePath: string) {
 }
 
 export async function removeAllEditors() {
-  await Promise.all([...allFileEditors].map(async (e) => e.declineDiff()));
+  await Promise.all([...allFileEditors].map(async (e) => e.closeDiff()));
 }
