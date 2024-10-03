@@ -1,9 +1,14 @@
 import { ToolMessage } from '../llms/messages/ToolMessage';
-import { chatStore, getToolMessages, removeMessage } from './chat-store';
 import { toolToToolString } from '../llms/messages/tools';
-import { trpc } from '../client';
+import {
+  chatStore,
+  CompletionMode,
+  getLatestFileContent,
+  getToolMessages,
+  removeMessage,
+} from './chat-store';
 
-export async function updateChat(input: string, mode = chatStore.get('mode')) {
+export async function updateChat(input: string, mode: CompletionMode) {
   if (mode === 'full') {
     return await updateChatFull(input);
   } else if (mode === 'edit') {
@@ -14,18 +19,11 @@ export async function updateChat(input: string, mode = chatStore.get('mode')) {
 }
 
 async function updateChatInline(input: string) {
-  const curMessages = getToolMessages();
-
-  const fileContextMsg = [...curMessages]
-    .reverse()
-    .find((msg) => msg.type === 'USER_FILE_CONTENTS');
-
-  if (
-    !fileContextMsg?.isType('USER_FILE_CONTENTS') ||
-    fileContextMsg.props === undefined
-  ) {
-    throw new Error('No USER_FILE_CONTENTS message found');
+  const latestFile = await getLatestFileContent();
+  if (!latestFile) {
+    throw new Error('Could not get latest file context');
   }
+  const { preSelection, props } = latestFile;
 
   const userPromptMessage = new ToolMessage(
     toolToToolString('USER_PROMPT', {
@@ -33,22 +31,15 @@ async function updateChatInline(input: string) {
       props: {},
     })
   );
-  const curContents = await trpc.files.getFileContents.query({
-    filePath: fileContextMsg.props.filePath,
-  });
-  const startLine = +fileContextMsg.props.startLine;
-  let preContents =
-    curContents?.split('\n').slice(0, startLine - 1).join('\n') ?? '';
-  preContents += '\n{THINKING_START}\n';
 
   const preAssistantPrompt = new ToolMessage(
     toolToToolString(
       'ASSISTANT_WRITE_FILE',
       {
         props: {
-          filePath: fileContextMsg.props.filePath,
+          filePath: props.filePath,
         },
-        body: preContents,
+        body: preSelection + '\n{THINKING_START}\n',
       },
       { excludeEnd: true }
     )

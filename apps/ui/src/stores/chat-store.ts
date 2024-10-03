@@ -11,6 +11,8 @@ import { createToolMessage, ToolMessage } from '../llms/messages/ToolMessage';
 import { TOOL_RENDER_TEMPLATES, ToolType } from '../llms/messages/tools';
 import { createBetterStore } from './create-better-store';
 
+export type CompletionMode = 'full' | 'edit' | 'inline';
+
 export const chatStore = createBetterStore({
   messages: [new SystemPromptMessage()] as CustomMessage[],
   llm: null as LLM | null,
@@ -19,7 +21,7 @@ export const chatStore = createBetterStore({
    * edit - For fixing a previous prompt
    * inline - For editing a specific part of the code
    */
-  mode: 'inline' as 'full' | 'edit' | 'inline',
+  mode: 'inline' as CompletionMode,
 });
 
 //@ts-expect-error for debugging
@@ -47,14 +49,26 @@ const setLlm = () => {
   throw new Error('Missing LLM Key!');
 };
 
-export async function continuePrompt(llm: LLM | null = chatStore.get('llm')) {
+export async function continuePrompt(
+  mode: CompletionMode,
+  llm: LLM | null = chatStore.get('llm')
+) {
   if (!llm) {
     llm = setLlm();
   }
 
   const rawMessages = getRawMessages(chatStore.get('messages'));
   const parser = new LLMOutputParser();
-  const stream = llm.prompt(rawMessages);
+  let stopSequences: string[] = [];
+  if (mode === 'inline') {
+    const latestFile = await getLatestFileContent();
+    if (!latestFile) {
+      throw new Error('Could not find latest file for inline prompting');
+    }
+    //TODO: Need to make sure stop sequence is unique, otherwise when there is repeating code might have issues stopping
+    stopSequences = [latestFile.postSelection.split('\n')[0].trim()];
+  }
+  const stream = llm.prompt(rawMessages, stopSequences);
 
   await parser.handleTextStream(stream);
 }
@@ -72,6 +86,41 @@ export function getRawMessages(messages: CustomMessage[]): RawMessage[] {
   }, [] as RawMessage[]);
 
   return concatenatedMessages;
+}
+
+export async function getLatestFileContent() {
+  const fileContextMsg = [...getToolMessages()]
+    .reverse()
+    .find((msg) => msg.type === 'USER_FILE_CONTENTS');
+
+  if (!fileContextMsg?.isType('USER_FILE_CONTENTS') || !fileContextMsg.props)
+    return undefined;
+
+  const curContents = await trpc.files.getFileContents.query({
+    filePath: fileContextMsg.props.filePath,
+  });
+  if (!curContents) return undefined;
+  const startLine = +fileContextMsg.props.startLine;
+  const endLine = +fileContextMsg.props.endLine;
+
+  const preSelection =
+    curContents
+      .split('\n')
+      .slice(0, startLine - 1)
+      .join('\n') ?? '';
+  const selection =
+    curContents
+      .split('\n')
+      .slice(startLine - 1, endLine)
+      .join('\n') ?? '';
+  const postSelection = curContents.split('\n').slice(endLine).join('\n') ?? '';
+
+  return {
+    preSelection,
+    selection,
+    postSelection,
+    props: fileContextMsg.props,
+  };
 }
 
 export function resetChatStore() {

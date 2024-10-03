@@ -32,8 +32,9 @@ export function ChatPanel() {
       scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
     }
     setInput('');
-    await updateChat(input);
-    continuePrompt();
+    const mode = chatStore.get('mode');
+    await updateChat(input, mode);
+    await continuePrompt(mode);
   };
 
   return (

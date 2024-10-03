@@ -10,7 +10,10 @@ export class Claude extends LLM {
     this.apiKey = apiKey;
   }
 
-  async *prompt(messages: RawMessage[]): AsyncIterable<string> {
+  async *prompt(
+    messages: RawMessage[],
+    stopSequences: string[]
+  ): AsyncIterable<string> {
     const client = new Anthropic({
       apiKey: this.apiKey,
       dangerouslyAllowBrowser: true,
@@ -39,6 +42,7 @@ export class Claude extends LLM {
         return msg;
       }),
       stream: true,
+      stop_sequences: stopSequences,
     });
 
     for await (const event of stream) {
