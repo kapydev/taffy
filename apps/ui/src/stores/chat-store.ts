@@ -112,6 +112,8 @@ chatStore.subscribe('messages', (messages) => {
     latestMsg?.type === 'ASSISTANT_WRITE_FILE'
   ) {
     chatStore.set('mode', 'edit');
+  } else if (toolMessages.some((msg) => msg.isType('USER_FILE_CONTENTS'))) {
+    chatStore.set('mode', 'inline');
   } else {
     chatStore.set('mode', 'full');
   }

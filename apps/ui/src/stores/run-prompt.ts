@@ -3,19 +3,17 @@ import { chatStore, getToolMessages, removeMessage } from './chat-store';
 import { toolToToolString } from '../llms/messages/tools';
 import { trpc } from '../client';
 
-export async function runPrompt(input: string, mode = chatStore.get('mode')) {
-  //We can't do inline mode if there is no codebase context
-
+export async function updateChat(input: string, mode = chatStore.get('mode')) {
   if (mode === 'full') {
-    return await runPromptFull(input);
+    return await updateChatFull(input);
   } else if (mode === 'edit') {
-    return await runPromptEdit(input);
+    return await updateChatEdit(input);
   } else if (mode === 'inline') {
-    return await runPromptInline(input);
+    return await updateChatInline(input);
   }
 }
 
-async function runPromptInline(input: string) {
+async function updateChatInline(input: string) {
   const curMessages = getToolMessages();
 
   const fileContextMsg = [...curMessages]
@@ -39,16 +37,21 @@ async function runPromptInline(input: string) {
     filePath: fileContextMsg.props.filePath,
   });
   const startLine = +fileContextMsg.props.startLine;
-  let preContents = curContents?.slice(0, startLine) ?? '';
+  let preContents =
+    curContents?.split('\n').slice(0, startLine).join('\n') ?? '';
   preContents += '\n{THINKING_START}\n';
 
   const preAssistantPrompt = new ToolMessage(
-    toolToToolString('ASSISTANT_WRITE_FILE', {
-      props: {
-        filePath: fileContextMsg.props.filePath,
+    toolToToolString(
+      'ASSISTANT_WRITE_FILE',
+      {
+        props: {
+          filePath: fileContextMsg.props.filePath,
+        },
+        body: preContents,
       },
-      body: preContents,
-    })
+      { excludeEnd: true }
+    )
   );
 
   chatStore.set('messages', [
@@ -58,7 +61,7 @@ async function runPromptInline(input: string) {
   ]);
 }
 
-async function runPromptFull(input: string) {
+async function updateChatFull(input: string) {
   chatStore.set('messages', [
     ...chatStore.get('messages'),
     new ToolMessage(
@@ -70,7 +73,7 @@ async function runPromptFull(input: string) {
   ]);
 }
 
-async function runPromptEdit(input: string) {
+async function updateChatEdit(input: string) {
   const messages = getToolMessages();
   const latestUserPrompt = [...messages]
     .reverse()

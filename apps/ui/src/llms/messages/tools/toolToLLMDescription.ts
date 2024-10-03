@@ -25,9 +25,14 @@ Sample:
 ${toolToToolString(toolName, sampleTool)}`;
 }
 
+interface ToolToToolStringOpts {
+  excludeEnd: boolean;
+}
+
 export function toolToToolString<T extends ToolType>(
   toolName: T,
-  tool: Tools[T]
+  tool: Tools[T],
+  opts?: ToolToToolStringOpts
 ): string {
   const samplePropsStr = JSON.stringify(tool.props);
 
@@ -43,6 +48,8 @@ export function toolToToolString<T extends ToolType>(
     result += '\n' + tool.body;
   }
 
-  result += `\n{END_TOOL ${toolName}}`;
+  if (!opts?.excludeEnd) {
+    result += `\n{END_TOOL ${toolName}}`;
+  }
   return result;
 }

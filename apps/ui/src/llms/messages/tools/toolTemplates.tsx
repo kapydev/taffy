@@ -36,21 +36,22 @@ export const TOOL_TEMPLATES = {
   //ASSISTANT TOOLS
   ASSISTANT_INFO: {
     role: 'assistant',
-    desc: 'For the assistant to write a response to the user. all messages from the assistant should start with an assistant info block.',
+    desc: 'For the assistant to write a response to the user.',
     propDesc: {},
     sampleProps: {},
     sampleBody:
       'To prevent .env files from being committed into the codebase, we need to update the .gitignore file',
   },
-  ASSISTANT_PLANNING: {
-    role: 'assistant',
-    desc: "For the assistant to plan how to tackle the task from the user. There should be a planning block after every assistant info tool block. Reason how to tackle the user's task step by step, placing steps in a logical order. After the planning tool is done, execute the plan. In each step, indicate what tool you will use, and how you will use it",
-    propDesc: {},
-    sampleProps: {},
-    sampleBody: `Example 1:
-    1. Read the .gitignore file using ASSISTANT_READ_FILE
-    2. Update the .gitignore file using ASSISTANT_WRITE_FILE`,
-  },
+  // TODO: For multi file, replace assistant planning with thinking blocks
+  // ASSISTANT_PLANNING: {
+  //   role: 'assistant',
+  //   desc: "For the assistant to plan how to tackle the task from the user. There should be a planning block after every assistant info tool block. Reason how to tackle the user's task step by step, placing steps in a logical order. After the planning tool is done, execute the plan. In each step, indicate what tool you will use, and how you will use it",
+  //   propDesc: {},
+  //   sampleProps: {},
+  //   sampleBody: `Example 1:
+  //   1. Read the .gitignore file using ASSISTANT_READ_FILE
+  //   2. Update the .gitignore file using ASSISTANT_WRITE_FILE`,
+  // },
   ASSISTANT_WRITE_FILE: {
     role: 'assistant',
     desc: `Ask the user for permission to create/overwrite a file. You will need to provide the FULL FILE CONTENTS, because the action suggested to the user will be a full override of the existing file. DO NOT INCLUDE LINE NUMBERS IN THE OUTPUT. Before tackling a challenging part of the code, you can walk yourself through the coding process in a THINKING block
@@ -146,11 +147,11 @@ export const TOOL_RENDER_TEMPLATES: {
     title: () => 'Assistant Info',
     description: (data) => data.body,
   },
-  ASSISTANT_PLANNING: {
-    Icon: WaypointsIcon,
-    title: () => 'Assistant Planning',
-    description: (data) => data.body,
-  },
+  // ASSISTANT_PLANNING: {
+  //   Icon: WaypointsIcon,
+  //   title: () => 'Assistant Planning',
+  //   description: (data) => data.body,
+  // },
   ASSISTANT_READ_FILE: {
     Icon: FilePlus2Icon,
     title: () => 'Requesting permission to read the following files',
