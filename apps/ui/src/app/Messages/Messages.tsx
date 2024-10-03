@@ -2,7 +2,7 @@ import { capitalize } from '@taffy/shared-helpers';
 import { useMemo, useState } from 'react';
 import { Badge } from '@taffy/components';
 import { CustomMessage } from '../../llms/messages/Messages';
-import { chatStore } from '../../stores/chat-store';
+import { chatStore, getRawMessages } from '../../stores/chat-store';
 import { SystemPromptMessage } from '../../llms/messages/SystemPromptMessage';
 import { ToolMessage } from '../../llms/messages/ToolMessage';
 import { SystemPromptRender } from './SystemPromptRender';
@@ -53,16 +53,18 @@ export function MessageGroupWrapper({
     throw new Error('MessageGroupWrapper: not all messages have the same role');
   }
 
-  const getRaw = () => (
-    <code className="break-words whitespace-pre-wrap">
-      {messages
-        .flatMap((msg) =>
-          msg.toRawMessages().flatMap((rawMsg) => rawMsg.content)
-        )
-        //TODO: Can't just get raw, need to make this a shared func
-        .join('\n')}
-    </code>
-  );
+  const getRaw = () => {
+    const rawMsgs = getRawMessages(messages);
+    if (rawMsgs.length !== 1) {
+      throw new Error('Expected exactly single raw message for message group');
+    }
+
+    return (
+      <code className="break-words whitespace-pre-wrap">
+        {rawMsgs[0].content}
+      </code>
+    );
+  };
 
   return (
     <div className={`mb-4 ${MESSAGE_GROUP_COLORS[messages[0].role]}`}>

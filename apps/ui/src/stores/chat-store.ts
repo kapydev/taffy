@@ -52,16 +52,15 @@ export async function continuePrompt(llm: LLM | null = chatStore.get('llm')) {
     llm = setLlm();
   }
 
-  const rawMessages = getRawMessages();
+  const rawMessages = getRawMessages(chatStore.get('messages'));
   const parser = new LLMOutputParser();
   const stream = llm.prompt(rawMessages);
 
   await parser.handleTextStream(stream);
 }
 
-function getRawMessages(): RawMessage[] {
-  const curMsgs = chatStore.get('messages');
-  const rawMsgs = curMsgs.flatMap((msg) => msg.toRawMessages());
+export function getRawMessages(messages: CustomMessage[]): RawMessage[] {
+  const rawMsgs = messages.flatMap((msg) => msg.toRawMessages());
   const concatenatedMessages = rawMsgs.reduce((acc, rawMsg) => {
     const lastMessage = acc[acc.length - 1];
     if (lastMessage && lastMessage.role === rawMsg.role) {
