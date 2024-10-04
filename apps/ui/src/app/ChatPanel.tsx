@@ -48,7 +48,7 @@ export function ChatPanel() {
         </div>
       </div>
       <div className="flex mt-4 flex-col">
-        <ButtonWithHotkey action={toggleModeHandler.action} keys="Ctrl+M">
+        <ButtonWithHotkey action={toggleModeHandler.action} keys="ctrl+m" keysPretty="Ctrl+M">
           <Badge>{mode}</Badge>
         </ButtonWithHotkey>
         <div className="flex">
@@ -67,10 +67,12 @@ export function ChatPanel() {
             placeholder="Type your message..."
             className="flex-1 mr-2"
           />
-          <Button onClick={handleSend}>
-            <Send className="h-3 w-3" />
-            <div className="text-[10px] pl-1">Ctrl+↵</div>
-          </Button>
+          <ButtonWithHotkey hideHint keys="ctrl+enter" action={handleSend}>
+            <Button>
+              <Send className="h-3 w-3" />
+              <div className="text-[10px] pl-1">Ctrl+↵</div>
+            </Button>
+          </ButtonWithHotkey>
         </div>
       </div>
     </div>

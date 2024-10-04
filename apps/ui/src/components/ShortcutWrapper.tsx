@@ -1,5 +1,6 @@
 import { cn } from '@taffy/components';
 import { ReactNode, useEffect, useState } from 'react';
+import Mousetrap from 'mousetrap';
 
 interface ShortcutWrapperProps {
   children: ReactNode;
@@ -7,12 +8,14 @@ interface ShortcutWrapperProps {
   keysPretty?: ReactNode;
   action: () => void;
   className?: string;
+  hideHint?: boolean;
 }
 
 export function ButtonWithHotkey({
   children,
   action,
   keys,
+  hideHint,
   keysPretty,
   className,
 }: ShortcutWrapperProps) {
@@ -24,31 +27,31 @@ export function ButtonWithHotkey({
   );
 
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Control') {
-        setShowTooltip(true);
-      }
+    const ms = new Mousetrap();
+
+    const handleKeyDown = () => {
+      setShowTooltip(true);
     };
 
-    const handleKeyUp = (event: KeyboardEvent) => {
-      if (event.key === 'Control') {
-        setShowTooltip(false);
-      }
+    const handleKeyUp = () => {
+      setShowTooltip(false);
     };
 
+    ms.bind(keys, action);
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
 
     return () => {
+      ms.unbind(keys);
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, []);
+  }, [keys, action]);
 
   return (
     <div className={containerClasses} onClick={action}>
       {children}
-      {showTooltip && (
+      {showTooltip && !hideHint && (
         <div className="absolute top-full bg-background rounded z-50 text-[8px] border-1">
           {keysPretty || keys}{' '}
         </div>

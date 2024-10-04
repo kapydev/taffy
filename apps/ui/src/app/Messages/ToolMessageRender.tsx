@@ -25,7 +25,8 @@ export function ToolMessageRender<T extends ToolType>({
         <ButtonWithHotkey
           className="text-vsc-errorForeground"
           action={() => removeMessage(message)}
-          keys="Ctrl+Bksp"
+          keys="ctrl+del"
+          keysPretty="Ctrl+Del"
         >
           <span>Remove</span>
         </ButtonWithHotkey>

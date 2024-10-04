@@ -58,5 +58,4 @@ export const toggleModeHandler: ShortcutHandler = {
 
 export const handlers = {
   'ctrl+l': toggleCodebaseContextHandler,
-  'ctrl+m': toggleModeHandler,
 };
