@@ -1,7 +1,7 @@
 import { Toaster } from 'react-hot-toast';
 import { useErrorCatching } from './ErrorBoundary';
 import { MainChat } from './MainChat';
-import { KeyboardShortCuts } from './KeyboardShortCuts';
+import { KeyboardShortcuts } from './KeyboardShortcuts/KeyboardShortcuts';
 
 export default function App() {
   useErrorCatching();
@@ -9,7 +9,7 @@ export default function App() {
   return (
     <div className="h-full w-full">
       <MainChat />
-      <KeyboardShortCuts />
+      <KeyboardShortcuts />
       <Toaster
         toastOptions={{
           style: {

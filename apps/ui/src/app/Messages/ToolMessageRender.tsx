@@ -3,6 +3,7 @@ import { ToolMessage } from '../../llms/messages/ToolMessage';
 import { TOOL_RENDER_TEMPLATES, ToolType } from '../../llms/messages/tools';
 import { chatStore, removeMessage } from '../../stores/chat-store';
 import { useMemo } from 'react';
+import { ShortcutWrapper } from '../../components/ShortcutWrapper';
 
 export function ToolMessageRender<T extends ToolType>({
   message,
@@ -25,7 +26,11 @@ export function ToolMessageRender<T extends ToolType>({
           className="text-vsc-errorForeground"
           onClick={() => removeMessage(message)}
         >
-          Remove
+          <div className="flex flex-col items-start">
+            <ShortcutWrapper action={() => {}} keys="Ctrl+Bksp">
+              <span>Remove</span>
+            </ShortcutWrapper>
+          </div>
         </button>
         {renderTemplate.actions?.map((meta) => {
           return (

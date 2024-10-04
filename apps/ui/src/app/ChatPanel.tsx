@@ -5,6 +5,8 @@ import { chatStore, continuePrompt } from '../stores/chat-store';
 import { updateChat } from '../stores/update-prompt';
 import { Messages } from './Messages';
 import { getPossibleModes } from '../stores/possible-modes';
+import { toggleModeHandler } from './KeyboardShortcuts/handlers';
+import { ShortcutWrapper } from '../components/ShortcutWrapper';
 
 export function ChatPanel() {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -23,23 +25,6 @@ export function ChatPanel() {
       window.removeEventListener('focus', handleWindowFocus);
     };
   }, []);
-
-  const toggleMode = () => {
-    const possibleModes = getPossibleModes();
-    const currentModeIndex = possibleModes.indexOf(mode);
-
-    let newMode;
-    if (
-      currentModeIndex === -1 ||
-      currentModeIndex === possibleModes.length - 1
-    ) {
-      newMode = possibleModes[0];
-    } else {
-      newMode = possibleModes[currentModeIndex + 1];
-    }
-
-    chatStore.set('mode', newMode);
-  };
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -63,8 +48,13 @@ export function ChatPanel() {
         </div>
       </div>
       <div className="flex mt-4 flex-col">
-        <Badge onClick={toggleMode} className="self-start cursor-pointer">
-          {mode}
+        <Badge
+          onClick={toggleModeHandler.action}
+          className="self-start cursor-pointer"
+        >
+          <ShortcutWrapper action={toggleModeHandler.action} keys="Ctrl+M">
+            {mode}
+          </ShortcutWrapper>
         </Badge>
         <div className="flex">
           <Textarea
@@ -83,7 +73,8 @@ export function ChatPanel() {
             className="flex-1 mr-2"
           />
           <Button onClick={handleSend}>
-            <Send className="h-4 w-4" />
+            <Send className="h-3 w-3" />
+            <div className="text-[10px] pl-1">Ctrl+↵</div>
           </Button>
         </div>
       </div>
