@@ -62,7 +62,7 @@ export const TOOL_TEMPLATES = {
   //I'm not sure about the thinking start version
   ASSISTANT_WRITE_FILE: {
     role: 'assistant',
-    desc: `Ask the user for permission to create/overwrite a file. You will need to provide the FULL FILE CONTENTS, because the action suggested to the user will be a full override of the existing file. DO NOT INCLUDE LINE NUMBERS IN THE OUTPUT. Before tackling a challenging part of the code, you can walk yourself through the coding process in a THINKING block
+    desc: `Ask the user for permission to create/overwrite a file. You will need to provide the FULL FILE CONTENTS, because the action suggested to the user will be a full override of the existing file. Stopping generation before reaching the end of the file will result in a confusing output to the end user after the result is parsed. DO NOT INCLUDE LINE NUMBERS IN THE OUTPUT. Before tackling a challenging part of the code, you can walk yourself through the coding process in a THINKING block
 
   {THINKING_START}
   In order to write this function, I will need to...
@@ -71,6 +71,7 @@ export const TOOL_TEMPLATES = {
   The thinking blocks will not be included in the outputted code.
   Within the thinking blocks, consider the user's existing code style and practices and follow those.
   DO NOT WRITE CODE WITHIN THE THINKING BLOCKS. The thinking blocks are soley meant for planning. Any code will need to be written outside the thinking block, in order to be included in the final suggestion to the user.
+
   `,
     propDesc: {
       filePath:

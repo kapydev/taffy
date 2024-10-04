@@ -82,6 +82,7 @@ export const fileRouter = router({
     .input(z.object({ id: z.string() }))
     .mutation(async (opts) => {
       const { id } = opts.input;
+      console.log('Approving file change', id);
       ee.emit('fileChangeApproved', id);
       return {};
     }),

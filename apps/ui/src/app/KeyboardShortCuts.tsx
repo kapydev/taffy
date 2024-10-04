@@ -16,9 +16,12 @@ const handlers = {
     name: 'Toggle Codebase Context',
     action: async () => {
       const workspaceFiles = await trpc.files.getWorkspaceFiles.query();
-      const curMessages = getToolMessages();
+      const curMessages = chatStore.get('messages');
       const latestMsg = curMessages.at(-1);
-      if (latestMsg?.type === 'USER_AVAILABLE_FILES') {
+      if (
+        latestMsg instanceof ToolMessage &&
+        latestMsg?.type === 'USER_AVAILABLE_FILES'
+      ) {
         chatStore.set('messages', curMessages.slice(0, -1));
         return;
       }
