@@ -1,9 +1,10 @@
-import { ReactNode, useEffect, useState } from 'react';
 import { cn } from '@taffy/components';
+import { ReactNode, useEffect, useState } from 'react';
 
 interface ShortcutWrapperProps {
   children: ReactNode;
   keys: string;
+  keysPretty?: ReactNode;
   action: () => void;
   className?: string;
 }
@@ -12,6 +13,7 @@ export function ButtonWithHotkey({
   children,
   action,
   keys,
+  keysPretty,
   className,
 }: ShortcutWrapperProps) {
   const [showTooltip, setShowTooltip] = useState(false);
@@ -48,7 +50,7 @@ export function ButtonWithHotkey({
       {children}
       {showTooltip && (
         <div className="absolute top-full bg-background rounded z-50 text-[8px] border-1">
-          {keys}
+          {keysPretty || keys}{' '}
         </div>
       )}
     </div>
