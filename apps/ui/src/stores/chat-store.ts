@@ -196,30 +196,49 @@ trpc.files.onSelectionChange.subscribe(undefined, {
   },
 });
 
-chatStore.subscribe('messages', (messages) => {
+export function canBeInline() {
+  const toolMessages = getToolMessages();
+  const hasUserFileContents = toolMessages.some((msg) =>
+    msg.isType('USER_FILE_CONTENTS')
+  );
+  return hasUserFileContents;
+}
+
+export function canBeEdit() {
   const toolMessages = getToolMessages();
   const latestMsg = toolMessages.at(-1);
   const numWriteFileMsgs = toolMessages.filter(
     (m) => m.type === 'ASSISTANT_WRITE_FILE'
   ).length;
-  const hasUserFileContents = toolMessages.some((msg) =>
-    msg.isType('USER_FILE_CONTENTS')
-  );
+  return numWriteFileMsgs === 1 && latestMsg?.type === 'ASSISTANT_WRITE_FILE';
+}
+
+/**Returns all the possible modes in order of preference */
+export function getPossibleModes(): CompletionMode[] {
+  const result: CompletionMode[] = [];
+  const canInline = canBeInline();
+  const canEdit = canBeEdit();
+  if (canEdit) {
+    if (canInline) {
+      result.push('inline-edit');
+    }
+    result.push('edit');
+  }
+
+  if (canInline) {
+    result.push('inline');
+  }
+  result.push('full');
+
+  return result;
+}
+
+chatStore.subscribe('messages', (messages) => {
   /**TODO: Allow editing in multi file mode - right now there are the following edge cases:
    * 1. After the edit, the diff view is quite strange
    * 2. Need to add state for edits that have already been accepted and those who have not been
    */
-  if (numWriteFileMsgs === 1 && latestMsg?.type === 'ASSISTANT_WRITE_FILE') {
-    if (hasUserFileContents) {
-      chatStore.set('mode', 'inline-edit');
-    } else {
-      chatStore.set('mode', 'edit');
-    }
-  } else if (hasUserFileContents) {
-    chatStore.set('mode', 'inline');
-  } else {
-    chatStore.set('mode', 'full');
-  }
+  chatStore.set('mode', getPossibleModes()[0]);
 });
 
 export function removeMessage<T extends ToolType>(message: ToolMessage<T>) {

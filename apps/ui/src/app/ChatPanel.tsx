@@ -1,7 +1,11 @@
 import { Badge, Button, Textarea } from '@taffy/components';
 import { Send } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { chatStore, continuePrompt } from '../stores/chat-store';
+import {
+  chatStore,
+  continuePrompt,
+  getPossibleModes,
+} from '../stores/chat-store';
 import { updateChat } from '../stores/update-prompt';
 import { Messages } from './Messages';
 
@@ -22,6 +26,23 @@ export function ChatPanel() {
       window.removeEventListener('focus', handleWindowFocus);
     };
   }, []);
+
+  const toggleMode = () => {
+    const possibleModes = getPossibleModes();
+    const currentModeIndex = possibleModes.indexOf(mode);
+
+    let newMode;
+    if (
+      currentModeIndex === -1 ||
+      currentModeIndex === possibleModes.length - 1
+    ) {
+      newMode = possibleModes[0];
+    } else {
+      newMode = possibleModes[currentModeIndex + 1];
+    }
+
+    chatStore.set('mode', newMode);
+  };
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -45,7 +66,9 @@ export function ChatPanel() {
         </div>
       </div>
       <div className="flex mt-4 flex-col">
-        <Badge className="self-start">{mode}</Badge>
+        <Badge onClick={toggleMode} className="self-start cursor-pointer">
+          {mode}
+        </Badge>
         <div className="flex">
           <Textarea
             ref={inputRef}
