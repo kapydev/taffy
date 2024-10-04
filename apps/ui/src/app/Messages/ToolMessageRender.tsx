@@ -3,7 +3,7 @@ import { ToolMessage } from '../../llms/messages/ToolMessage';
 import { TOOL_RENDER_TEMPLATES, ToolType } from '../../llms/messages/tools';
 import { chatStore, removeMessage } from '../../stores/chat-store';
 import { useMemo } from 'react';
-import { ShortcutWrapper } from '../../components/ShortcutWrapper';
+import { ButtonWithHotkey } from '../../components/ShortcutWrapper';
 
 export function ToolMessageRender<T extends ToolType>({
   message,
@@ -22,16 +22,13 @@ export function ToolMessageRender<T extends ToolType>({
         {renderTemplate.description(message)}
       </AlertDescription>
       <div className={`flex gap-2 ${message.loading && 'hidden'}`}>
-        <button
+        <ButtonWithHotkey
           className="text-vsc-errorForeground"
-          onClick={() => removeMessage(message)}
+          action={() => removeMessage(message)}
+          keys="Ctrl+Bksp"
         >
-          <div className="flex flex-col items-start">
-            <ShortcutWrapper action={() => {}} keys="Ctrl+Bksp">
-              <span>Remove</span>
-            </ShortcutWrapper>
-          </div>
-        </button>
+          <span>Remove</span>
+        </ButtonWithHotkey>
         {renderTemplate.actions?.map((meta) => {
           return (
             <button

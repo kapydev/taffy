@@ -6,7 +6,7 @@ import { updateChat } from '../stores/update-prompt';
 import { Messages } from './Messages';
 import { getPossibleModes } from '../stores/possible-modes';
 import { toggleModeHandler } from './KeyboardShortcuts/handlers';
-import { ShortcutWrapper } from '../components/ShortcutWrapper';
+import { ButtonWithHotkey } from '../components/ShortcutWrapper';
 
 export function ChatPanel() {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -48,14 +48,9 @@ export function ChatPanel() {
         </div>
       </div>
       <div className="flex mt-4 flex-col">
-        <Badge
-          onClick={toggleModeHandler.action}
-          className="self-start cursor-pointer"
-        >
-          <ShortcutWrapper action={toggleModeHandler.action} keys="Ctrl+M">
-            {mode}
-          </ShortcutWrapper>
-        </Badge>
+        <ButtonWithHotkey action={toggleModeHandler.action} keys="Ctrl+M">
+          <Badge>{mode}</Badge>
+        </ButtonWithHotkey>
         <div className="flex">
           <Textarea
             ref={inputRef}

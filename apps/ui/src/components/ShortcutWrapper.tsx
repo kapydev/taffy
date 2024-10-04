@@ -1,18 +1,25 @@
-import React, { useState, useEffect, ReactNode } from 'react';
-import { ShortcutHandler } from '../app/KeyboardShortcuts/handlers';
+import { ReactNode, useEffect, useState } from 'react';
+import { cn } from '@taffy/components';
 
 interface ShortcutWrapperProps {
   children: ReactNode;
   keys: string;
   action: () => void;
+  className?: string;
 }
 
-export function ShortcutWrapper({
+export function ButtonWithHotkey({
   children,
   action,
   keys,
+  className,
 }: ShortcutWrapperProps) {
   const [showTooltip, setShowTooltip] = useState(false);
+
+  const containerClasses = cn(
+    'relative inline-block cursor-pointer',
+    className
+  );
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -37,7 +44,7 @@ export function ShortcutWrapper({
   }, []);
 
   return (
-    <div className="relative inline-block">
+    <div className={containerClasses} onClick={action}>
       {children}
       {showTooltip && (
         <div className="absolute top-full bg-background rounded z-50 text-[8px] border-1">
