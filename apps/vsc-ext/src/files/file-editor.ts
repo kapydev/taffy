@@ -193,8 +193,11 @@ export class FileEditor {
   }
 
   async acceptDiff() {
+    await this.createIfNotExists();
     const doc = await this.getDoc();
-    if (!doc) return;
+    if (!doc) {
+      throw new Error("Should have document")
+    };
     if (this.modifiedContents === undefined) {
       throw new Error('No modified contents yet!');
     }
