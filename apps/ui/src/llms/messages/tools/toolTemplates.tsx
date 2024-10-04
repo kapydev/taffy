@@ -222,6 +222,17 @@ export const TOOL_RENDER_TEMPLATES: {
     },
     actions: [
       {
+        name: 'Preview',
+        action: (message) => {
+          if (!message.props) return;
+          trpc.files.previewFileChange.mutate({
+            fileName: message.props.filePath,
+            newContents: message.body,
+            id: message.id,
+          });
+        },
+      },
+      {
         name: 'Approve Change',
         action: (message) => {
           trpc.files.approveFileChange.mutate({ id: message.id });
