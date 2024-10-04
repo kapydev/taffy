@@ -27,7 +27,9 @@ export class LLMOutputParser {
     //If we completed generation in inline mode need to auto complete the remaining text
     if (mode.includes('inline')) {
       const inlineStopSeq = await getInlineStopSequence();
-      if (inlineStopSeq) {
+      const toolEndStr = getToolEndString('ASSISTANT_WRITE_FILE');
+      //If LLM already outputted the toolEndStr, don't append stuff
+      if (inlineStopSeq && !curLine.includes(toolEndStr)) {
         const latestFileContent = await getLatestFileContent();
         if (!latestFileContent) {
           throw new Error('Expected latest file content');
@@ -39,7 +41,7 @@ export class LLMOutputParser {
             .slice(1)
             .join(inlineStopSeq);
         curLine += remainder;
-        curLine += getToolEndString('ASSISTANT_WRITE_FILE');
+        curLine += toolEndStr;
       }
     }
     if (curLine) {
