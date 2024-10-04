@@ -1,12 +1,11 @@
 import { Badge, Button, Textarea } from '@taffy/components';
 import { Send } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { ButtonWithHotkey } from '../components/ButtonWithHotkey';
 import { chatStore, continuePrompt } from '../stores/chat-store';
 import { updateChat } from '../stores/update-prompt';
-import { Messages } from './Messages';
-import { getPossibleModes } from '../stores/possible-modes';
 import { toggleModeHandler } from './KeyboardShortcuts/handlers';
-import { ButtonWithHotkey } from '../components/ShortcutWrapper';
+import { Messages } from './Messages';
 
 export function ChatPanel() {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -48,7 +47,11 @@ export function ChatPanel() {
         </div>
       </div>
       <div className="flex mt-4 flex-col">
-        <ButtonWithHotkey action={toggleModeHandler.action} keys="ctrl+m" keysPretty="Ctrl+M">
+        <ButtonWithHotkey
+          action={toggleModeHandler.action}
+          keys="ctrl+m"
+          keysPretty="Ctrl+M"
+        >
           <Badge>{mode}</Badge>
         </ButtonWithHotkey>
         <div className="flex">
@@ -67,10 +70,9 @@ export function ChatPanel() {
             placeholder="Type your message..."
             className="flex-1 mr-2"
           />
-          <ButtonWithHotkey hideHint keys="ctrl+enter" action={handleSend}>
+          <ButtonWithHotkey hideHint keys="enter" action={handleSend}>
             <Button>
               <Send className="h-3 w-3" />
-              <div className="text-[10px] pl-1">Ctrl+↵</div>
             </Button>
           </ButtonWithHotkey>
         </div>

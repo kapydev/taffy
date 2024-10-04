@@ -29,8 +29,10 @@ export function ButtonWithHotkey({
   useEffect(() => {
     const ms = new Mousetrap();
 
-    const handleKeyDown = () => {
-      setShowTooltip(true);
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.ctrlKey) {
+        setShowTooltip(true);
+      }
     };
 
     const handleKeyUp = () => {

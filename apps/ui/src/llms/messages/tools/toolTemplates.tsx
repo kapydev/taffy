@@ -139,6 +139,10 @@ type ToolAction<ToolName extends ToolType> = (
 export type ToolActionMeta<ToolName extends ToolType> = {
   name: string;
   action: ToolAction<ToolName>;
+  /**For a keyboard shortcut Ctrl+T, or Ctrl+1+T for an older
+   * message for example, just put 't' as the shortcut - it
+   * will be concatenated to the end */
+  shortcutEnd: string;
 };
 export type ToolRenderTemplate<ToolName extends ToolType> = {
   Icon: MessageIcon;
@@ -174,6 +178,7 @@ export const TOOL_RENDER_TEMPLATES: {
       {
         name: 'approve',
         action: () => {},
+        shortcutEnd: 'enter',
       },
     ],
   },
@@ -232,12 +237,14 @@ export const TOOL_RENDER_TEMPLATES: {
             id: message.id,
           });
         },
+        shortcutEnd: 'p',
       },
       {
         name: 'Approve Change',
         action: (message) => {
           trpc.files.approveFileChange.mutate({ id: message.id });
         },
+        shortcutEnd: 'enter',
       },
     ],
   },
