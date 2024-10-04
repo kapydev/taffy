@@ -10,7 +10,24 @@ function canBeInline() {
 
 function inlineHasPriority() {
   const toolMessages = getToolMessages();
-  return toolMessages.at(-1)?.isType('USER_FILE_CONTENTS');
+
+  if (toolMessages.at(-1)?.isType('USER_FILE_CONTENTS')) {
+    return true;
+  }
+
+  const lastUserPromptIndex = toolMessages
+    .map((msg, index) => (msg.isType('USER_PROMPT') ? index : null))
+    .filter((index) => index !== null)
+    .at(-1);
+
+  if (
+    lastUserPromptIndex !== undefined &&
+    toolMessages[lastUserPromptIndex - 1]?.isType('USER_FILE_CONTENTS')
+  ) {
+    return true;
+  }
+
+  return false;
 }
 
 function canBeEdit() {
