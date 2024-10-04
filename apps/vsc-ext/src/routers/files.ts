@@ -189,7 +189,7 @@ const getSelectionData = (editor: vscode.TextEditor | undefined) => {
     minIndent = Math.min(minIndent, currentIndent);
   }
   //TODO: Find average indent in file to get better selection
-  minIndent -= 2;
+  minIndent -= 4;
 
   // Expand selection
   let startLine = editor.selection.start.line;

@@ -5,8 +5,8 @@ import { makeObservable, observable, computed } from 'mobx';
 
 export const TOOL_START_MATCH_REGEX = /{TOOL (\w+)(?: (.*))?}/;
 export const TOOL_END_MATCH_REGEX = /{END_TOOL\s?(\w*)}/;
-export const THINKING_START_MATCH_REGEX =
-  /\n?{THINKING_START}\n([\s\S]*?)\n{THINKING_END}/gm;
+export const THINKING_BLOCK_REGEX =
+  /\n?{THINKING_START}\n([\s\S]*?)\n?{THINKING_END}/gm;
 
 const logger = console;
 
@@ -65,7 +65,7 @@ export class ToolMessage<
     let bodyMatch = this.contents
       .replace(TOOL_START_MATCH_REGEX, '')
       .replace(TOOL_END_MATCH_REGEX, '')
-      .replace(THINKING_START_MATCH_REGEX, '');
+      .replace(THINKING_BLOCK_REGEX, '');
     if (bodyMatch.startsWith('\n')) {
       bodyMatch = bodyMatch.substring(1);
     }
@@ -86,7 +86,7 @@ export class ToolMessage<
   }
 
   get thoughts(): string | undefined {
-    const thoughtMatches = this.contents.matchAll(THINKING_START_MATCH_REGEX);
+    const thoughtMatches = this.contents.matchAll(THINKING_BLOCK_REGEX);
     const thoughts: string[] = [];
     for (const match of thoughtMatches) {
       thoughts.push(match[1].trim());

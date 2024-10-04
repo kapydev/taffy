@@ -70,6 +70,7 @@ export const TOOL_TEMPLATES = {
 
   The thinking blocks will not be included in the outputted code.
   Within the thinking blocks, consider the user's existing code style and practices and follow those.
+  DO NOT WRITE CODE WITHIN THE THINKING BLOCKS. The thinking blocks are soley meant for planning. Any code will need to be written outside the thinking block, in order to be included in the final suggestion to the user.
   `,
     propDesc: {
       filePath:

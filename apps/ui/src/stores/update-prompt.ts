@@ -9,28 +9,23 @@ import {
 } from './chat-store';
 
 export async function updateChat(input: string, mode: CompletionMode) {
-  if (mode === 'full') {
-    return await updateChatFull(input);
-  } else if (mode === 'edit') {
-    return await updateChatEdit(input);
-  } else if (mode === 'inline') {
-    return await updateChatInline(input);
+  if (mode.includes('edit')) {
+    await updateChatEdit(input);
+  } else {
+    await updateChatFull(input);
+  }
+
+  if (mode.includes('inline')) {
+    return await addInlinePrePrompt();
   }
 }
 
-async function updateChatInline(input: string) {
+async function addInlinePrePrompt() {
   const latestFile = await getLatestFileContent();
   if (!latestFile) {
     throw new Error('Could not get latest file context');
   }
   const { preSelection, props } = latestFile;
-
-  const userPromptMessage = new ToolMessage(
-    toolToToolString('USER_PROMPT', {
-      body: input,
-      props: {},
-    })
-  );
 
   const thinkingStartFence =
     (preSelection.length > 0 ? '\n' : '') + '{THINKING_START}\n';
@@ -48,11 +43,7 @@ async function updateChatInline(input: string) {
     )
   );
 
-  chatStore.set('messages', [
-    ...chatStore.get('messages'),
-    userPromptMessage,
-    preAssistantPrompt,
-  ]);
+  chatStore.set('messages', [...chatStore.get('messages'), preAssistantPrompt]);
 }
 
 async function updateChatFull(input: string) {

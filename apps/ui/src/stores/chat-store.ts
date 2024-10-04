@@ -10,7 +10,10 @@ import { createToolMessage, ToolMessage } from '../llms/messages/ToolMessage';
 import { TOOL_RENDER_TEMPLATES, ToolType } from '../llms/messages/tools';
 import { createBetterStore } from './create-better-store';
 
-export type CompletionMode = 'full' | 'edit' | 'inline';
+/**If you need the same functionality for multiple completion modes, you can include the keywords together.
+ * By doing that, we can use the str.contains() function to determin the behaviour
+ */
+export type CompletionMode = 'full' | 'edit' | 'inline' | 'inline-edit';
 
 export const chatStore = createBetterStore({
   messages: [new SystemPromptMessage()] as CustomMessage[],
@@ -18,6 +21,7 @@ export const chatStore = createBetterStore({
   /**
    * full - Can edit multiple files, and full files
    * edit - For fixing a previous prompt
+   * inline-edit - For fixing a previous inline prompt
    * inline - For editing a specific part of the code
    */
   mode: 'inline' as CompletionMode,
@@ -80,7 +84,7 @@ export async function continuePrompt(
   const rawMessages = getRawMessages(chatStore.get('messages'));
   const parser = new LLMOutputParser();
   const stopSequences: string[] = [];
-  if (mode === 'inline') {
+  if (mode.includes('inline')) {
     const additionalStopSeq = await getInlineStopSequence();
     if (additionalStopSeq) {
       stopSequences.push(additionalStopSeq);
@@ -195,17 +199,23 @@ trpc.files.onSelectionChange.subscribe(undefined, {
 chatStore.subscribe('messages', (messages) => {
   const toolMessages = getToolMessages();
   const latestMsg = toolMessages.at(-1);
+  const numWriteFileMsgs = toolMessages.filter(
+    (m) => m.type === 'ASSISTANT_WRITE_FILE'
+  ).length;
+  const hasUserFileContents = toolMessages.some((msg) =>
+    msg.isType('USER_FILE_CONTENTS')
+  );
   /**TODO: Allow editing in multi file mode - right now there are the following edge cases:
    * 1. After the edit, the diff view is quite strange
    * 2. Need to add state for edits that have already been accepted and those who have not been
    */
-  if (
-    toolMessages.filter((m) => m.type === 'ASSISTANT_WRITE_FILE').length ===
-      1 &&
-    latestMsg?.type === 'ASSISTANT_WRITE_FILE'
-  ) {
-    chatStore.set('mode', 'edit');
-  } else if (toolMessages.some((msg) => msg.isType('USER_FILE_CONTENTS'))) {
+  if (numWriteFileMsgs === 1 && latestMsg?.type === 'ASSISTANT_WRITE_FILE') {
+    if (hasUserFileContents) {
+      chatStore.set('mode', 'inline-edit');
+    } else {
+      chatStore.set('mode', 'edit');
+    }
+  } else if (hasUserFileContents) {
     chatStore.set('mode', 'inline');
   } else {
     chatStore.set('mode', 'full');

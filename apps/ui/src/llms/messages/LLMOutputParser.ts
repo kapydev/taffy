@@ -25,7 +25,7 @@ export class LLMOutputParser {
       this.parseLines(lines);
     }
     //If we completed generation in inline mode need to auto complete the remaining text
-    if (mode === 'inline') {
+    if (mode.includes('inline')) {
       const inlineStopSeq = await getInlineStopSequence();
       if (inlineStopSeq) {
         const latestFileContent = await getLatestFileContent();
