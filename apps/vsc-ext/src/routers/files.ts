@@ -168,7 +168,6 @@ const focusInEditor = async (
 };
 
 const getSelectionData = (editor: vscode.TextEditor | undefined) => {
-  console.log('GETTING SELECTION DATA');
   if (!editor) return undefined;
   const fileName = extractWorkspacePath(editor.document.fileName);
   if (!fileName) {
@@ -179,34 +178,10 @@ const getSelectionData = (editor: vscode.TextEditor | undefined) => {
   const selectedText = editor.document.getText(editor.selection);
   const fullFileContents = editor.document.getText();
   const allLines = fullFileContents.split('\n');
-  const lines = fullFileContents
-    .split('\n')
-    .slice(editor.selection.start.line, editor.selection.end.line + 1);
-
-  //TODO: switch to using folding ranges for greater accuracy
-  // Find the smallest indentation level in the selection
-  let minIndent = Number.MAX_VALUE;
-
-  for (const line of lines) {
-    const currentIndent = getIndentLen(line);
-    minIndent = Math.min(minIndent, currentIndent);
-  }
-  //TODO: Find average indent in file to get better selection
-  minIndent -= 4;
 
   // Expand selection
-  let startLine = editor.selection.start.line;
-  let endLine = editor.selection.end.line;
-
-  while (startLine > 0 && getIndentLen(allLines[startLine - 1]) >= minIndent) {
-    startLine--;
-  }
-  while (
-    endLine < allLines.length - 1 &&
-    getIndentLen(allLines[endLine + 1]) >= minIndent
-  ) {
-    endLine++;
-  }
+  const startLine = editor.selection.start.line;
+  const endLine = editor.selection.end.line;
 
   editor.selection = new vscode.Selection(
     new vscode.Position(startLine, 0),
