@@ -1,13 +1,10 @@
 import { Badge, Button, Textarea } from '@taffy/components';
 import { Send } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import {
-  chatStore,
-  continuePrompt,
-  getPossibleModes,
-} from '../stores/chat-store';
+import { chatStore, continuePrompt } from '../stores/chat-store';
 import { updateChat } from '../stores/update-prompt';
 import { Messages } from './Messages';
+import { getPossibleModes } from '../stores/possible-modes';
 
 export function ChatPanel() {
   const scrollAreaRef = useRef<HTMLDivElement>(null);

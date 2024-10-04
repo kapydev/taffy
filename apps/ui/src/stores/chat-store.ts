@@ -9,6 +9,7 @@ import { SystemPromptMessage } from '../llms/messages/SystemPromptMessage';
 import { createToolMessage, ToolMessage } from '../llms/messages/ToolMessage';
 import { TOOL_RENDER_TEMPLATES, ToolType } from '../llms/messages/tools';
 import { createBetterStore } from './create-better-store';
+import { getPossibleModes } from './possible-modes';
 
 /**If you need the same functionality for multiple completion modes, you can include the keywords together.
  * By doing that, we can use the str.contains() function to determin the behaviour
@@ -196,44 +197,7 @@ trpc.files.onSelectionChange.subscribe(undefined, {
   },
 });
 
-export function canBeInline() {
-  const toolMessages = getToolMessages();
-  const hasUserFileContents = toolMessages.some((msg) =>
-    msg.isType('USER_FILE_CONTENTS')
-  );
-  return hasUserFileContents;
-}
-
-export function canBeEdit() {
-  const toolMessages = getToolMessages();
-  const latestMsg = toolMessages.at(-1);
-  const numWriteFileMsgs = toolMessages.filter(
-    (m) => m.type === 'ASSISTANT_WRITE_FILE'
-  ).length;
-  return numWriteFileMsgs === 1 && latestMsg?.type === 'ASSISTANT_WRITE_FILE';
-}
-
-/**Returns all the possible modes in order of preference */
-export function getPossibleModes(): CompletionMode[] {
-  const result: CompletionMode[] = [];
-  const canInline = canBeInline();
-  const canEdit = canBeEdit();
-  if (canEdit) {
-    if (canInline) {
-      result.push('inline-edit');
-    }
-    result.push('edit');
-  }
-
-  if (canInline) {
-    result.push('inline');
-  }
-  result.push('full');
-
-  return result;
-}
-
-chatStore.subscribe('messages', (messages) => {
+chatStore.subscribe('messages', () => {
   /**TODO: Allow editing in multi file mode - right now there are the following edge cases:
    * 1. After the edit, the diff view is quite strange
    * 2. Need to add state for edits that have already been accepted and those who have not been
