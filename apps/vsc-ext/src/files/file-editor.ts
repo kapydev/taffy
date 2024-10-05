@@ -90,7 +90,7 @@ export class FileEditor {
     if (this._readonlyUri) return this._readonlyUri;
     this._readonlyUri = await createReadonlyUri(
       contents || '',
-      `${this.fileName}-${v4()}`
+      `${v4()}-${this.fileName}`
     );
     return this._readonlyUri;
   }
@@ -116,7 +116,7 @@ export class FileEditor {
     const curReadonlyUri = await this.getFileReadonlyUri();
     const newReadonlyUri = await createReadonlyUri(
       newContents,
-      `${this.fileName}-new-${v4()}`
+      `${v4()}-new-${this.fileName}`
     );
     const openOpts: vscode.TextDocumentShowOptions = {
       viewColumn: getBestColForEditor(),
@@ -131,9 +131,11 @@ export class FileEditor {
     this.modifiedContents = newContents;
     const originalTab = await this.getOriginalDocTab();
     const activeEditor = vscode.window.activeTextEditor;
-    if (originalTab && activeEditor) {
+    if (
+      originalTab?.isActive &&
+      originalTab.group.viewColumn === activeEditor?.viewColumn
+    ) {
       const visibleRanges = activeEditor.visibleRanges;
-
       if (visibleRanges.length > 0) {
         const range = visibleRanges[0];
         activeEditor.revealRange(range, vscode.TextEditorRevealType.AtTop);
@@ -196,8 +198,8 @@ export class FileEditor {
     await this.createIfNotExists();
     const doc = await this.getDoc();
     if (!doc) {
-      throw new Error("Should have document")
-    };
+      throw new Error('Should have document');
+    }
     if (this.modifiedContents === undefined) {
       throw new Error('No modified contents yet!');
     }
