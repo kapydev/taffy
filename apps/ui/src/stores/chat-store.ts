@@ -146,7 +146,7 @@ export async function getLatestFileContent() {
   const curContents = await trpc.files.getFileContents.query({
     filePath: fileContextMsg.props.filePath,
   });
-  if (!curContents) return undefined;
+  if (curContents === undefined) return undefined;
   const startLine = +fileContextMsg.props.startLine;
   const endLine = +fileContextMsg.props.endLine;
 
