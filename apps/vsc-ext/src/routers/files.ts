@@ -171,8 +171,6 @@ const getSelectionData = (editor: vscode.TextEditor | undefined) => {
   if (!editor) return undefined;
   const fileName = extractWorkspacePath(editor.document.fileName);
   if (!fileName) {
-    debugger;
-    extractWorkspacePath(editor.document.fileName);
     throw new Error('Could not find relative filename!');
   }
   const selectedText = editor.document.getText(editor.selection);

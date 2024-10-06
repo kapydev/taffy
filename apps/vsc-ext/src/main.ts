@@ -27,8 +27,6 @@ export const appRouter = router({
 
     // Perform a fuzzy match on filteredFiles
     const fuzzyResults = fuzzysort.go(glob, files);
-    console.log(fuzzyResults);
-    debugger;
 
     // Remove 'debugger' and replace with the return of the results
     return {};
