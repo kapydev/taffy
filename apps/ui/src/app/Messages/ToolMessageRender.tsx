@@ -2,44 +2,49 @@ import { Alert, AlertDescription, AlertTitle } from '@taffy/components';
 import { ToolMessage } from '../../llms/messages/ToolMessage';
 import { TOOL_RENDER_TEMPLATES, ToolType } from '../../llms/messages/tools';
 import { chatStore, removeMessage } from '../../stores/chat-store';
-import { useMemo } from 'react';
+import { ButtonWithHotkey } from '../../components/ButtonWithHotkey';
 
 export function ToolMessageRender<T extends ToolType>({
   message,
 }: {
   message: ToolMessage<T>;
 }) {
+  const allMessages = chatStore.use('messages');
   const { type } = message;
   if (!type) return;
   const renderTemplate = TOOL_RENDER_TEMPLATES[type];
 
-  const description = useMemo(() => {
-    const result = renderTemplate.description(message);
-    return result;
-  }, [message.contents]);
+  const messageIndex = allMessages.indexOf(message);
+  const isLatestMessage = messageIndex === allMessages.length - 1;
+  const keyPrefix = isLatestMessage
+    ? `ctrl+`
+    : `ctrl+${allMessages.length - messageIndex}+`;
 
   return (
     <Alert>
       <renderTemplate.Icon className="w-4 h-4" />
       <AlertTitle>{renderTemplate.title(message)}</AlertTitle>
       <AlertDescription className="break-words whitespace-pre-wrap">
-        {description}
+        {renderTemplate.description(message)}
       </AlertDescription>
       <div className={`flex gap-2 ${message.loading && 'hidden'}`}>
-        <button
+        <ButtonWithHotkey
           className="text-vsc-errorForeground"
-          onClick={() => removeMessage(message)}
+          action={() => removeMessage(message)}
+          keys="ctrl+del"
+          keysPretty="Ctrl+Del"
         >
-          Remove
-        </button>
+          <span>Remove</span>
+        </ButtonWithHotkey>
         {renderTemplate.actions?.map((meta) => {
           return (
-            <button
+            <ButtonWithHotkey
               className="text-vsc-foreground"
-              onClick={() => meta.action(message)}
+              action={() => meta.action(message)}
+              keys={keyPrefix + meta.shortcutEnd}
             >
               {meta.name}
-            </button>
+            </ButtonWithHotkey>
           );
         })}
       </div>

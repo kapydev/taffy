@@ -1,13 +1,6 @@
-import { addLineNumbers } from '@taffy/shared-helpers';
-import {
-  BotIcon,
-  FilePlus2Icon,
-  LucideProps,
-  UserIcon,
-  WaypointsIcon,
-} from 'lucide-react';
-import { ToolMessage } from '../ToolMessage';
+import { BotIcon, FilePlus2Icon, LucideProps, UserIcon } from 'lucide-react';
 import { trpc } from '../../../client';
+import { ToolMessage } from '../ToolMessage';
 
 export type MessageIcon = React.ForwardRefExoticComponent<
   Omit<LucideProps, 'ref'> & React.RefAttributes<SVGSVGElement>
@@ -36,24 +29,51 @@ export const TOOL_TEMPLATES = {
   //ASSISTANT TOOLS
   ASSISTANT_INFO: {
     role: 'assistant',
-    desc: 'For the assistant to write a response to the user. all messages from the assistant should start with an assistant info block.',
+    desc: 'For the assistant to write a response to the user.',
     propDesc: {},
     sampleProps: {},
     sampleBody:
       'To prevent .env files from being committed into the codebase, we need to update the .gitignore file',
   },
-  ASSISTANT_PLANNING: {
-    role: 'assistant',
-    desc: "For the assistant to plan how to tackle the task from the user. There should be a planning block after every assistant info tool block. Reason how to tackle the user's task step by step, placing steps in a logical order. After the planning tool is done, execute the plan. In each step, indicate what tool you will use, and how you will use it",
-    propDesc: {},
-    sampleProps: {},
-    sampleBody: `Example 1:
-    1. Read the .gitignore file using ASSISTANT_READ_FILE
-    2. Update the .gitignore file using ASSISTANT_WRITE_FILE`,
-  },
+  // TODO: For multi file, replace assistant planning with thinking blocks
+  // ASSISTANT_PLANNING: {
+  //   role: 'assistant',
+  //   desc: "For the assistant to plan how to tackle the task from the user. There should be a planning block after every assistant info tool block. Reason how to tackle the user's task step by step, placing steps in a logical order. After the planning tool is done, execute the plan. In each step, indicate what tool you will use, and how you will use it",
+  //   propDesc: {},
+  //   sampleProps: {},
+  //   sampleBody: `Example 1:
+  //   1. Read the .gitignore file using ASSISTANT_READ_FILE
+  //   2. Update the .gitignore file using ASSISTANT_WRITE_FILE`,
+  // },
+  //   ASSISTANT_WRITE_FILE: {
+  //     role: 'assistant',
+  //     desc: `Ask the user for permission to create/overwrite a file. You will need to provide the FULL FILE CONTENTS, because the action suggested to the user will be a full override of the existing file. DO NOT INCLUDE LINE NUMBERS IN THE OUTPUT.`,
+  //     propDesc: {
+  //       filePath:
+  //         "The path to which the file is written. If the file path doesn't exist, directories will be recursively created until we are able to create the file.",
+  //     },
+  //     sampleProps: {
+  //       filePath: 'src/utils/helloWorld.ts',
+  //     },
+  //     sampleBody: `export function helloWorld() {
+  // ${'console'}.log("Hello World!");
+  // }`,
+  //   },
+  //I'm not sure about the thinking start version
   ASSISTANT_WRITE_FILE: {
     role: 'assistant',
-    desc: 'Ask the user for permission to create/overwrite a file. You will need to provide the FULL FILE CONTENTS, because the action suggested to the user will be a full override of the existing file. DO NOT INCLUDE LINE NUMBERS IN THE OUTPUT',
+    desc: `Ask the user for permission to create/overwrite a file. You will need to provide the FULL FILE CONTENTS, because the action suggested to the user will be a full override of the existing file. Stopping generation before reaching the end of the file will result in a confusing output to the end user after the result is parsed. DO NOT INCLUDE LINE NUMBERS IN THE OUTPUT. Before tackling a challenging part of the code, you can walk yourself through the coding process in a THINKING block
+
+  {THINKING_START}
+  In order to write this function, I will need to...
+  {THINKING_END}
+
+  The thinking blocks will not be included in the outputted code.
+  Within the thinking blocks, consider the user's existing code style and practices and follow those.
+  DO NOT WRITE CODE WITHIN THE THINKING BLOCKS. The thinking blocks are soley meant for planning. Any code will need to be written outside the thinking block, in order to be included in the final suggestion to the user.
+
+  Do not generate comments in the generated code, unless the user explicitly asks for it. Use thinking blocks instead if absolutely necessary.
+  `,
     propDesc: {
       filePath:
         "The path to which the file is written. If the file path doesn't exist, directories will be recursively created until we are able to create the file.",
@@ -62,8 +82,11 @@ export const TOOL_TEMPLATES = {
       filePath: 'src/utils/helloWorld.ts',
     },
     sampleBody: `export function helloWorld() {
-      ${'console'}.log("Hello World!")
-    }`,
+{THINKING_START}
+The hello world function should log hello world.
+{THINKING_END}
+  ${'console'}.log("Hello World!");
+}`,
   },
   ASSISTANT_READ_FILE: {
     role: 'assistant',
@@ -82,7 +105,7 @@ export const TOOL_TEMPLATES = {
   },
   USER_FILE_CONTENTS: {
     role: 'user',
-    desc: 'Information from the user regarding the contents of a file. If there are multiple FILE_CONTENTS tool responses, the latest one should be considered as the correct one. Line numbers, are NOT part of the file, every line number is followed by a space, which contains the actual contents of the file.',
+    desc: 'Information from the user regarding the contents of a file. If there are multiple FILE_CONTENTS tool responses, the latest one should be considered as the correct one. Questions from the user should be focused on parts of the code within a FOCUS fence block ',
     propDesc: {
       startLine: 'The start line of the specific area to focus on',
       endLine: 'The end line of the specific area to focus on',
@@ -93,9 +116,12 @@ export const TOOL_TEMPLATES = {
       endLine: '25',
       filePath: 'src/utils/helloWorld.ts',
     },
-    sampleBody: addLineNumbers(`export default function HelloWorld() {
+    sampleBody: `export default function HelloWorld() {
+{FOCUS_START}
+    const name = 'Thomas';
+{FOCUS_END}
     ${'console'}.log("Hello World");
-  }`),
+  }`,
   },
   USER_AVAILABLE_FILES: {
     role: 'user',
@@ -113,6 +139,10 @@ type ToolAction<ToolName extends ToolType> = (
 export type ToolActionMeta<ToolName extends ToolType> = {
   name: string;
   action: ToolAction<ToolName>;
+  /**For a keyboard shortcut Ctrl+T, or Ctrl+1+T for an older
+   * message for example, just put 't' as the shortcut - it
+   * will be concatenated to the end */
+  shortcutEnd: string;
 };
 export type ToolRenderTemplate<ToolName extends ToolType> = {
   Icon: MessageIcon;
@@ -135,11 +165,11 @@ export const TOOL_RENDER_TEMPLATES: {
     title: () => 'Assistant Info',
     description: (data) => data.body,
   },
-  ASSISTANT_PLANNING: {
-    Icon: WaypointsIcon,
-    title: () => 'Assistant Planning',
-    description: (data) => data.body,
-  },
+  // ASSISTANT_PLANNING: {
+  //   Icon: WaypointsIcon,
+  //   title: () => 'Assistant Planning',
+  //   description: (data) => data.body,
+  // },
   ASSISTANT_READ_FILE: {
     Icon: FilePlus2Icon,
     title: () => 'Requesting permission to read the following files',
@@ -148,6 +178,7 @@ export const TOOL_RENDER_TEMPLATES: {
       {
         name: 'approve',
         action: () => {},
+        shortcutEnd: 'enter',
       },
     ],
   },
@@ -169,10 +200,15 @@ export const TOOL_RENDER_TEMPLATES: {
     title: () => 'Requesting permission to write the following files',
     description: (data) => {
       if (!data.props) return;
+      const thoughtsString = data.thoughts ? `💡${data.thoughts}` : '';
+      const infoString = data.loading
+        ? `${data.body.length} characters loaded so far`
+        : 'Loading Complete!';
+      const fullStr = infoString + '\n\n' + thoughtsString;
       return (
         <>
           <div>File Path - {data.props.filePath} </div>
-          <code className="break-word whitespace-pre-wrap">{data.body}</code>
+          {fullStr}
         </>
       );
     },
@@ -192,10 +228,23 @@ export const TOOL_RENDER_TEMPLATES: {
     },
     actions: [
       {
+        name: 'Preview',
+        action: (message) => {
+          if (!message.props) return;
+          trpc.files.previewFileChange.mutate({
+            fileName: message.props.filePath,
+            newContents: message.body,
+            id: message.id,
+          });
+        },
+        shortcutEnd: 'p',
+      },
+      {
         name: 'Approve Change',
         action: (message) => {
           trpc.files.approveFileChange.mutate({ id: message.id });
         },
+        shortcutEnd: 'enter',
       },
     ],
   },

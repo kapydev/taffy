@@ -9,33 +9,17 @@ import { ee } from '../event-emitter';
 import { latestActiveEditor } from '../main';
 import { previewFileChange } from '../files/preview-file-change';
 import { getWorkspaceFiles } from '../files/get-folder-structure';
+import { FileEditor } from '../files/file-editor';
+
+function getIndentLen(line: string) {
+  return (line.match(/^\s*/)?.[0] ?? '').replace(/\t/g, '    ').length;
+}
 
 export const fileRouter = router({
   getWorkingDirFilesObj: publicProcedure.query(async (): Promise<FilesObj> => {
     return getFilesObj();
   }),
   onSelectionChange: publicProcedure.subscription(() => {
-    const getSelectionData = (editor: vscode.TextEditor | undefined) => {
-      if (!editor) return undefined;
-      const fileName = extractWorkspacePath(editor.document.fileName);
-      if (!fileName) {
-        throw new Error('Could not find relative filename!');
-      }
-      const selection = editor.selection;
-      const selectedText = editor.document.getText(selection);
-      const fullFileContents = editor.document.getText();
-      const selectedLineNumbers = {
-        start: selection.start.line + 1,
-        end: selection.end.line + 1,
-      };
-      return {
-        fullFileContents,
-        selectedLineNumbers,
-        selectedText,
-        fileName,
-      };
-    };
-
     return observable<NonNullable<ReturnType<typeof getSelectionData>>>(
       (emit) => {
         const sendSelectionData = () => {
@@ -55,7 +39,7 @@ export const fileRouter = router({
     );
   }),
   getWorkspaceFiles: publicProcedure.query(() => getWorkspaceFiles()),
-  getFileByPath: publicProcedure
+  getFileDiskContentsByPath: publicProcedure
     .input(z.object({ filePath: z.string() }))
     .query(async (opts) => {
       const { filePath: rawFilePath } = opts.input;
@@ -71,6 +55,15 @@ export const fileRouter = router({
       } catch (error) {
         return undefined;
       }
+    }),
+  /**Gets the file contents currently, even if the file is still being edited */
+  getFileContents: publicProcedure
+    .input(z.object({ filePath: z.string() }))
+    .query(async (opts) => {
+      const { filePath } = opts.input;
+      const editor = new FileEditor(filePath);
+      const contents = await editor.getContents();
+      return contents;
     }),
   previewFileChange: publicProcedure
     .input(
@@ -89,6 +82,7 @@ export const fileRouter = router({
     .input(z.object({ id: z.string() }))
     .mutation(async (opts) => {
       const { id } = opts.input;
+      console.log('Approving file change', id);
       ee.emit('fileChangeApproved', id);
       return {};
     }),
@@ -171,4 +165,36 @@ const focusInEditor = async (
   const range = new vscode.Range(position, position);
   editor.revealRange(range, vscode.TextEditorRevealType.InCenter);
   editor.selection = new vscode.Selection(position, position);
+};
+
+const getSelectionData = (editor: vscode.TextEditor | undefined) => {
+  if (!editor) return undefined;
+  const fileName = extractWorkspacePath(editor.document.fileName);
+  if (!fileName) {
+    throw new Error('Could not find relative filename!');
+  }
+  const selectedText = editor.document.getText(editor.selection);
+  const fullFileContents = editor.document.getText();
+  const allLines = fullFileContents.split('\n');
+
+  // Expand selection
+  const startLine = editor.selection.start.line;
+  const endLine = editor.selection.end.line;
+
+  editor.selection = new vscode.Selection(
+    new vscode.Position(startLine, 0),
+    new vscode.Position(endLine, allLines[endLine].length)
+  );
+
+  const selectedLineNumbers = {
+    start: startLine + 1,
+    end: endLine + 1,
+  };
+
+  return {
+    fullFileContents,
+    selectedLineNumbers,
+    selectedText,
+    fileName,
+  };
 };

@@ -19,6 +19,7 @@ function LeftPanel() {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const runTestFunc = () => {
+    // console.log(chatStore.get('messages'));
     trpc.testFunc.query();
   };
 

@@ -7,5 +7,8 @@ export abstract class LLM {
     this.maxTokens = 4096;
   }
 
-  abstract prompt(messages: RawMessage[]): AsyncIterable<string>;
+  abstract prompt(
+    messages: RawMessage[],
+    stopSequences: string[]
+  ): AsyncIterable<string>;
 }

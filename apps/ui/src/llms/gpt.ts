@@ -9,7 +9,10 @@ export class GPT extends LLM {
     this.apiKey = apiKey;
   }
 
-  async *prompt(messages: RawMessage[]): AsyncIterable<string> {
+  async *prompt(
+    messages: RawMessage[],
+    stopSequences: string[]
+  ): AsyncIterable<string> {
     const client = new OpenAI({
       apiKey: this.apiKey,
       dangerouslyAllowBrowser: true,
@@ -19,6 +22,7 @@ export class GPT extends LLM {
       model: 'gpt-4o',
       messages: messages,
       max_tokens: this.maxTokens,
+      stop: stopSequences,
       stream: true,
     });
 

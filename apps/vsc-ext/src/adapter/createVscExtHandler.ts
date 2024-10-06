@@ -13,6 +13,8 @@ import { isTRPCRequestWithId } from '@taffy/shared-helpers';
 import * as vscode from 'vscode';
 import { getErrorFromUnknown } from './errors';
 
+const logger = console;
+
 //Inspired by https://github.com/janek26/trpc-browser?tab=readme-ov-file#createchromehandleroptions
 type CreateContextOptions = { req: unknown; res: unknown };
 type CreateHandlerOptions<
@@ -146,6 +148,7 @@ export function createVscExtHandler<TRouter extends AnyTRPCRouter>(
       subscriptions.set(id, subscription);
       sendResponse({ result: { type: 'started' } });
     } catch (cause) {
+      logger.error(cause);
       handleError(cause);
     }
   };

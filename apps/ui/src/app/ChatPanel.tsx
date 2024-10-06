@@ -1,11 +1,11 @@
 import { Badge, Button, Textarea } from '@taffy/components';
 import { Send } from 'lucide-react';
-import { useState } from 'react';
-import { useEffect, useRef } from 'react';
-import { chatStore, removeMessage, runPrompts } from '../stores/chat-store';
+import { useEffect, useRef, useState } from 'react';
+import { ButtonWithHotkey } from '../components/ButtonWithHotkey';
+import { chatStore, continuePrompt } from '../stores/chat-store';
+import { updateChat } from '../stores/update-prompt';
+import { toggleModeHandler } from './KeyboardShortcuts/handlers';
 import { Messages } from './Messages';
-import { ToolMessage } from '../llms/messages/ToolMessage';
-import { toolToToolString } from '../llms/messages/tools';
 
 export function ChatPanel() {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -17,9 +17,6 @@ export function ChatPanel() {
       if (inputRef.current) {
         inputRef.current.focus();
       }
-      if (scrollAreaRef.current) {
-        scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
-      }
     };
     handleWindowFocus();
     window.addEventListener('focus', handleWindowFocus);
@@ -28,42 +25,15 @@ export function ChatPanel() {
     };
   }, []);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim()) return;
     if (scrollAreaRef.current) {
       scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
     }
-    if (mode === 'normal') {
-      chatStore.set('messages', [
-        ...chatStore.get('messages'),
-        new ToolMessage(
-          toolToToolString('USER_PROMPT', {
-            body: input,
-            props: {},
-          })
-        ),
-      ]);
-    } else if (mode === 'edit') {
-      const messages = chatStore.get('messages');
-      const latestUserPrompt = [...messages]
-        .reverse()
-        .find(
-          (msg) => msg instanceof ToolMessage && msg.type === 'USER_PROMPT'
-        );
-      if (!latestUserPrompt) return;
-      if (!(latestUserPrompt instanceof ToolMessage)) return;
-      latestUserPrompt.body += ',' + input;
-
-      const messagesAfterPrompt = messages.slice(
-        messages.indexOf(latestUserPrompt) + 1
-      );
-      messagesAfterPrompt.forEach((msg) => {
-        if (!(msg instanceof ToolMessage)) return;
-        removeMessage(msg);
-      });
-    }
     setInput('');
-    runPrompts();
+    const mode = chatStore.get('mode');
+    await updateChat(input, mode);
+    await continuePrompt(mode);
   };
 
   return (
@@ -77,7 +47,13 @@ export function ChatPanel() {
         </div>
       </div>
       <div className="flex mt-4 flex-col">
-        <Badge className="self-start">{mode}</Badge>
+        <ButtonWithHotkey
+          action={toggleModeHandler.action}
+          keys="ctrl+m"
+          keysPretty="Ctrl+M"
+        >
+          <Badge>{mode}</Badge>
+        </ButtonWithHotkey>
         <div className="flex">
           <Textarea
             ref={inputRef}
@@ -94,9 +70,11 @@ export function ChatPanel() {
             placeholder="Type your message..."
             className="flex-1 mr-2"
           />
-          <Button onClick={handleSend}>
-            <Send className="h-4 w-4" />
-          </Button>
+          <ButtonWithHotkey hideHint keys="enter" action={handleSend}>
+            <Button>
+              <Send className="h-3 w-3" />
+            </Button>
+          </ButtonWithHotkey>
         </div>
       </div>
     </div>

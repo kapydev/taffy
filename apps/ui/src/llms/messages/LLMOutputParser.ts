@@ -1,18 +1,21 @@
-import { sleep } from '@taffy/shared-helpers';
-import { CustomMessage } from './Messages';
-import { ToolMessage } from './ToolMessage';
-import { TOOL_RENDER_TEMPLATES } from './tools';
+import {
+  chatStore,
+  CompletionMode,
+  getInlineStopSequence,
+  getLatestFileContent,
+  getToolMessages,
+} from '../../stores/chat-store';
+import {
+  TOOL_END_MATCH_REGEX,
+  TOOL_START_MATCH_REGEX,
+  ToolMessage,
+} from './ToolMessage';
+import { getToolEndString, TOOL_RENDER_TEMPLATES } from './tools';
 
 const logger = console;
 
 export class LLMOutputParser {
-  private inTool = false;
-  private messages: CustomMessage[] = [new ToolMessage()];
-
-  async handleTextStream(
-    stream: AsyncIterable<string>,
-    onMsgUpdate?: () => void
-  ) {
+  async handleTextStream(stream: AsyncIterable<string>, mode: CompletionMode) {
     let curLine = '';
     for await (const textChunk of stream) {
       curLine += textChunk;
@@ -20,13 +23,29 @@ export class LLMOutputParser {
       const lines = curLine.split('\n');
       curLine = lines.pop() || '';
       this.parseLines(lines);
-      logger.log(lines.join('\n'));
-      onMsgUpdate?.();
+    }
+    //If we completed generation in inline mode need to auto complete the remaining text
+    if (mode.includes('inline')) {
+      const inlineStopSeq = await getInlineStopSequence();
+      const toolEndStr = getToolEndString('ASSISTANT_WRITE_FILE');
+      //If LLM already outputted the toolEndStr, don't append stuff
+      if (inlineStopSeq && !curLine.includes(toolEndStr)) {
+        const latestFileContent = await getLatestFileContent();
+        if (!latestFileContent) {
+          throw new Error('Expected latest file content');
+        }
+        const remainder =
+          inlineStopSeq +
+          latestFileContent.postSelection
+            .split(inlineStopSeq)
+            .slice(1)
+            .join(inlineStopSeq);
+        curLine += remainder;
+        curLine += toolEndStr;
+      }
     }
     if (curLine) {
       this.parse(curLine);
-      logger.log(curLine);
-      onMsgUpdate?.();
     }
   }
 
@@ -40,39 +59,32 @@ export class LLMOutputParser {
 
   parseLine(line: string) {
     //The tool matches are more fuzzy than the actual instructions given to the models, to try to render as far as possible.
-    const toolStartMatch = line.match(/{TOOL (\w+)(?: (.*))?}/);
-    const toolEndMatch = line.match(/{END_TOOL\s?(\w*)}/);
-    if (toolStartMatch && !this.inTool) {
-      this.messages.push(new ToolMessage());
-      this.inTool = true;
+    const toolStartMatch = line.match(TOOL_START_MATCH_REGEX);
+    const toolEndMatch = line.match(TOOL_END_MATCH_REGEX);
+    if (toolStartMatch) {
+      chatStore.set('messages', [
+        ...chatStore.get('messages'),
+        new ToolMessage(),
+      ]);
     }
 
-    const latestMsg = this.messages.at(-1);
+    const latestMsg = getToolMessages().at(-1);
     if (!latestMsg) {
       throw new Error('Expected at least one message!');
     }
-    if (this.inTool) {
-      latestMsg.contents += `${line}\n`;
-      if (latestMsg instanceof ToolMessage) {
-        latestMsg.loading = true;
-      }
-    }
+
+    latestMsg.contents += `${line}\n`;
 
     if (toolEndMatch) {
-      this.inTool = false;
-      if (latestMsg instanceof ToolMessage) {
-        latestMsg.loading = false;
-        if (!latestMsg.type) return;
-        const renderTemplate = TOOL_RENDER_TEMPLATES[latestMsg.type];
-        if (!renderTemplate) return;
-        if (!renderTemplate.onFocus) return;
-        renderTemplate.onFocus(latestMsg as any);
-        //TODO: Stop parsing until user finishes focus action
-      }
+      if (!latestMsg.type) return;
+      const renderTemplate = TOOL_RENDER_TEMPLATES[latestMsg.type];
+      if (!renderTemplate) return;
+      if (!renderTemplate.onFocus) return;
+      renderTemplate.onFocus(latestMsg as any);
+      //TODO: Stop parsing until user finishes focus action
     }
-  }
 
-  getMessages(): CustomMessage[] {
-    return this.messages;
+    //Trigger rerender, cos I'm not sure how else to ensure proper updating
+    chatStore.set('messages', [...chatStore.get('messages')]);
   }
 }

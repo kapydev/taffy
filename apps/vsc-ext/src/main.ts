@@ -1,13 +1,14 @@
+import '@taffy/shared-types';
+import fuzzysort from 'fuzzysort';
 import * as vscode from 'vscode';
 import html from '../../../dist/apps/taffy/static/index.html?raw';
-import '@taffy/shared-types';
 import { createVscExtHandler } from './adapter/createVscExtHandler';
-import { router, publicProcedure } from './trpc';
-import { fileRouter } from './routers/files';
 import { ee } from './event-emitter';
-import { previewFileChange } from './files/preview-file-change';
+import { removeAllEditors } from './files/file-editor';
+import { getWorkspaceFiles } from './files/get-folder-structure';
 import { getBestColForWebView } from './helpers/get-best-col';
-import { FileEditor } from './files/file-editor';
+import { fileRouter } from './routers/files';
+import { publicProcedure, router } from './trpc';
 
 const logger = console;
 export let latestActiveEditor = vscode.window.activeTextEditor;
@@ -20,8 +21,14 @@ export function getCurWebView() {
 export const appRouter = router({
   files: fileRouter,
   testFunc: publicProcedure.query(async () => {
-    const xxx = new FileEditor('.gitignore');
-    const yyy = await xxx.showDiffView('Hello World');
+    const files = await getWorkspaceFiles();
+    const glob = 'vite';
+    // Import the fuzzy matching library
+
+    // Perform a fuzzy match on filteredFiles
+    const fuzzyResults = fuzzysort.go(glob, files);
+
+    // Remove 'debugger' and replace with the return of the results
     return {};
   }),
   hello: publicProcedure.query(() => {
@@ -62,6 +69,7 @@ export function activate(context: vscode.ExtensionContext) {
     currentWebview.onDidDispose(
       () => {
         currentWebview = undefined;
+        removeAllEditors();
       },
       null,
       context.subscriptions

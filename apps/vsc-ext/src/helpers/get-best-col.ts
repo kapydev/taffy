@@ -4,9 +4,8 @@ import { getCurWebView } from '../main';
 export function getBestColForWebView(): vscode.ViewColumn {
   const editor = vscode.window.activeTextEditor;
   const baseCol: vscode.ViewColumn = vscode.ViewColumn.Beside;
-
   const curWebView = getCurWebView();
-  if (curWebView?.viewColumn !== undefined) {
+  if (curWebView?.visible && curWebView.viewColumn !== undefined) {
     return curWebView.viewColumn;
   }
 
@@ -43,7 +42,9 @@ export function getBestColForEditor(): vscode.ViewColumn {
   const visibleColumns = vscode.window.tabGroups.all.map((tg) => tg.viewColumn);
 
   // Find the first column that is not occupied by the current webview
-  const bestCol = visibleColumns.find((col) => col !== curWebView?.viewColumn);
+  const bestCol = visibleColumns.find(
+    (col) => col !== curWebView?.viewColumn && curWebView?.visible
+  );
 
   // Return the found column or the base column
   return bestCol ?? baseCol;
