@@ -1,5 +1,5 @@
 import { Button } from '@taffy/components';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Settings } from 'lucide-react';
 import { useState } from 'react';
 import { chatStore, resetChatStore } from '../stores/chat-store';
 import { ChatPanel } from './ChatPanel';
@@ -16,39 +16,37 @@ export function MainChat() {
 }
 
 function LeftPanel() {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const showSettings = chatStore.use('showSettings');
 
   const runTestFunc = () => {
     trpc.testFunc.query();
   };
 
-  if (!isExpanded) {
-    return (
-      <ChevronRight
-        className={`absolute top-2 left-2 cursor-pointer transform transition-transform`}
-        onClick={() => setIsExpanded(!isExpanded)}
-      />
-    );
-  }
-
   return (
     <div
       className={`relative ${
-        isExpanded ? 'w-64' : 'w-8'
-      } flex flex-col bg-background p-4 overflow-auto flex-shrink-0 self-stretch`}
+        showSettings ? 'w-64' : 'hidden'
+      } flex flex-col bg-background p-4 overflow-auto flex-shrink-0 self-stretch mr-3`}
     >
-      <div className="flex justify-between">
-        <h2 className="text-lg font-semibold mb-4">Options</h2>
+      <div className="flex items-center justify-between mb-4">
+        <div className='flex gap-2 items-center'>
+          <Settings className="w-4 h-4" />
+          <h2 className="text-base font-semibold mb-0.5">Settings</h2>
+        </div>
         <ChevronRight
-          className={`cursor-pointer transform transition-transform ${
-            isExpanded ? 'rotate-180' : ''
+          className={`w-4 h-4 cursor-pointer transform transition-transform ${
+            showSettings ? 'rotate-180' : ''
           }`}
-          onClick={() => setIsExpanded(!isExpanded)}
+          onClick={() => chatStore.set('showSettings', !showSettings)}
         />
       </div>
-      <div className="flex flex-col justify-between flex-1">
-        <Button onClick={resetChatStore}>Reset Chat</Button>
-        <Button onClick={runTestFunc}>Test Func</Button>
+      <div className="flex flex-col flex-1 gap-3">
+        <Button size="sm" onClick={resetChatStore}>
+          Reset Chat
+        </Button>
+        <Button size="sm" onClick={runTestFunc}>
+          Test Func
+        </Button>
         <KeyInput />
       </div>
     </div>

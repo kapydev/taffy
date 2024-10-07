@@ -1,6 +1,7 @@
 import { addLineNumbers } from '@taffy/shared-helpers';
 import {
   BotIcon,
+  FileInput,
   FilePlus2Icon,
   LucideProps,
   UserIcon,
@@ -132,7 +133,7 @@ export const TOOL_RENDER_TEMPLATES: {
   },
   ASSISTANT_INFO: {
     Icon: BotIcon,
-    title: () => 'Assistant Info',
+    title: () => 'Assistant',
     description: (data) => data.body,
   },
   ASSISTANT_PLANNING: {
@@ -142,7 +143,7 @@ export const TOOL_RENDER_TEMPLATES: {
   },
   ASSISTANT_READ_FILE: {
     Icon: FilePlus2Icon,
-    title: () => 'Requesting permission to read the following files',
+    title: () => 'Shall I add the following?',
     description: (data) => data.body,
     actions: [
       {
@@ -152,8 +153,9 @@ export const TOOL_RENDER_TEMPLATES: {
     ],
   },
   USER_FILE_CONTENTS: {
-    Icon: FilePlus2Icon,
+    Icon: FileInput,
     title: () => 'File Context Added',
+
     description: (data) => {
       if (!data.props) return;
       return (
@@ -166,7 +168,7 @@ export const TOOL_RENDER_TEMPLATES: {
   },
   ASSISTANT_WRITE_FILE: {
     Icon: FilePlus2Icon,
-    title: () => 'Requesting permission to write the following files',
+    title: () => 'Shall I add the following?',
     description: (data) => {
       if (!data.props) return;
       return (
@@ -192,7 +194,7 @@ export const TOOL_RENDER_TEMPLATES: {
     },
     actions: [
       {
-        name: 'Approve Change',
+        name: 'Approve',
         action: (message) => {
           trpc.files.approveFileChange.mutate({ id: message.id });
         },

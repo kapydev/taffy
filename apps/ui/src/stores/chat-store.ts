@@ -15,6 +15,7 @@ export const chatStore = createBetterStore({
   messages: [new SystemPromptMessage()] as CustomMessage[],
   llm: null as LLM | null,
   mode: 'normal' as 'normal' | 'edit',
+  showSettings: false || true,
 });
 
 //@ts-expect-error for debugging

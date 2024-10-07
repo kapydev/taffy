@@ -1,5 +1,5 @@
 import { Badge, Button, Textarea } from '@taffy/components';
-import { Send } from 'lucide-react';
+import { Send, Settings } from 'lucide-react';
 import { useState } from 'react';
 import { useEffect, useRef } from 'react';
 import { chatStore, removeMessage, runPrompts } from '../stores/chat-store';
@@ -8,6 +8,7 @@ import { ToolMessage } from '../llms/messages/ToolMessage';
 import { toolToToolString } from '../llms/messages/tools';
 
 export function ChatPanel() {
+  const showSettings = chatStore.use('showSettings');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const mode = chatStore.use('mode');
   const [input, setInput] = useState('');
@@ -67,7 +68,7 @@ export function ChatPanel() {
   };
 
   return (
-    <div className="flex flex-col p-4 flex-1">
+    <div className="flex flex-col flex-1">
       <div className="flex-1 relative">
         <div
           ref={scrollAreaRef}
@@ -76,9 +77,9 @@ export function ChatPanel() {
           <Messages />
         </div>
       </div>
-      <div className="flex mt-4 flex-col">
-        <Badge className="self-start">{mode}</Badge>
-        <div className="flex">
+      <div className="flex flex-col">
+        {/* <Badge className="self-start">{mode}</Badge> */}
+        <div className="flex gap-2 relative mt-2">
           <Textarea
             ref={inputRef}
             value={input}
@@ -92,11 +93,26 @@ export function ChatPanel() {
               }
             }}
             placeholder="Type your message..."
-            className="flex-1 mr-2"
+            className="flex-1 pr-10 border-none"
           />
-          <Button onClick={handleSend}>
-            <Send className="h-4 w-4" />
-          </Button>
+          <div className="flex flex-col absolute right-0 inset-y-0 p-1.5 gap-1.5">
+            <Button
+              className="hover:bg-white/10 w-8 h-8 shadow-none"
+              size="icon"
+              variant="default"
+              onClick={handleSend}
+            >
+              <Send className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              className="hover:bg-white/10 w-8 h-8 shadow-none"
+              size="icon"
+              variant="default"
+              onClick={() => chatStore.set('showSettings', !showSettings)}
+            >
+              <Settings className="h-3.5 w-3.5" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>
