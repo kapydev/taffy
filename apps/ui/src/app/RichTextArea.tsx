@@ -1,4 +1,5 @@
 import { useEditor, EditorContent, Editor, JSONContent } from '@tiptap/react';
+import Placeholder from '@tiptap/extension-placeholder';
 import Mention, { MentionOptions } from '@tiptap/extension-mention';
 import StarterKit from '@tiptap/starter-kit';
 import {
@@ -99,12 +100,16 @@ export function RichTextArea() {
         HTMLAttributes: { class: 'text-blue-400' },
         suggestion: mentionSuggestion,
       }),
+      Placeholder.configure({
+        placeholder: 'Key "@" to add context files.',
+      }),
     ],
     autofocus: true,
     editorProps: {
       attributes: {
         class:
-          'flex min-h-[80px] w-full rounded-md bg-background pl-3 pr-10 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 flex-1 border-none w-full',
+          // 'flex min-h-[80px] w-full rounded-md bg-background pl-3 pr-10 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 flex-1 border-none w-full',
+          'focus-visible:outline-none bg-vsc-input-background py-2 pl-3 rounded-t-md text-xs',
       },
     },
     onUpdate(props) {
@@ -189,13 +194,13 @@ const MentionList = forwardRef<unknown, MentionListProps>((props, ref) => {
   }));
 
   return (
-    <div className="flex flex-col bg-background border">
+    <div className="flex flex-col bg-background border rounded-md w-full text-xs">
       {props.items.length ? (
         props.items.map((item, index) => (
           <button
             className={
-              'hover:bg-gray-700 p-1 ' +
-              (index === selectedIndex ? 'bg-gray-800' : '')
+              'hover:bg-white/10 p-1 truncate' +
+              (index === selectedIndex ? 'bg-white/20' : '')
             }
             key={index}
             onClick={() => selectItem(index)}

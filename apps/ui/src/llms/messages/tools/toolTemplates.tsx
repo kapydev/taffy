@@ -184,7 +184,8 @@ export type ToolActionMeta<ToolName extends ToolType> = {
 export type ToolRenderTemplate<ToolName extends ToolType> = {
   Icon: MessageIcon;
   title: (message: ToolMessage<ToolName>) => React.ReactNode;
-  description: (message: ToolMessage<ToolName>) => React.ReactNode;
+  body: (message: ToolMessage<ToolName>) => React.ReactNode;
+  content: (message: ToolMessage<ToolName>) => string; // THIS IS FOR SHOWING MARKDOWN BUT ITS QUITE BUGGY. FIX AND USE THIS IN THE UI NEXT TIME
   onRemove?: ToolAction<ToolName>;
   onFocus?: ToolAction<ToolName>;
   actions?: ToolActionMeta<ToolName>[];
@@ -195,17 +196,20 @@ export const TOOL_RENDER_TEMPLATES: {
   USER_PROMPT: {
     Icon: UserIcon,
     title: () => 'You',
-    description: (data) => data.body,
+    body: (data) => data.body,
+    content: (data) => data.contents,
   },
   ASSISTANT_INFO: {
     Icon: BotIcon,
     title: () => 'Taffy',
-    description: (data) => data.body,
+    body: (data) => data.body,
+    content: (data) => data.contents,
   },
   ASSISTANT_PLANNING: {
     Icon: WaypointsIcon,
     title: () => 'Taffy Planning',
-    description: (data) => data.body,
+    body: (data) => data.body,
+    content: (data) => data.contents,
   },
   // ASSISTANT_READ_FILE: {
   //   Icon: FilePlus2Icon,
@@ -222,20 +226,26 @@ export const TOOL_RENDER_TEMPLATES: {
   USER_FOCUS_BLOCK: {
     Icon: FileInput,
     title: () => 'File Context Added',
-    description: (data) => {
+    body: (data) => {
       if (!data.props) return;
       return (
-        <p className=''>
+        <p className="">
           {data.props.filePath} <br />
           Line {data.props.startLine} to Line {data.props.endLine}
         </p>
       );
     },
+    content: (data) =>
+      data.props?.filePath +
+      'Line ' +
+      data.props?.startLine +
+      ' to Line ' +
+      data.props?.endLine,
   },
   ASSISTANT_REPLACE_BLOCK: {
     Icon: FilePlus2Icon,
     title: () => 'Can I edit these files?',
-    description: (data) => {
+    body: (data) => {
       if (!data.props) return;
       const thoughtsString = data.thoughts ? `💡${data.thoughts}` : '';
       let fullStr = data.loading
@@ -247,11 +257,23 @@ export const TOOL_RENDER_TEMPLATES: {
 
       return (
         <>
-          <div>{data.props.filePath} </div>
+          <div>{data.props?.filePath} </div>
           {fullStr}
         </>
       );
     },
+    content: (data) => {
+      if (!data.props) return '';
+      const thoughtsString = data.thoughts ? `💡${data.thoughts}` : '';
+      let fullStr = data.loading
+        ? `${data.body.length} characters loaded so far`
+        : '';
+      if (thoughtsString) {
+        fullStr += '\n\n' + thoughtsString;
+      }
+      return data.props?.filePath + '\n' + fullStr;
+    },
+
     onFocus: async (message) => {
       if (!message.props) return;
       const curContents = await getLatestFocusedContent();
@@ -303,15 +325,16 @@ export const TOOL_RENDER_TEMPLATES: {
   USER_FILE_CONTENTS: {
     Icon: FileInputIcon,
     title: () => 'File Context Added',
-    description: (data) => {
+    body: (data) => {
       if (!data.props) return;
       return data.props.filePath;
     },
+    content: (data) => data.props?.filePath ?? '',
   },
   ASSISTANT_WRITE_FILE: {
     Icon: FilePlus2Icon,
     title: () => 'Shall I add the following?',
-    description: (data) => {
+    body: (data) => {
       if (!data.props) return;
       const thoughtsString = data.thoughts ? `💡${data.thoughts}` : '';
       let fullStr = data.loading
@@ -327,6 +350,17 @@ export const TOOL_RENDER_TEMPLATES: {
           {fullStr}
         </>
       );
+    },
+    content: (data) => {
+      if (!data.props) return '';
+      const thoughtsString = data.thoughts ? `💡${data.thoughts}` : '';
+      let fullStr = data.loading
+        ? `${data.body.length} characters loaded so far`
+        : '';
+      if (thoughtsString) {
+        fullStr += '\n\n' + thoughtsString;
+      }
+      return 'File Path - ' + data.props?.filePath + '\n' + fullStr;
     },
     onFocus: (message) => {
       if (!message.props) return;
@@ -367,7 +401,11 @@ export const TOOL_RENDER_TEMPLATES: {
   USER_AVAILABLE_FILES: {
     Icon: FilePlus2Icon,
     title: () => 'Available Files in Repository',
-    description: (data) => {
+    body: (data) => {
+      const numFiles = data.body.split('\n').length;
+      return `${numFiles} filenames added to context`;
+    },
+    content: (data) => {
       const numFiles = data.body.split('\n').length;
       return `${numFiles} filenames added to context`;
     },
