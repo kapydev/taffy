@@ -41,7 +41,7 @@ export interface ToolTemplate {
  * Prompt Engineering Guidelines:
  * CoT - Ask LLM to explain thought process step by step for better outputs
  * Citations - By asking LLM for citation, we can run a bullshit detector using regex
- * No negatives - Instead of saying `DO NOT DO XXX`, which places a focus on XXX cos that's how attention models work, say `DO YYY`
+ * Prefer positives - Instead of saying `DO NOT DO XXX`, which places a focus on XXX cos that's how attention models work, say `DO YYY`. Negatives are okay from time to time but if you can put both you might as well
  * Avoid controlling termination behaviour - the models can't control themselves if you ask them `STOP GENERATING AFTER YYY`. Use stop sequences instead, or if you use xml tags, with rules, they can recognise that as a reason to stop
  * Common terminology - Instead of using uncommon terminology like 'planning block' and 'fence blocks', stick to what is common for the LLM to have a better understanding of the rules, like 'thinking blocks' and 'xml tags'
  *
@@ -56,6 +56,7 @@ export interface ToolTemplate {
  * Add token limit registrar to context adder
  * Explicitly state indentation for replace block flow
  * Fix assistant read file
+ * Rule follower - make sure LLM output follows rules at every step otherwise restart prompting
  */
 
 export const TOOL_TEMPLATES = {
