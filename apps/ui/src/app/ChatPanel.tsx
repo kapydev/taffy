@@ -48,13 +48,13 @@ export function ChatPanel() {
         </div>
       </div>
       <div className="flex flex-col">
-        <ButtonWithHotkey
+        {/* <ButtonWithHotkey
           action={toggleModeHandler.action}
           keys="ctrl+m"
           keysPretty="Ctrl+M"
         >
           <Badge>{mode}</Badge>
-        </ButtonWithHotkey>
+        </ButtonWithHotkey> */}
         <div className="flex gap-2 relative mt-2">
           <Textarea
             ref={inputRef}
