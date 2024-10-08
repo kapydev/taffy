@@ -67,30 +67,18 @@ export function MessageGroupWrapper({
   };
 
   return (
-    <div className={`mb-4`}>
-      {/* <div className="flex gap-2 mb-2">
-        <strong>{capitalize(role)}</strong>
-        <Badge
-          variant="default"
-          className="cursor-pointer"
-          onClick={() => setMode(mode === 'RAW' ? 'SIMPLIFIED' : 'RAW')}
-        >
-          {mode === 'RAW' && 'See less'}
-          {mode === 'SIMPLIFIED' && 'See more'}
-        </Badge>
-      </div> */}
-      <div className="flex flex-col gap-2">
-        {messages.map((message) => (
-          <SingleMessage key={message.id} message={message} />
-        ))}
-      </div>
+    <div className="flex flex-col gap-3 mb-3">
+      {messages.map((message) => (
+        <SingleMessage key={message.id} message={message} />
+      ))}
     </div>
   );
 }
 
 function SingleMessage({ message }: { message: CustomMessage }) {
   if (message instanceof SystemPromptMessage) {
-    return <SystemPromptRender message={message} />;
+    return null;
+    // return <SystemPromptRender message={message} />;
   } else if (message instanceof ToolMessage) {
     return <ToolMessageRender message={message} />;
   }

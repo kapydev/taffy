@@ -194,7 +194,7 @@ export const TOOL_RENDER_TEMPLATES: {
 } = {
   USER_PROMPT: {
     Icon: UserIcon,
-    title: () => 'User Prompt',
+    title: () => 'You',
     description: (data) => data.body,
   },
   ASSISTANT_INFO: {

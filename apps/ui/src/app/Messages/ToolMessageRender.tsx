@@ -30,30 +30,15 @@ export function ToolMessageRender<T extends ToolType>({
     </code>
   );
 
+  const isUserPrompt = message.type === 'USER_PROMPT';
+
   return (
     <div className="flex gap-2.5">
       <renderTemplate.Icon className="w-4 h-4 mt-3.5" />
-      <Alert>
+      <Alert className={`${isUserPrompt && 'bg-black/40'} w-auto`}>
         <AlertTitle className="flex w-full mb-2 gap-2">
           <div className="w-full">
             {renderTemplate.title(message)}
-            {/* ACTION BUTTON */}
-            {renderTemplate.actions?.map((meta) => {
-              return (
-                <ButtonWithHotkey
-                  className="text-vsc-foreground"
-                  action={() => meta.action(message)}
-                  keys={keyPrefix + meta.shortcutEnd}
-                >
-                  <button
-                    className="text-vsc-foreground ml-2 font-bold text-white"
-                    onClick={() => meta.action(message)}
-                  >
-                    {meta.name}
-                  </button>
-                </ButtonWithHotkey>
-              );
-            })}
           </div>
           <div
             className={`flex items-center text-xs gap-2 ${
