@@ -4,6 +4,13 @@ import { getGitIgnoredFiles } from './get-ignore-patterns';
 import { toPosix } from '../helpers/to-posix';
 import globToRegexp from 'glob-to-regexp';
 
+
+export function helloWorld() {
+  console.log("Hello World");
+}
+
+
+
 export const getWorkspaceFiles = async () => {
   const workspaceFolders = vscode.workspace.workspaceFolders;
   if (!workspaceFolders) {

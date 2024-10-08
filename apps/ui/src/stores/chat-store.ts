@@ -8,8 +8,8 @@ import { CustomMessage } from '../llms/messages/Messages';
 import { SystemPromptMessage } from '../llms/messages/SystemPromptMessage';
 import { createToolMessage, ToolMessage } from '../llms/messages/ToolMessage';
 import { TOOL_RENDER_TEMPLATES, ToolType } from '../llms/messages/tools';
-import { createBetterStore } from './create-better-store';
 import { getPossibleModes } from './possible-modes';
+import { createBetterStore } from '@taffy/shared-helpers';
 
 /**If you need the same functionality for multiple completion modes, you can include the keywords together.
  * By doing that, we can use the str.contains() function to determin the behaviour
