@@ -1,7 +1,5 @@
 import { create } from 'zustand';
-import { createJSONStorage, persist } from 'zustand/middleware';
-import { subscribeWithSelector } from 'zustand/middleware';
-import { vscApi } from '../common/vsc-api';
+import { persist, subscribeWithSelector } from 'zustand/middleware';
 
 export function createBetterStore<T extends Record<string, any>>(
   storeDefaults: T,
