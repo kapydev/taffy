@@ -5,6 +5,7 @@ import { ButtonWithHotkey } from '../../components/ButtonWithHotkey';
 import { ToolMessage } from '../../llms/messages/ToolMessage';
 import { TOOL_RENDER_TEMPLATES, ToolType } from '../../llms/messages/tools';
 import { chatStore, removeMessage } from '../../stores/chat-store';
+import Markdown from 'react-markdown';
 
 export function ToolMessageRender<T extends ToolType>({
   message,
@@ -70,7 +71,7 @@ export function ToolMessageRender<T extends ToolType>({
               return (
                 <ButtonWithHotkey
                   className="text-vsc-foreground"
-                  action={() => meta.action(message)} 
+                  action={() => meta.action(message)}
                   keys={keyPrefix + meta.shortcutEnd}
                 >
                   <button
@@ -102,7 +103,12 @@ export function ToolMessageRender<T extends ToolType>({
           </div>
         </AlertTitle>
         <AlertDescription className="break-words whitespace-pre-wrap w-full text-xs">
-          {mode === 'RAW' ? getRaw() : renderTemplate.description(message)}
+          {mode === 'RAW'
+            ? message
+                .toRawMessages()
+                .flatMap((rawMsg) => rawMsg.content)
+                .join()
+            : renderTemplate.body(message)}
         </AlertDescription>
       </Alert>
     </div>

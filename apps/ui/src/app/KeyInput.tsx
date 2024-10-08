@@ -53,11 +53,6 @@ function KeyInputRow({
           {key ? 'Clear' : 'Submit'}
         </Button>
       </form>
-      {/* {key === '' && (
-        <p className="text-vsc-errorForeground text-xs">
-          Please enter a {keyName} key
-        </p>
-      )} */}
     </div>
   );
 }

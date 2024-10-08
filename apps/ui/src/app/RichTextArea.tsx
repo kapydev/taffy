@@ -1,4 +1,5 @@
 import { useEditor, EditorContent, Editor, JSONContent } from '@tiptap/react';
+import Placeholder from '@tiptap/extension-placeholder';
 import Mention, { MentionOptions } from '@tiptap/extension-mention';
 import StarterKit from '@tiptap/starter-kit';
 import {
@@ -64,6 +65,8 @@ const mentionSuggestion: MentionOptions['suggestion'] = {
       },
 
       onKeyDown(props) {
+        console.log(component?.editor.getText());
+
         if (props.event.key === 'Escape') {
           popup![0].hide();
           return true;
@@ -99,12 +102,15 @@ export function RichTextArea() {
         HTMLAttributes: { class: 'text-blue-400' },
         suggestion: mentionSuggestion,
       }),
+      Placeholder.configure({
+        placeholder: 'Ask Taffy anything or try "@" to add files as context.',
+      }),
     ],
     autofocus: true,
     editorProps: {
       attributes: {
         class:
-          'flex min-h-[80px] w-full rounded-md bg-background pl-3 pr-10 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 flex-1 border-none w-full',
+          'flex text-xs min-h-[80px] w-full rounded-md bg-background pl-3 pr-10 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 flex-1 border-none w-full',
       },
     },
     onUpdate(props) {

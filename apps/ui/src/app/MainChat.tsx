@@ -1,7 +1,7 @@
 import { Button } from '@taffy/components';
 import { ChevronRight, Settings } from 'lucide-react';
-import { useState } from 'react';
-import { chatStore, resetChatStore } from '../stores/chat-store';
+import { useEffect, useState } from 'react';
+import { chatStore, keyStore, resetChatStore } from '../stores/chat-store';
 import { ChatPanel } from './ChatPanel';
 import { KeyInput } from './KeyInput';
 import { trpc } from '../client';
@@ -17,6 +17,17 @@ export function MainChat() {
 
 function LeftPanel() {
   const showSettings = chatStore.use('showSettings');
+  const claudeKey = keyStore.use('claudeKey');
+  const gptKey = keyStore.use('gptKey');
+  const deepSeekKey = keyStore.use('deepSeekKey');
+
+  useEffect(() => {
+    if (claudeKey === '' && gptKey === '' && deepSeekKey === '') {
+      chatStore.set('showSettings', true);
+    } else {
+      chatStore.set('showSettings', false);
+    }
+  }, []);
 
   const runTestFunc = () => {
     // console.log(chatStore.get('messages'));
@@ -30,7 +41,7 @@ function LeftPanel() {
       } flex flex-col bg-background p-4 overflow-auto flex-shrink-0 self-stretch mr-3`}
     >
       <div className="flex items-center justify-between mb-4">
-        <div className='flex gap-2 items-center'>
+        <div className="flex gap-2 items-center">
           <Settings className="w-4 h-4" />
           <h2 className="text-base font-semibold mb-0.5">Settings</h2>
         </div>
@@ -49,6 +60,11 @@ function LeftPanel() {
           Test Func
         </Button>
         <KeyInput />
+        {claudeKey === '' && gptKey === '' && deepSeekKey === '' && (
+          <p className="text-vsc-errorForeground text-xs">
+            Please enter one of the API keys.
+          </p>
+        )}
       </div>
     </div>
   );

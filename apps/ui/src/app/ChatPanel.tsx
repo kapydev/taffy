@@ -1,4 +1,4 @@
-import { Button } from '@taffy/components';
+import { Button, Textarea } from '@taffy/components';
 import { Send, Settings } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { ButtonWithHotkey } from '../components/ButtonWithHotkey';
@@ -44,8 +44,8 @@ export function ChatPanel() {
           <Badge>{mode}</Badge>
         </ButtonWithHotkey> */}
         <div className="flex gap-2 relative mt-2">
-          <RichTextArea />
-          {/* <Textarea
+          {/* <RichTextArea /> */}
+          <Textarea
             ref={inputRef}
             value={input}
             onChange={(e) => {
@@ -58,8 +58,8 @@ export function ChatPanel() {
               }
             }}
             placeholder="Type your message..."
-            className="flex-1 pr-10 border-none"
-          /> */}
+            className="flex-1 pr-10 border-none text-xs"
+          />
           <div className="flex flex-col absolute right-0 inset-y-0 p-1.5 gap-1.5">
             <ButtonWithHotkey hideHint keys="enter" action={handleSend}>
               <Button
