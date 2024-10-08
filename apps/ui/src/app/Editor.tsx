@@ -11,6 +11,7 @@ import {
 } from 'react';
 import tippy, { Instance as TippyInstance } from 'tippy.js';
 import { ReactRenderer } from '@tiptap/react';
+import { trpc } from '../client';
 
 type MentionItem = string;
 type MentionCommandProps = {
@@ -18,36 +19,9 @@ type MentionCommandProps = {
 };
 
 const mentionSuggestion: MentionOptions['suggestion'] = {
-  items: ({ query }): MentionItem[] => {
-    return [
-      'Lea Thompson',
-      'Cyndi Lauper',
-      'Tom Cruise',
-      'Madonna',
-      'Jerry Hall',
-      'Joan Collins',
-      'Winona Ryder',
-      'Christina Applegate',
-      'Alyssa Milano',
-      'Molly Ringwald',
-      'Ally Sheedy',
-      'Debbie Harry',
-      'Olivia Newton-John',
-      'Elton John',
-      'Michael J. Fox',
-      'Axl Rose',
-      'Emilio Estevez',
-      'Ralph Macchio',
-      'Rob Lowe',
-      'Jennifer Grey',
-      'Mickey Rourke',
-      'John Cusack',
-      'Matthew Broderick',
-      'Justine Bateman',
-      'Lisa Bonet',
-    ]
-      .filter((item) => item.toLowerCase().startsWith(query.toLowerCase()))
-      .slice(0, 5);
+  items: async ({ query }): Promise<MentionItem[]> => {
+    const results = await trpc.files.searchFiles.query({ query });
+    return results.map((item) => item.target);
   },
   render: () => {
     let component: ReactRenderer<MentionListProps> | null = null;
@@ -186,6 +160,11 @@ const MentionList = forwardRef<unknown, MentionListProps>((props, ref) => {
         return true;
       }
 
+      if (event.key === 'Tab') {
+        enterHandler();
+        return true;
+      }
+
       return false;
     },
   }));
@@ -195,7 +174,10 @@ const MentionList = forwardRef<unknown, MentionListProps>((props, ref) => {
       {props.items.length ? (
         props.items.map((item, index) => (
           <button
-            className={'hover:bg-gray-700 p-1 ' + (index === selectedIndex ? 'bg-gray-800' : '')}
+            className={
+              'hover:bg-gray-700 p-1 ' +
+              (index === selectedIndex ? 'bg-gray-800' : '')
+            }
             key={index}
             onClick={() => selectItem(index)}
           >

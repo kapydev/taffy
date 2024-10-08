@@ -5,7 +5,7 @@ import globToRegexp from 'glob-to-regexp';
 import { toPosix } from '../helpers/to-posix';
 import { getGitIgnoredFiles } from './get-ignore-patterns';
 
-const fileStore = createBetterStore({
+export const fileStore = createBetterStore({
   filePaths: new Set<string>(),
 });
 
