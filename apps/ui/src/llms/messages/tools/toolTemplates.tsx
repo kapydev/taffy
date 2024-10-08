@@ -199,12 +199,12 @@ export const TOOL_RENDER_TEMPLATES: {
   },
   ASSISTANT_INFO: {
     Icon: BotIcon,
-    title: () => 'Assistant',
+    title: () => 'Taffy',
     description: (data) => data.body,
   },
   ASSISTANT_PLANNING: {
     Icon: WaypointsIcon,
-    title: () => 'Assistant Planning',
+    title: () => 'Taffy Planning',
     description: (data) => data.body,
   },
   // ASSISTANT_READ_FILE: {
@@ -225,29 +225,29 @@ export const TOOL_RENDER_TEMPLATES: {
     description: (data) => {
       if (!data.props) return;
       return (
-        <>
-          {data.props.filePath} <br /> Line {data.props.startLine} to Line{' '}
-          {data.props.endLine}
-        </>
+        <p className=''>
+          {data.props.filePath} <br />
+          Line {data.props.startLine} to Line {data.props.endLine}
+        </p>
       );
     },
   },
   ASSISTANT_REPLACE_BLOCK: {
     Icon: FilePlus2Icon,
-    title: () => 'Requesting permission to write the following files',
+    title: () => 'Can I edit these files?',
     description: (data) => {
       if (!data.props) return;
       const thoughtsString = data.thoughts ? `💡${data.thoughts}` : '';
       let fullStr = data.loading
         ? `${data.body.length} characters loaded so far`
-        : 'Loading Complete!';
+        : '';
       if (thoughtsString) {
         fullStr += '\n\n' + thoughtsString;
       }
 
       return (
         <>
-          <div>File Path - {data.props.filePath} </div>
+          <div>{data.props.filePath} </div>
           {fullStr}
         </>
       );
@@ -292,7 +292,7 @@ export const TOOL_RENDER_TEMPLATES: {
         shortcutEnd: 'p',
       },
       {
-        name: 'Approve Change',
+        name: 'Approve',
         action: (message) => {
           trpc.files.approveFileChange.mutate({ id: message.id });
         },
@@ -316,7 +316,7 @@ export const TOOL_RENDER_TEMPLATES: {
       const thoughtsString = data.thoughts ? `💡${data.thoughts}` : '';
       let fullStr = data.loading
         ? `${data.body.length} characters loaded so far`
-        : 'Loading Complete!';
+        : '';
       if (thoughtsString) {
         fullStr += '\n\n' + thoughtsString;
       }

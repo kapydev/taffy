@@ -42,7 +42,7 @@ export function ChatPanel() {
       <div className="flex-1 relative">
         <div
           ref={scrollAreaRef}
-          className="flex flex-col-reverse overflow-x-auto overflow-y-auto inset-0 absolute"
+          className="flex flex-col-reverse overflow-x-auto overflow-y-auto inset-0 absolute pr-2"
         >
           <Messages />
         </div>
@@ -69,7 +69,7 @@ export function ChatPanel() {
               }
             }}
             placeholder="Type your message..."
-            className="flex-1 pr-10 border-none"
+            className="flex-1 pr-10 border-none text-xs"
           />
           <div className="flex flex-col absolute right-0 inset-y-0 p-1.5 gap-1.5">
             <ButtonWithHotkey hideHint keys="enter" action={handleSend}>

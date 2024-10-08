@@ -43,7 +43,6 @@ export function MessageGroupWrapper({
   messages: CustomMessage[];
 }) {
   const role = messages[0].role;
-  const [mode, setMode] = useState<'RAW' | 'SIMPLIFIED'>('SIMPLIFIED');
 
   if (messages.length === 0) {
     throw new Error('MessageGroupWrapper: messages array is empty');
@@ -52,19 +51,6 @@ export function MessageGroupWrapper({
   if (!messages.every((message) => message.role === role)) {
     throw new Error('MessageGroupWrapper: not all messages have the same role');
   }
-
-  const getRaw = () => {
-    const rawMsgs = getRawMessages(messages);
-    if (rawMsgs.length !== 1) {
-      throw new Error('Expected exactly single raw message for message group');
-    }
-
-    return (
-      <code className="break-words whitespace-pre-wrap">
-        {rawMsgs[0].content}
-      </code>
-    );
-  };
 
   return (
     <div className="flex flex-col gap-3 mb-3">
@@ -77,9 +63,12 @@ export function MessageGroupWrapper({
 
 function SingleMessage({ message }: { message: CustomMessage }) {
   if (message instanceof SystemPromptMessage) {
-    return null;
     // return <SystemPromptRender message={message} />;
-  } else if (message instanceof ToolMessage) {
+    return null;
+  } else if (
+    message instanceof ToolMessage &&
+    message.type !== 'ASSISTANT_PLANNING'
+  ) {
     return <ToolMessageRender message={message} />;
   }
 }
