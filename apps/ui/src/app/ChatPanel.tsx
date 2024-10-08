@@ -4,7 +4,7 @@ import { useRef, useState } from 'react';
 import { ButtonWithHotkey } from '../components/ButtonWithHotkey';
 import { chatStore, continuePrompt } from '../stores/chat-store';
 import { updateChat } from '../stores/update-prompt';
-import { Editor } from './Editor';
+import { RichTextArea } from './RichTextArea';
 import { Messages } from './Messages';
 
 export function ChatPanel() {
@@ -44,7 +44,7 @@ export function ChatPanel() {
           <Badge>{mode}</Badge>
         </ButtonWithHotkey> */}
         <div className="flex gap-2 relative mt-2">
-          <Editor />
+          <RichTextArea />
           {/* <Textarea
             ref={inputRef}
             value={input}

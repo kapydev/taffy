@@ -1,4 +1,4 @@
-import { useEditor, EditorContent } from '@tiptap/react';
+import { useEditor, EditorContent, Editor, JSONContent } from '@tiptap/react';
 import Mention, { MentionOptions } from '@tiptap/extension-mention';
 import StarterKit from '@tiptap/starter-kit';
 import {
@@ -12,6 +12,8 @@ import {
 import tippy, { Instance as TippyInstance } from 'tippy.js';
 import { ReactRenderer } from '@tiptap/react';
 import { trpc } from '../client';
+import { booleanFilter } from '@taffy/shared-helpers';
+import { setAdditionalContext } from '../stores/chat-store';
 
 type MentionItem = string;
 type MentionCommandProps = {
@@ -78,22 +80,39 @@ const mentionSuggestion: MentionOptions['suggestion'] = {
   },
 };
 
-export function Editor() {
+function getNodesByType(editor: Editor, type: string) {
+  const json = editor.getJSON();
+  const results: JSONContent[] = [];
+  const parseJson = (node: JSONContent) => {
+    if (node.type === type) results.push(node);
+    node.content?.forEach(parseJson);
+  };
+  parseJson(json);
+  return results;
+}
+
+export function RichTextArea() {
   const editor = useEditor({
     extensions: [
       StarterKit,
       Mention.configure({
-        HTMLAttributes: {class:'text-blue-400'},
+        HTMLAttributes: { class: 'text-blue-400' },
         suggestion: mentionSuggestion,
       }),
     ],
-    content: '',
     autofocus: true,
     editorProps: {
       attributes: {
         class:
           'flex min-h-[80px] w-full rounded-md bg-background pl-3 pr-10 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 flex-1 border-none w-full',
       },
+    },
+    onUpdate(props) {
+      const mentions = getNodesByType(props.editor, 'mention');
+      const additionalFileNames: string[] = mentions
+        .map((mention) => mention.attrs?.id)
+        .filter(booleanFilter);
+      setAdditionalContext(additionalFileNames);
     },
   });
 

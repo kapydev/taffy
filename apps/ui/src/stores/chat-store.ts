@@ -9,7 +9,7 @@ import { SystemPromptMessage } from '../llms/messages/SystemPromptMessage';
 import { createToolMessage, ToolMessage } from '../llms/messages/ToolMessage';
 import { TOOL_RENDER_TEMPLATES, ToolType } from '../llms/messages/tools';
 import { getPossibleModes } from './possible-modes';
-import { createBetterStore } from '@taffy/shared-helpers';
+import { booleanFilter, createBetterStore } from '@taffy/shared-helpers';
 
 /**If you need the same functionality for multiple completion modes, you can include the keywords together.
  * By doing that, we can use the str.contains() function to determin the behaviour
@@ -242,4 +242,40 @@ export function removeMessage<T extends ToolType>(message: ToolMessage<T>) {
 export function getToolMessages(): ToolMessage[] {
   const allMessages = chatStore.get('messages');
   return allMessages.filter((msg) => msg instanceof ToolMessage);
+}
+
+export async function setAdditionalContext(fileNames: string[]) {
+  const currentMessages = chatStore.get('messages');
+  const newMessages = currentMessages.filter(
+    (msg) => !(msg instanceof ToolMessage && msg.type === 'USER_FILE_CONTENTS')
+  );
+
+  const newFileContentMessages = (
+    await Promise.all(
+      fileNames.map(async (filePath) => {
+        const data = await trpc.files.getFileContents.query({ filePath });
+        if (data === undefined) return undefined;
+        return createToolMessage('USER_FILE_CONTENTS', {
+          body: data, // Assuming full file contents are fetched elsewhere,
+          props: {
+            filePath: filePath,
+          },
+        });
+      })
+    )
+  ).filter(booleanFilter);
+
+  const lastFocusIndex = newMessages.findIndex(
+    (msg) => msg instanceof ToolMessage && msg.type === 'USER_FOCUS_BLOCK'
+  );
+
+  if (lastFocusIndex === -1) {
+    chatStore.set('messages', [...newMessages, ...newFileContentMessages]);
+  } else {
+    chatStore.set('messages', [
+      ...newMessages.slice(0, lastFocusIndex),
+      ...newFileContentMessages,
+      ...newMessages.slice(lastFocusIndex),
+    ]);
+  }
 }
