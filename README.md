@@ -1,68 +1,82 @@
-<div align="center">
-  <p style="font-size: 3em; margin-bottom: 0px;">Taffy 🍬</p>
-  <p style="font-style: italic;">AI Code Editor focused on multi file editing and better context</p>
-![Placeholder gif demonstrating Taffy in action](#)
-</div>
+# CtoAi
+
+<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+
+✨ Your new, shiny [Nx workspace](https://nx.dev) is almost ready ✨.
+
+[Learn more about this workspace setup and its capabilities](https://nx.dev/getting-started/tutorials/react-monorepo-tutorial?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+
+## Finish your remote caching setup
+
+[Click here to finish setting up your workspace!](https://cloud.nx.app/connect/FeT2StV652)
 
 
-## Getting Started
+## Run tasks
 
-1. Add to VSCode from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=FireJet.taffy)
-2. Add either a OpenAI, Anthropic or DeepSeek API Key
-3. Select any portion of your code, then press `Ctrl+Shift+M` to ask a question
-
-## Motivation
-
-We found that often with AI code assistants, they just don't seem smart enough to generate the correct code in the context required. Examples include
-
-1. Not follow codebase best practices
-2. Using outdated versions of libraries
-3. Not understanding types within the codebase
-4. Generation being limited to single file edits
-
-The thing is, all of these are not outside the capabilities of modern LLMs - with the right information in the context window, all these issues can be resolved.
-
-However, with alternative AI code assistants, they fall fall short in one of these ways:
-
-1. Not having multi-file support
-2. Not having sufficient context to answer the question correctly
-3. Racking up large API bills because of large context windows
-
-With our initial release, we've solved multi-file support, and with subsequent releases we hope to solve the other problems as well.
-
-## Features
-### Current Features
-
-- Multi File Editing
-- Fast edits (Only edit the section being updated)
-- LLM Tools (LLM can read other files in your codebase, and make necessary updates)
-- `@mentions` files in your codebase to reference them
-- Bring Your Own key (BYOK)
-- MIT Licensed
-
-### Upcoming Features
-
-Right now, we have a base of features that we believe make a good foundation for the developer experience that we expect from an AI code assistant. 
-
-We have several ideas of how we can improve the developer experience, and we need your feedback and votes in order to better shape the development of this product.
-
-- **Small Model Context Big Model Thinking**: [Upvote this feature](#)
-- **Types Context**: [Upvote this feature](#)
-- **Library Context**: [Upvote this feature](#)
-- **Diagnostics Context**: [Upvote this feature](#)
-- **Best Practices Context**: [Upvote this feature](#)
-
-## Local Development
-
-To run Taffy locally:
+To run the dev server for your app, use:
 
 ```sh
-npm i          # Install dependencies
-npm run serve  # Start the development server
+npx nx serve cto-ai
 ```
 
-Press `F5` to debug or run it in the standard VSCode extension host.
+To create a production bundle:
 
-## License
+```sh
+npx nx build cto-ai
+```
 
-MIT
+To see all available targets to run for a project, run:
+
+```sh
+npx nx show project cto-ai
+```
+        
+These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+
+[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+
+## Add new projects
+
+While you could add new projects to your workspace manually, you might want to leverage [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) and their [code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) feature.
+
+Use the plugin's generator to create new projects.
+
+To generate a new application, use:
+
+```sh
+npx nx g @nx/react:app demo
+```
+
+To generate a new library, use:
+
+```sh
+npx nx g @nx/react:lib mylib
+```
+
+You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>` to learn about more specific capabilities of a particular plugin. Alternatively, [install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) to browse plugins and generators in your IDE.
+
+[Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+
+
+[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+
+## Install Nx Console
+
+Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
+
+[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+
+## Useful links
+
+Learn more:
+
+- [Learn more about this workspace setup](https://nx.dev/getting-started/tutorials/react-monorepo-tutorial?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
+- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+
+And join the Nx community:
+- [Discord](https://go.nx.dev/community)
+- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
+- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
+- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)

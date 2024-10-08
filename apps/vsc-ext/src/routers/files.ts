@@ -10,8 +10,6 @@ import { latestActiveEditor } from '../main';
 import { previewFileChange } from '../files/preview-file-change';
 import { getWorkspaceFiles } from '../files/get-folder-structure';
 import { FileEditor } from '../files/file-editor';
-import { fileStore } from '../files/file-indexer';
-import fuzzysort from 'fuzzysort';
 
 function getIndentLen(line: string) {
   return (line.match(/^\s*/)?.[0] ?? '').replace(/\t/g, '    ').length;
@@ -40,18 +38,6 @@ export const fileRouter = router({
       }
     );
   }),
-  searchFiles: publicProcedure
-    .input(z.object({ query: z.string() }))
-    .query(async (opts) => {
-      //TODO: Should probably wait for inital index to finish before returning results, or update list as updates come in
-      const allFiles = [...fileStore.get('filePaths')];
-      const matchResults = fuzzysort.go(opts.input.query, allFiles, {
-        threshold: 0.5,
-        limit: 6,
-      });
-
-      return matchResults;
-    }),
   getWorkspaceFiles: publicProcedure.query(() => getWorkspaceFiles()),
   getFileDiskContentsByPath: publicProcedure
     .input(z.object({ filePath: z.string() }))
