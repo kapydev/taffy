@@ -30,23 +30,51 @@ export function ToolMessageRender<T extends ToolType>({
     </code>
   );
 
+  const isUserPrompt = message.type === 'USER_PROMPT';
+
   return (
     <div className="flex gap-2.5">
-      <renderTemplate.Icon className="w-4 h-4 mt-3.5" />
-      <Alert>
-        <AlertTitle className="flex w-full mb-2 gap-2">
-          <div className="w-full">
+      {/* TODO Add this icon back don't just yeet the bug stephen */}
+      {/* <renderTemplate.Icon className="w-4 h-4 mt-3.5" /> */}
+      <Alert
+        className={`${
+          isUserPrompt
+            ? 'bg-transparent border-vsc-disabledForeground'
+            : 'border-none'
+        } w-auto`}
+      >
+        <AlertTitle className="flex flex-wrap w-full justify-between mb-2 gap-2 leading-snug text-xs">
+          <div className="flex gap-1.5 mr-5">
+            {/* TITLE */}
             {renderTemplate.title(message)}
+
+            {/* EXPAND BUTTON */}
+            <Button
+              size="icon"
+              variant="ghost"
+              className="cursor-pointer w-3.5 h-3.5"
+              onClick={() => setMode(mode === 'RAW' ? 'SIMPLIFIED' : 'RAW')}
+            >
+              {mode === 'SIMPLIFIED' && <ChevronDown className="w-4 h-4" />}
+              {mode === 'RAW' && <ChevronUp className="w-4 h-4" />}
+            </Button>
+          </div>
+
+          <div
+            className={`flex items-center justify-end text-xs ${
+              message.loading && 'hidden'
+            }`}
+          >
             {/* ACTION BUTTON */}
             {renderTemplate.actions?.map((meta) => {
               return (
                 <ButtonWithHotkey
                   className="text-vsc-foreground"
-                  action={() => meta.action(message)}
+                  action={() => meta.action(message)} 
                   keys={keyPrefix + meta.shortcutEnd}
                 >
                   <button
-                    className="text-vsc-foreground ml-2 font-bold text-white"
+                    className="text-[11px] whitespace-nowrap border-[0.5px] border-vsc-foreground rounded-md px-2 py-1 scale-90"
                     onClick={() => meta.action(message)}
                   >
                     {meta.name}
@@ -54,41 +82,26 @@ export function ToolMessageRender<T extends ToolType>({
                 </ButtonWithHotkey>
               );
             })}
-          </div>
-          <div
-            className={`flex items-center text-xs gap-2 ${
-              message.loading && 'hidden'
-            }`}
-          >
             {/* DELETE BUTTON */}
-            <ButtonWithHotkey
-              className="text-vsc-errorForeground"
-              action={() => removeMessage(message)}
-              keys={`${keyPrefix}del`}
-            >
-              <Button
-                size="icon"
-                variant="ghost"
-                className="text-vsc-errorForeground w-4 h-4"
-                onClick={() => removeMessage(message)}
+            {message.type === 'USER_FOCUS_BLOCK' && (
+              <ButtonWithHotkey
+                className="text-vsc-errorForeground"
+                action={() => removeMessage(message)}
+                keys={`${keyPrefix}del`}
               >
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            </ButtonWithHotkey>
-
-            {/* SEE MORE BUTTON */}
-            <Button
-              size="icon"
-              variant="ghost"
-              className="cursor-pointer w-4 h-4"
-              onClick={() => setMode(mode === 'RAW' ? 'SIMPLIFIED' : 'RAW')}
-            >
-              {mode === 'SIMPLIFIED' && <ChevronDown className="w-4 h-4" />}
-              {mode === 'RAW' && <ChevronUp className="w-4 h-4" />}
-            </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="text-vsc-errorForeground w-3.5 h-3.5"
+                  onClick={() => removeMessage(message)}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </ButtonWithHotkey>
+            )}
           </div>
         </AlertTitle>
-        <AlertDescription className="break-words whitespace-pre-wrap w-full">
+        <AlertDescription className="break-words whitespace-pre-wrap w-full text-xs">
           {mode === 'RAW' ? getRaw() : renderTemplate.description(message)}
         </AlertDescription>
       </Alert>

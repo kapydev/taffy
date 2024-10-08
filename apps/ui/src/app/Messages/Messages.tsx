@@ -43,7 +43,6 @@ export function MessageGroupWrapper({
   messages: CustomMessage[];
 }) {
   const role = messages[0].role;
-  const [mode, setMode] = useState<'RAW' | 'SIMPLIFIED'>('SIMPLIFIED');
 
   if (messages.length === 0) {
     throw new Error('MessageGroupWrapper: messages array is empty');
@@ -53,45 +52,23 @@ export function MessageGroupWrapper({
     throw new Error('MessageGroupWrapper: not all messages have the same role');
   }
 
-  const getRaw = () => {
-    const rawMsgs = getRawMessages(messages);
-    if (rawMsgs.length !== 1) {
-      throw new Error('Expected exactly single raw message for message group');
-    }
-
-    return (
-      <code className="break-words whitespace-pre-wrap">
-        {rawMsgs[0].content}
-      </code>
-    );
-  };
-
   return (
-    <div className={`mb-4`}>
-      {/* <div className="flex gap-2 mb-2">
-        <strong>{capitalize(role)}</strong>
-        <Badge
-          variant="default"
-          className="cursor-pointer"
-          onClick={() => setMode(mode === 'RAW' ? 'SIMPLIFIED' : 'RAW')}
-        >
-          {mode === 'RAW' && 'See less'}
-          {mode === 'SIMPLIFIED' && 'See more'}
-        </Badge>
-      </div> */}
-      <div className="flex flex-col gap-2">
-        {messages.map((message) => (
-          <SingleMessage key={message.id} message={message} />
-        ))}
-      </div>
+    <div className="flex flex-col gap-3 mb-3">
+      {messages.map((message) => (
+        <SingleMessage key={message.id} message={message} />
+      ))}
     </div>
   );
 }
 
 function SingleMessage({ message }: { message: CustomMessage }) {
   if (message instanceof SystemPromptMessage) {
-    return <SystemPromptRender message={message} />;
-  } else if (message instanceof ToolMessage) {
+    // return <SystemPromptRender message={message} />;
+    return null;
+  } else if (
+    message instanceof ToolMessage &&
+    message.type !== 'ASSISTANT_PLANNING'
+  ) {
     return <ToolMessageRender message={message} />;
   }
 }
