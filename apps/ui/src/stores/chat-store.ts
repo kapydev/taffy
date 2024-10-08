@@ -26,7 +26,7 @@ export const chatStore = createBetterStore({
    * inline - For editing a specific part of the code
    */
   mode: 'inline' as CompletionMode,
-  showSettings: false || true,
+  showSettings: false as boolean,
 });
 
 //@ts-expect-error for debugging
