@@ -83,7 +83,7 @@ export function Editor() {
     extensions: [
       StarterKit,
       Mention.configure({
-        HTMLAttributes: {},
+        HTMLAttributes: {class:'text-blue-400'},
         suggestion: mentionSuggestion,
       }),
     ],
