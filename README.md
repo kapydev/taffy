@@ -46,9 +46,11 @@ Right now, we have a base of features that we believe make a good foundation for
 
 We have several ideas of how we can improve the developer experience, and we need your feedback and votes in order to better shape the development of this product.
 
-- **Feature 1**: [Upvote this feature](#)
-- **Feature 2**: [Upvote this feature](#)
-- **Feature 3**: [Upvote this feature](#)
+- **Small Model Context Big Model Thinking**: [Upvote this feature](#)
+- **Types Context**: [Upvote this feature](#)
+- **Library Context**: [Upvote this feature](#)
+- **Diagnostics Context**: [Upvote this feature](#)
+- **Best Practices Context**: [Upvote this feature](#)
 
 ## Local Development
 
