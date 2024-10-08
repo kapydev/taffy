@@ -110,7 +110,7 @@ export function getRawMessages(messages: CustomMessage[]): RawMessage[] {
 
   return concatenatedMessages;
 }
-export function getSelectionDetails(
+export function getSelectionDetailsByContent(
   fullContents: string,
   startLine: number,
   endLine: number
@@ -135,6 +135,25 @@ export function getSelectionDetails(
   };
 }
 
+export async function getSelectionDetailsByFile(
+  filePath: string,
+  startLine: number,
+  endLine: number
+) {
+  const curContents = await trpc.files.getFileContents.query({
+    filePath,
+  });
+  if (curContents === undefined) return undefined;
+  const { preSelection, selection, postSelection } =
+    getSelectionDetailsByContent(curContents, startLine, endLine);
+  return {
+    fullContents: curContents,
+    preSelection,
+    selection,
+    postSelection,
+  };
+}
+
 export async function getLatestFocusedContent() {
   const fileContextMsg = [...getToolMessages()]
     .reverse()
@@ -143,24 +162,18 @@ export async function getLatestFocusedContent() {
   if (!fileContextMsg?.isType('USER_FOCUS_BLOCK') || !fileContextMsg.props)
     return undefined;
 
-  const curContents = await trpc.files.getFileContents.query({
-    filePath: fileContextMsg.props.filePath,
-  });
-  if (curContents === undefined) return undefined;
   const startLine = +fileContextMsg.props.startLine;
   const endLine = +fileContextMsg.props.endLine;
-
-  const { preSelection, selection, postSelection } = getSelectionDetails(
-    curContents,
+  const result = await getSelectionDetailsByFile(
+    fileContextMsg.props.filePath,
     startLine,
     endLine
   );
 
+  if (result === undefined) return undefined;
+
   return {
-    fullContents: curContents,
-    preSelection,
-    selection,
-    postSelection,
+    ...result,
     props: fileContextMsg.props,
   };
 }
@@ -174,7 +187,7 @@ trpc.files.onSelectionChange.subscribe(undefined, {
     //TODO: If taffy window is still active, we should probably add to context instead of completely new
     resetChatStore();
     const curMsgs = chatStore.get('messages');
-    const selectionDetails = getSelectionDetails(
+    const selectionDetails = getSelectionDetailsByContent(
       data.fullFileContents,
       data.selectedLineNumbers.start,
       data.selectedLineNumbers.end
