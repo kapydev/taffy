@@ -54,7 +54,7 @@ const setLlm = () => {
 };
 
 export async function getInlineStopSequence(): Promise<string | undefined> {
-  const latestFile = await getLatestFileContent();
+  const latestFile = await getLatestFocusedContent();
   if (!latestFile) {
     throw new Error('Could not find latest file for inline prompting');
   }
@@ -135,12 +135,12 @@ export function getSelectionDetails(
   };
 }
 
-export async function getLatestFileContent() {
+export async function getLatestFocusedContent() {
   const fileContextMsg = [...getToolMessages()]
     .reverse()
-    .find((msg) => msg.type === 'USER_FILE_CONTENTS');
+    .find((msg) => msg.type === 'USER_FOCUS_BLOCK');
 
-  if (!fileContextMsg?.isType('USER_FILE_CONTENTS') || !fileContextMsg.props)
+  if (!fileContextMsg?.isType('USER_FOCUS_BLOCK') || !fileContextMsg.props)
     return undefined;
 
   const curContents = await trpc.files.getFileContents.query({
@@ -179,13 +179,20 @@ trpc.files.onSelectionChange.subscribe(undefined, {
       data.selectedLineNumbers.start,
       data.selectedLineNumbers.end
     );
+
+    // const fileSelectionMessage = createToolMessage('USER_FILE_CONTENTS', {
+    //   body: data.fullFileContents,
+    //   props: {
+    //     filePath: data.fileName,
+    //   },
+    // });
     const fullContents =
       selectionDetails.preSelection +
       '\n{FOCUS_START}\n' +
       selectionDetails.selection +
       '\n{FOCUS_END}\n' +
       selectionDetails.postSelection;
-    const fileSelectionMessage = createToolMessage('USER_FILE_CONTENTS', {
+    const fileFocusMessage = createToolMessage('USER_FOCUS_BLOCK', {
       body: fullContents,
       props: {
         startLine: String(data.selectedLineNumbers.start),
@@ -193,7 +200,11 @@ trpc.files.onSelectionChange.subscribe(undefined, {
         filePath: data.fileName,
       },
     });
-    chatStore.set('messages', [...curMsgs, fileSelectionMessage]);
+    chatStore.set('messages', [
+      ...curMsgs,
+      // fileSelectionMessage,
+      fileFocusMessage,
+    ]);
   },
 });
 
