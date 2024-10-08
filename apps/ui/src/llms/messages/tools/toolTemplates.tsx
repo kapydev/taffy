@@ -1,5 +1,7 @@
 import {
   BotIcon,
+  FileInput,
+  FileInputIcon,
   FilePlus2Icon,
   LucideProps,
   UserIcon,
@@ -197,7 +199,7 @@ export const TOOL_RENDER_TEMPLATES: {
   },
   ASSISTANT_INFO: {
     Icon: BotIcon,
-    title: () => 'Assistant Info',
+    title: () => 'Assistant',
     description: (data) => data.body,
   },
   ASSISTANT_PLANNING: {
@@ -207,7 +209,7 @@ export const TOOL_RENDER_TEMPLATES: {
   },
   // ASSISTANT_READ_FILE: {
   //   Icon: FilePlus2Icon,
-  //   title: () => 'Requesting permission to read the following files',
+  //   title: () => 'Shall I add the following?',
   //   description: (data) => data.body,
   //   actions: [
   //     {
@@ -218,8 +220,8 @@ export const TOOL_RENDER_TEMPLATES: {
   //   ],
   // },
   USER_FOCUS_BLOCK: {
-    Icon: UserIcon,
-    title: () => 'User Focus Block',
+    Icon: FileInput,
+    title: () => 'File Context Added',
     description: (data) => {
       if (!data.props) return;
       return (
@@ -234,7 +236,21 @@ export const TOOL_RENDER_TEMPLATES: {
     Icon: FilePlus2Icon,
     title: () => 'Requesting permission to write the following files',
     description: (data) => {
-      return data.body;
+      if (!data.props) return;
+      const thoughtsString = data.thoughts ? `💡${data.thoughts}` : '';
+      let fullStr = data.loading
+        ? `${data.body.length} characters loaded so far`
+        : 'Loading Complete!';
+      if (thoughtsString) {
+        fullStr += '\n\n' + thoughtsString;
+      }
+
+      return (
+        <>
+          <div>File Path - {data.props.filePath} </div>
+          {fullStr}
+        </>
+      );
     },
     onFocus: async (message) => {
       if (!message.props) return;
@@ -285,7 +301,7 @@ export const TOOL_RENDER_TEMPLATES: {
     ],
   },
   USER_FILE_CONTENTS: {
-    Icon: FilePlus2Icon,
+    Icon: FileInputIcon,
     title: () => 'File Context Added',
     description: (data) => {
       if (!data.props) return;
@@ -294,14 +310,17 @@ export const TOOL_RENDER_TEMPLATES: {
   },
   ASSISTANT_WRITE_FILE: {
     Icon: FilePlus2Icon,
-    title: () => 'Requesting permission to write the following files',
+    title: () => 'Shall I add the following?',
     description: (data) => {
       if (!data.props) return;
       const thoughtsString = data.thoughts ? `💡${data.thoughts}` : '';
-      const infoString = data.loading
+      let fullStr = data.loading
         ? `${data.body.length} characters loaded so far`
         : 'Loading Complete!';
-      const fullStr = infoString + '\n\n' + thoughtsString;
+      if (thoughtsString) {
+        fullStr += '\n\n' + thoughtsString;
+      }
+
       return (
         <>
           <div>File Path - {data.props.filePath} </div>
@@ -337,7 +356,7 @@ export const TOOL_RENDER_TEMPLATES: {
         shortcutEnd: 'p',
       },
       {
-        name: 'Approve Change',
+        name: 'Approve',
         action: (message) => {
           trpc.files.approveFileChange.mutate({ id: message.id });
         },

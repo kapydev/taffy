@@ -7,7 +7,7 @@ export default function App() {
   useErrorCatching();
 
   return (
-    <div className="h-full w-full">
+    <div className="h-full w-full py-3.5">
       <MainChat />
       <KeyboardShortcuts />
       <Toaster

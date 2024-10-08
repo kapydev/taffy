@@ -21,7 +21,7 @@ function KeyInputRow({
 
   const getPlaceholder = () => {
     if (key) return `${keyName} key is set`;
-    return `${keyName} key`;
+    return `Enter ${keyName} key`;
   };
 
   return (
@@ -32,27 +32,32 @@ function KeyInputRow({
       >
         <div className="relative flex-grow">
           <KeyRound
-            className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400"
-            size={18}
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+            size={12}
           />
           <Input
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             placeholder={getPlaceholder()}
-            className="pl-8"
+            className={`pl-8 pb-3 h-8 placeholder:text-xs w-full`}
             disabled={!!key}
           />
         </div>
-        <Button type="submit" disabled={!inputValue && !key}>
+        <Button
+          size="sm"
+          type="submit"
+          className="w-20"
+          disabled={!inputValue && !key}
+        >
           {key ? 'Clear' : 'Submit'}
         </Button>
       </form>
-      {key === '' && (
-        <p className="text-sm text-vsc-errorForeground">
+      {/* {key === '' && (
+        <p className="text-vsc-errorForeground text-xs">
           Please enter a {keyName} key
         </p>
-      )}
+      )} */}
     </div>
   );
 }

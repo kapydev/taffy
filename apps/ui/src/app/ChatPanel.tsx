@@ -1,5 +1,5 @@
 import { Badge, Button, Textarea } from '@taffy/components';
-import { Send } from 'lucide-react';
+import { Send, Settings } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { ButtonWithHotkey } from '../components/ButtonWithHotkey';
 import { chatStore, continuePrompt } from '../stores/chat-store';
@@ -8,6 +8,7 @@ import { toggleModeHandler } from './KeyboardShortcuts/handlers';
 import { Messages } from './Messages';
 
 export function ChatPanel() {
+  const showSettings = chatStore.use('showSettings');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const mode = chatStore.use('mode');
   const [input, setInput] = useState('');
@@ -37,7 +38,7 @@ export function ChatPanel() {
   };
 
   return (
-    <div className="flex flex-col p-4 flex-1">
+    <div className="flex flex-col flex-1">
       <div className="flex-1 relative">
         <div
           ref={scrollAreaRef}
@@ -46,7 +47,7 @@ export function ChatPanel() {
           <Messages />
         </div>
       </div>
-      <div className="flex mt-4 flex-col">
+      <div className="flex flex-col">
         <ButtonWithHotkey
           action={toggleModeHandler.action}
           keys="ctrl+m"
@@ -54,7 +55,7 @@ export function ChatPanel() {
         >
           <Badge>{mode}</Badge>
         </ButtonWithHotkey>
-        <div className="flex">
+        <div className="flex gap-2 relative mt-2">
           <Textarea
             ref={inputRef}
             value={input}
@@ -68,13 +69,28 @@ export function ChatPanel() {
               }
             }}
             placeholder="Type your message..."
-            className="flex-1 mr-2"
+            className="flex-1 pr-10 border-none"
           />
-          <ButtonWithHotkey hideHint keys="enter" action={handleSend}>
-            <Button>
-              <Send className="h-3 w-3" />
+          <div className="flex flex-col absolute right-0 inset-y-0 p-1.5 gap-1.5">
+            <ButtonWithHotkey hideHint keys="enter" action={handleSend}>
+              <Button
+                className="hover:bg-white/10 w-8 h-8 shadow-none"
+                size="icon"
+                variant="default"
+                onClick={handleSend}
+              >
+                <Send className="h-3.5 w-3.5" />
+              </Button>
+            </ButtonWithHotkey>
+            <Button
+              className="hover:bg-white/10 w-8 h-8 shadow-none"
+              size="icon"
+              variant="default"
+              onClick={() => chatStore.set('showSettings', !showSettings)}
+            >
+              <Settings className="h-3.5 w-3.5" />
             </Button>
-          </ButtonWithHotkey>
+          </div>
         </div>
       </div>
     </div>

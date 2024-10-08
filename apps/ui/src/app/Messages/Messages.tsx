@@ -67,22 +67,22 @@ export function MessageGroupWrapper({
   };
 
   return (
-    <div className={`mb-4 ${MESSAGE_GROUP_COLORS[messages[0].role]}`}>
-      <div className="flex gap-2 mb-2">
+    <div className={`mb-4`}>
+      {/* <div className="flex gap-2 mb-2">
         <strong>{capitalize(role)}</strong>
         <Badge
+          variant="default"
           className="cursor-pointer"
           onClick={() => setMode(mode === 'RAW' ? 'SIMPLIFIED' : 'RAW')}
         >
-          {mode}
+          {mode === 'RAW' && 'See less'}
+          {mode === 'SIMPLIFIED' && 'See more'}
         </Badge>
-      </div>
+      </div> */}
       <div className="flex flex-col gap-2">
-        {mode === 'RAW'
-          ? getRaw()
-          : messages.map((message) => (
-              <SingleMessage key={message.id} message={message} />
-            ))}
+        {messages.map((message) => (
+          <SingleMessage key={message.id} message={message} />
+        ))}
       </div>
     </div>
   );
