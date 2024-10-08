@@ -2,7 +2,7 @@ import {
   chatStore,
   CompletionMode,
   getInlineStopSequence,
-  getLatestFileContent,
+  getLatestFocusedContent,
   getToolMessages,
 } from '../../stores/chat-store';
 import {
@@ -30,7 +30,7 @@ export class LLMOutputParser {
       const toolEndStr = getToolEndString('ASSISTANT_WRITE_FILE');
       //If LLM already outputted the toolEndStr, don't append stuff
       if (inlineStopSeq && !curLine.includes(toolEndStr)) {
-        const latestFileContent = await getLatestFileContent();
+        const latestFileContent = await getLatestFocusedContent();
         if (!latestFileContent) {
           throw new Error('Expected latest file content');
         }

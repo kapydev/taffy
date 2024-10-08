@@ -54,7 +54,7 @@ const setLlm = () => {
 };
 
 export async function getInlineStopSequence(): Promise<string | undefined> {
-  const latestFile = await getLatestFileContent();
+  const latestFile = await getLatestFocusedContent();
   if (!latestFile) {
     throw new Error('Could not find latest file for inline prompting');
   }
@@ -110,7 +110,7 @@ export function getRawMessages(messages: CustomMessage[]): RawMessage[] {
 
   return concatenatedMessages;
 }
-export function getSelectionDetails(
+export function getSelectionDetailsByContent(
   fullContents: string,
   startLine: number,
   endLine: number
@@ -135,32 +135,45 @@ export function getSelectionDetails(
   };
 }
 
-export async function getLatestFileContent() {
-  const fileContextMsg = [...getToolMessages()]
-    .reverse()
-    .find((msg) => msg.type === 'USER_FILE_CONTENTS');
-
-  if (!fileContextMsg?.isType('USER_FILE_CONTENTS') || !fileContextMsg.props)
-    return undefined;
-
+export async function getSelectionDetailsByFile(
+  filePath: string,
+  startLine: number,
+  endLine: number
+) {
   const curContents = await trpc.files.getFileContents.query({
-    filePath: fileContextMsg.props.filePath,
+    filePath,
   });
   if (curContents === undefined) return undefined;
-  const startLine = +fileContextMsg.props.startLine;
-  const endLine = +fileContextMsg.props.endLine;
-
-  const { preSelection, selection, postSelection } = getSelectionDetails(
-    curContents,
-    startLine,
-    endLine
-  );
-
+  const { preSelection, selection, postSelection } =
+    getSelectionDetailsByContent(curContents, startLine, endLine);
   return {
     fullContents: curContents,
     preSelection,
     selection,
     postSelection,
+  };
+}
+
+export async function getLatestFocusedContent() {
+  const fileContextMsg = [...getToolMessages()]
+    .reverse()
+    .find((msg) => msg.type === 'USER_FOCUS_BLOCK');
+
+  if (!fileContextMsg?.isType('USER_FOCUS_BLOCK') || !fileContextMsg.props)
+    return undefined;
+
+  const startLine = +fileContextMsg.props.startLine;
+  const endLine = +fileContextMsg.props.endLine;
+  const result = await getSelectionDetailsByFile(
+    fileContextMsg.props.filePath,
+    startLine,
+    endLine
+  );
+
+  if (result === undefined) return undefined;
+
+  return {
+    ...result,
     props: fileContextMsg.props,
   };
 }
@@ -174,18 +187,25 @@ trpc.files.onSelectionChange.subscribe(undefined, {
     //TODO: If taffy window is still active, we should probably add to context instead of completely new
     resetChatStore();
     const curMsgs = chatStore.get('messages');
-    const selectionDetails = getSelectionDetails(
+    const selectionDetails = getSelectionDetailsByContent(
       data.fullFileContents,
       data.selectedLineNumbers.start,
       data.selectedLineNumbers.end
     );
+
+    // const fileSelectionMessage = createToolMessage('USER_FILE_CONTENTS', {
+    //   body: data.fullFileContents,
+    //   props: {
+    //     filePath: data.fileName,
+    //   },
+    // });
     const fullContents =
       selectionDetails.preSelection +
       '\n{FOCUS_START}\n' +
       selectionDetails.selection +
       '\n{FOCUS_END}\n' +
       selectionDetails.postSelection;
-    const fileSelectionMessage = createToolMessage('USER_FILE_CONTENTS', {
+    const fileFocusMessage = createToolMessage('USER_FOCUS_BLOCK', {
       body: fullContents,
       props: {
         startLine: String(data.selectedLineNumbers.start),
@@ -193,7 +213,11 @@ trpc.files.onSelectionChange.subscribe(undefined, {
         filePath: data.fileName,
       },
     });
-    chatStore.set('messages', [...curMsgs, fileSelectionMessage]);
+    chatStore.set('messages', [
+      ...curMsgs,
+      // fileSelectionMessage,
+      fileFocusMessage,
+    ]);
   },
 });
 

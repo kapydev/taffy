@@ -13,6 +13,7 @@ const logger = console;
 export class ToolMessage<
   ToolName extends ToolType = ToolType
 > extends BaseMessage {
+  data: Partial<(typeof TOOL_TEMPLATES)[ToolName]['data']> = {};
   get role(): 'user' | 'assistant' | 'system' {
     return this.type ? TOOL_TEMPLATES[this.type].role : 'assistant';
   }

@@ -3,7 +3,7 @@ import { toolToToolString } from '../llms/messages/tools';
 import {
   chatStore,
   CompletionMode,
-  getLatestFileContent,
+  getLatestFocusedContent,
   getToolMessages,
   removeMessage,
 } from './chat-store';
@@ -21,7 +21,7 @@ export async function updateChat(input: string, mode: CompletionMode) {
 }
 
 async function addInlinePrePrompt() {
-  const latestFile = await getLatestFileContent();
+  const latestFile = await getLatestFocusedContent();
   if (!latestFile) {
     throw new Error('Could not get latest file context');
   }
