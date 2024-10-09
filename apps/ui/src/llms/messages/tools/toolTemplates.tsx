@@ -13,6 +13,7 @@ import { trpc } from '../../../client';
 import { getLatestFocusedContent } from '../../../stores/chat-store';
 import { ToolMessage } from '../ToolMessage';
 import { CustomMessage } from '../Messages';
+import { findLatest } from '@taffy/shared-helpers';
 
 export type MessageIcon = React.ForwardRefExoticComponent<
   Omit<LucideProps, 'ref'> & React.RefAttributes<SVGSVGElement>
@@ -304,29 +305,65 @@ export const TOOL_RENDER_TEMPLATES: {
     rules: [
       {
         description:
-          'The first code editing action after a FOCUS_BLOCK must be an ASSISTANT_REPLACE_BLOCK',
-        check: () => undefined,
+          'Only user actions, ASSISTANT_INFO and ASSISTANT_PLANNING are allowed after a USER_FOCUS_BLOCK.',
+        check: (messages) => {
+          const latestFocusBlock = findLatest(
+            messages,
+            (msg) => msg.type === 'USER_FOCUS_BLOCK'
+          );
+          if (!latestFocusBlock) return undefined;
+          const checkStartIdx = messages.indexOf(latestFocusBlock) + 1;
+          for (let i = checkStartIdx; i < messages.length; i += 1) {
+            const curMsg = messages[i];
+            if (curMsg.role === 'user') continue;
+            if (curMsg.type === 'ASSISTANT_INFO') continue;
+            if (curMsg.type === 'ASSISTANT_PLANNING') continue;
+            if (curMsg.type === 'ASSISTANT_REPLACE_BLOCK') break;
+            return `We expected only legal actions after a USER_FOCUS_BLOCK, but instead found ${curMsg.type}`;
+          }
+          return undefined;
+        },
       },
       {
         description:
           'The filename of the replace block should match the preceding FOCUS_BLOCK',
-        check: () => undefined,
+        check: (messages) => {
+          const latestMsg = messages.at(-1);
+          if (!latestMsg?.isType('ASSISTANT_REPLACE_BLOCK')) {
+            return undefined;
+          }
+          const latestFocusBlock = findLatest(messages, (msg) =>
+            msg.isType('USER_FOCUS_BLOCK')
+          );
+          if (!latestFocusBlock) {
+            return 'We can only run ASSISTANT_REPLACE_BLOCK when there is a preceding FOCUS_BLOCK, but there was none found!';
+          }
+          if (!latestFocusBlock?.isType('USER_FOCUS_BLOCK')) {
+            throw new Error('Expected user focus block');
+          }
+          if (!latestMsg.props?.filePath) return undefined;
+          if (!latestFocusBlock.props?.filePath) return undefined;
+          if (latestMsg.props.filePath !== latestFocusBlock.props.filePath) {
+            return `Expected replace block filePath to match latest focus block filePath ${latestFocusBlock.props.filePath} but instead got ${latestMsg.props.filePath}`;
+          }
+          return undefined;
+        },
       },
-      {
-        description:
-          'Repeat the preceding 4 lines before the replace block, if any, matching the original indentation exactly. The preceding lines should be inside a {PRECEDING_START}\n{PRECEDING_END} block',
-        check: () => undefined,
-      },
-      {
-        description:
-          'Start and end the new code to replace the existing focused code with a {REPLACE_START}\n{REPLACE_END} block',
-        check: () => undefined,
-      },
-      {
-        description:
-          'End the block with a {SUCCEEDING_START}\n{SUCCEEDING_END} block, whose contents should be the 4 lines after the replace block, if any, matching the original indentation exactly.',
-        check: () => undefined,
-      },
+      // {
+      //   description:
+      //     'Repeat the preceding 4 lines before the replace block, if any, matching the original indentation exactly. The preceding lines should be inside a {PRECEDING_START}\n{PRECEDING_END} block',
+      //   check: () => undefined,
+      // },
+      // {
+      //   description:
+      //     'Start and end the new code to replace the existing focused code with a {REPLACE_START}\n{REPLACE_END} block',
+      //   check: () => undefined,
+      // },
+      // {
+      //   description:
+      //     'End the block with a {SUCCEEDING_START}\n{SUCCEEDING_END} block, whose contents should be the 4 lines after the replace block, if any, matching the original indentation exactly.',
+      //   check: () => undefined,
+      // },
     ],
     body: (data) => {
       if (!data.props) return;
@@ -422,23 +459,36 @@ export const TOOL_RENDER_TEMPLATES: {
       {
         description:
           'You cannot write to a file until the file contents have been provided to you. Do not make assumptions about the contents of a file.',
-        check: () => undefined,
+        check: (messages) => {
+          const latestMsg = messages.at(-1);
+          if (!latestMsg?.isType('ASSISTANT_WRITE_FILE')) return undefined;
+          if (!latestMsg.props) return undefined;
+          const precedingFileContents = findLatest(messages, (msg) => {
+            if (
+              !msg.isType('USER_FOCUS_BLOCK') &&
+              !msg.isType('USER_FILE_CONTENTS')
+            ) {
+              return false;
+            }
+            if (msg.props?.filePath !== latestMsg.props?.filePath) return false;
+            return true;
+          });
+          if (!precedingFileContents) {
+            return `You are trying to write to ${latestMsg.props.filePath}, but there is no such file in the context! Ask for permission to read the file first.`;
+          }
+          return undefined;
+        },
       },
       {
         description:
           'You will need to provide the FULL FILE CONTENTS, because the action suggested to the user will be a full override of the existing file.',
         check: () => undefined,
       },
-      {
-        description:
-          'This tool cannot be used after an USER_FOCUS_BLOCK, until an ASSISTANT_REPLACE_BLOCK is used',
-        check: () => undefined,
-      },
-      {
-        description:
-          'You cannot write to a file more than once until you obtain the updated contents of that file',
-        check: () => undefined,
-      },
+      // {
+      //   description:
+      //     'You cannot write to a file more than once until you obtain the updated contents of that file',
+      //   check: () => undefined,
+      // },
     ],
     body: (data) => {
       if (!data.props) return;

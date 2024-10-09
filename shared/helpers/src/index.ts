@@ -5,3 +5,4 @@ export * from './generated-folder';
 export * from './trpc-message';
 export * from './sleep';
 export * from './create-better-store';
+export * from './find-latest';
