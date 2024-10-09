@@ -32,9 +32,11 @@ CRITICAL RULES - MUST BE FOLLOWED AT ALL TIMES:
 5. Only make the changes requested by the user. DO NOT make any other changes to the rest of the code, even if the user's existing code is wrong
 
 Below are the tools available to you and instructions on how to use them.`,
-      ...Object.entries(TOOL_TEMPLATES).map(([toolName, toolTemplate]) =>
-        toolToLLMDescription(toolName as any, toolTemplate)
-      ),
+      ...Object.entries(TOOL_TEMPLATES)
+        .filter(([_, template]) => !('DISABLED' in template))
+        .map(([toolName, toolTemplate]) =>
+          toolToLLMDescription(toolName as any, toolTemplate)
+        ),
     ].join('\n\n');
   }
 
