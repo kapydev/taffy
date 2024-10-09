@@ -131,12 +131,13 @@ export const TOOL_TEMPLATES = {
       newContents: undefined as string | undefined,
     },
   },
-  ASSISTANT_READ_FILE: {
+  ASSISTANT_READ_PATHS: {
     role: 'assistant',
-    desc: "Ask the user for permission to add a file to the context. The contents of the tool call should be all the files that need to be read, seperated by newlines. After calling this tool, no other tool calls can be made by the assistant, as we have to wait for the user's response",
+    desc: "Ask the user for permission to add certain paths to the context. The contents of the tool call should be all the paths that need to be read, seperated by newlines. After calling this tool, no other tool calls can be made by the assistant, as we have to wait for the user's response. This tool can be used to read file contents, read files available in a directory, and check if a path exists.",
     propDesc: {},
     sampleProps: {},
-    sampleBody: 'src/index.ts\nsrc/messages/helloWorld.ts',
+    sampleBody:
+      'src/index.ts\nsrc/messages/helloWorld.ts\nsrc\nsrc/does-this-file-exist.ts',
     data: {},
   },
 
@@ -163,18 +164,24 @@ export const TOOL_TEMPLATES = {
     desc: 'Information from the user regarding the contents of a file. If there are multiple FILE_CONTENTS tool responses, the latest one should be considered as the correct one. If exists is true, the body can be considered the entire contents of the file. Otherwise, the body may consider additional info on the file not existing.',
     propDesc: {
       filePath: 'The file path where the contents are from',
-      exists: 'Whether the file exists',
+      type: 'What exists at the specified path',
     },
     sampleProps: {
       filePath: 'src/utils/helloWorld.ts',
-      exists: 'true',
+      type: 'file | folder | non-existent',
     },
     sampleBody: `export default function HelloWorld() {
   const name = 'Thomas';
   ${'console'}.log("Hello World");
 }
 >>>>OR<<<<
-The file does not exist.  
+Nothing exists at the path
+>>>>OR<<<<
+The specified path contains a folder with the following sub paths:
+src/index.ts
+src/README.md
+src/components (FOLDER)
+src/pages (FOLDER)
 `,
     data: {},
   },
@@ -267,7 +274,7 @@ export const TOOL_RENDER_TEMPLATES: {
       },
     ],
   },
-  ASSISTANT_READ_FILE: {
+  ASSISTANT_READ_PATHS: {
     Icon: BookPlusIcon,
     title: () => 'Can I read these files?',
     body: (data) => data.body,
@@ -322,7 +329,7 @@ export const TOOL_RENDER_TEMPLATES: {
     rules: [
       {
         description:
-          'Only user actions, ASSISTANT_INFO, ASSISTANT_READ_FILE and ASSISTANT_PLANNING are allowed after a USER_FOCUS_BLOCK.',
+          'Only user actions, ASSISTANT_INFO, ASSISTANT_READ_PATHS and ASSISTANT_PLANNING are allowed after a USER_FOCUS_BLOCK.',
         check: (messages) => {
           const latestFocusBlock = findLatest(
             messages,
@@ -335,7 +342,7 @@ export const TOOL_RENDER_TEMPLATES: {
             if (curMsg.role === 'user') continue;
             if (curMsg.type === 'ASSISTANT_INFO') continue;
             if (curMsg.type === 'ASSISTANT_PLANNING') continue;
-            if (curMsg.type === 'ASSISTANT_READ_FILE') continue;
+            if (curMsg.type === 'ASSISTANT_READ_PATHS') continue;
             if (curMsg.type === 'ASSISTANT_REPLACE_BLOCK') break;
             return `We expected only legal actions after a USER_FOCUS_BLOCK, but instead found ${curMsg.type}`;
           }
@@ -358,7 +365,7 @@ export const TOOL_RENDER_TEMPLATES: {
             if (curMsg.role === 'user') continue;
             if (curMsg.type === 'ASSISTANT_INFO') continue;
             if (curMsg.type === 'ASSISTANT_PLANNING') continue;
-            if (curMsg.type === 'ASSISTANT_READ_FILE') continue;
+            if (curMsg.type === 'ASSISTANT_READ_PATHS') continue;
             if (curMsg.type === 'ASSISTANT_REPLACE_BLOCK') break;
             return `We expected only legal actions after a USER_FOCUS_BLOCK, but instead found ${curMsg.type}`;
           }

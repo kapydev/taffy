@@ -12,6 +12,7 @@ import { getWorkspaceFiles } from '../files/get-folder-structure';
 import { FileEditor } from '../files/file-editor';
 import { fileStore, finishedIndexing } from '../files/file-indexer';
 import fuzzysort from 'fuzzysort';
+import path from 'path';
 
 function getIndentLen(line: string) {
   return (line.match(/^\s*/)?.[0] ?? '').replace(/\t/g, '    ').length;
@@ -86,6 +87,40 @@ export const fileRouter = router({
       } catch {
         return undefined;
       }
+    }),
+  getPathContents: publicProcedure
+    .input(z.object({ filePath: z.string() }))
+    .query(async (opts) => {
+      const { filePath } = opts.input;
+      const fullPath = getFullPath(filePath);
+      try {
+        const stat = await fs.stat(fullPath);
+        if (stat.isFile()) {
+          const editor = new FileEditor(filePath);
+          const editorContents = await editor.getContents();
+          if (!editorContents) {
+            throw new Error('Expected there to be editor contents!');
+          }
+          const contents = editorContents;
+          return { type: 'file' as const, contents };
+        } else if (stat.isDirectory()) {
+          const files = await fs.readdir(fullPath);
+          return {
+            type: 'directory' as const,
+            contents: await Promise.all(
+              files.map(async (file) => {
+                const subPath = path.posix.join(fullPath, file);
+                const subStat = await fs.stat(subPath);
+                return {
+                  fullPath: subPath,
+                  type: subStat.isFile() ? 'FILE' : 'DIR',
+                };
+              })
+            ),
+          };
+        }
+      } catch {}
+      return { type: 'non-existent' as const, contents: 'Path does not exist' };
     }),
   previewFileChange: publicProcedure
     .input(
