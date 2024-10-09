@@ -4,7 +4,7 @@ import {
   chatStore,
   CompletionMode,
   getLatestFocusedContent,
-  getToolMessages,
+  getToolMessagesWithoutErrors,
   removeMessage,
 } from './chat-store';
 
@@ -59,7 +59,7 @@ async function updateChatFull(input: string) {
 }
 
 async function updateChatEdit(input: string) {
-  const messages = getToolMessages();
+  const messages = getToolMessagesWithoutErrors();
   const latestUserPrompt = [...messages]
     .reverse()
     .find((msg) => msg.type === 'USER_PROMPT');

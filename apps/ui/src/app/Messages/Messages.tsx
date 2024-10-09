@@ -62,13 +62,19 @@ export function MessageGroupWrapper({
 }
 
 function SingleMessage({ message }: { message: CustomMessage }) {
+  const showVerbose = chatStore.use('showVerboseMessages');
+  const hiddenByDefault = useMemo(() => {
+    if (message instanceof SystemPromptMessage) return true;
+    if (message.type === 'ASSISTANT_PLANNING') return true;
+    if (message.type === 'USER_TOOL_ERROR') return true;
+    return false;
+  }, [message]);
+
+  if (hiddenByDefault && !showVerbose) return undefined;
+
   if (message instanceof SystemPromptMessage) {
-    // return <SystemPromptRender message={message} />;
-    return null;
-  } else if (
-    message instanceof ToolMessage &&
-    message.type !== 'ASSISTANT_PLANNING'
-  ) {
+    return <SystemPromptRender message={message} />;
+  } else if (message instanceof ToolMessage) {
     return <ToolMessageRender message={message} />;
   }
 }

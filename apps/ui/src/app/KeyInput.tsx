@@ -7,7 +7,7 @@ function KeyInputRow({
   keyType,
   keyName,
 }: {
-  keyType: 'claudeKey' | 'gptKey' | 'deepSeekKey';
+  keyType: 'claudeKey' | 'gptKey'; //| 'deepSeekKey';
   keyName: string;
 }) {
   const [inputValue, setInputValue] = useState('');
@@ -62,7 +62,7 @@ export function KeyInput() {
     <div className="w-full max-w-sm mx-auto">
       <KeyInputRow keyType="claudeKey" keyName="Claude" />
       <KeyInputRow keyType="gptKey" keyName="GPT" />
-      <KeyInputRow keyType="deepSeekKey" keyName="DeepSeek" />
+      {/* <KeyInputRow keyType="deepSeekKey" keyName="DeepSeek" /> */}
     </div>
   );
 }

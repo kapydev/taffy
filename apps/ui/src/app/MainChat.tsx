@@ -19,19 +19,25 @@ function LeftPanel() {
   const showSettings = chatStore.use('showSettings');
   const claudeKey = keyStore.use('claudeKey');
   const gptKey = keyStore.use('gptKey');
-  const deepSeekKey = keyStore.use('deepSeekKey');
+  const showVerbose = chatStore.use('showVerboseMessages');
+  // const deepSeekKey = keyStore.use('deepSeekKey');
 
   useEffect(() => {
-    if (claudeKey === '' && gptKey === '' && deepSeekKey === '') {
+    if (
+      claudeKey === '' &&
+      gptKey === ''
+      //  && deepSeekKey === ''
+    ) {
       chatStore.set('showSettings', true);
     } else {
       chatStore.set('showSettings', false);
     }
   }, []);
 
-  const runTestFunc = () => {
+  const toggleVerboseMessages = () => {
     // console.log(chatStore.get('messages'));
-    trpc.testFunc.query();
+    // trpc.testFunc.query();
+    chatStore.set('showVerboseMessages', !showVerbose);
   };
 
   return (
@@ -56,11 +62,12 @@ function LeftPanel() {
         <Button size="sm" onClick={resetChatStore}>
           Reset Chat
         </Button>
-        <Button size="sm" onClick={runTestFunc}>
-          Test Func
+        <Button size="sm" onClick={toggleVerboseMessages}>
+          {showVerbose ? 'Hide Verbose Messages' : 'Show Verbose Messages'}
         </Button>
         <KeyInput />
-        {claudeKey === '' && gptKey === '' && deepSeekKey === '' && (
+        {claudeKey === '' && gptKey === '' && (
+          //  && deepSeekKey === ''
           <p className="text-vsc-errorForeground text-xs">
             Please enter one of the API keys.
           </p>

@@ -75,9 +75,13 @@ export const fileRouter = router({
     .input(z.object({ filePath: z.string() }))
     .query(async (opts) => {
       const { filePath } = opts.input;
-      const editor = new FileEditor(filePath);
-      const contents = await editor.getContents();
-      return contents;
+      try {
+        const editor = new FileEditor(filePath);
+        const contents = await editor.getContents();
+        return contents;
+      } catch {
+        return undefined;
+      }
     }),
   previewFileChange: publicProcedure
     .input(

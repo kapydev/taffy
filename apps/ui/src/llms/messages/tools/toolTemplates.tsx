@@ -1,18 +1,24 @@
 import {
+  BookPlusIcon,
   BotIcon,
   FileInput,
   FileInputIcon,
   FilePlus2Icon,
   LucideProps,
+  ShieldAlertIcon,
   UserIcon,
   WaypointsIcon,
 } from 'lucide-react';
 import { trpc } from '../../../client';
-import { ToolMessage } from '../ToolMessage';
 import {
+  addAddtionalContext,
+  chatStore,
+  continuePrompt,
   getLatestFocusedContent,
-  getSelectionDetailsByFile,
 } from '../../../stores/chat-store';
+import { ToolMessage } from '../ToolMessage';
+import { CustomMessage } from '../Messages';
+import { findLatest } from '@taffy/shared-helpers';
 
 export type MessageIcon = React.ForwardRefExoticComponent<
   Omit<LucideProps, 'ref'> & React.RefAttributes<SVGSVGElement>
@@ -28,6 +34,18 @@ export type Tools = {
       | undefined;
   };
 };
+
+/**returns undefined or a string to pass back to llm to scold it to do better */
+type ToolRuleResult = string | undefined;
+
+//TODO: ToolRules need to be moved to render templates for type inference
+/**Used to enforce certain formats for the LLM output and to hint it in the right direction if it messes up */
+export interface ToolRule {
+  /**Description passed to LLM regarding tool usage. */
+  description: string;
+  /**Checks to be done for the tool. Always just check the latest message, REGARDLESS of type*/
+  check: (messagesWithoutErrors: ToolMessage[]) => ToolRuleResult;
+}
 
 export interface ToolTemplate {
   role: 'assistant' | 'user';
@@ -74,17 +92,18 @@ export const TOOL_TEMPLATES = {
   },
   ASSISTANT_PLANNING: {
     role: 'assistant',
-    desc: "For the assistant to plan how to tackle the task from the user. If an assistant info block or the user's prompt suggests that the user's codebase will be edited, the planning block should be between the info block and the write file block, or whatever action on the users codebase. Reason how to tackle the user's task step by step, placing steps in a logical order. After the planning tool is done, execute the plan. In each step, indicate what tool you will use, and how you will use it",
+    desc: "For the assistant to plan how to tackle the task from the user. Reason how to tackle the user's task step by step, placing steps in a logical order. After the planning tool is done, execute the plan. In each step, indicate what tool you will use, and how you will use it",
     propDesc: {},
     sampleProps: {},
     sampleBody: `Example 1:
-    1. Update the src/utils/helloWorld.ts file using ASSISTANT_REPLACE_BLOCK
-    2. Update the barrel file src/utils/index.ts to include the export from helloWorld.ts using ASSISTANT_WRITE_FILE`,
+    1. Read the src/utils/index.ts and other relevant files to understand what files need to be updated
+    2. Update the src/utils/helloWorld.ts file using ASSISTANT_REPLACE_BLOCK
+    3. Update the barrel file src/utils/index.ts to include the export from helloWorld.ts using ASSISTANT_WRITE_FILE`,
     data: {},
   },
   ASSISTANT_WRITE_FILE: {
     role: 'assistant',
-    desc: `Ask the user for permission to create/overwrite a file. You will need to provide the FULL FILE CONTENTS, because the action suggested to the user will be a full override of the existing file. This tool cannot be used after an USER_FOCUS_BLOCK, until an ASSISTANT_REPLACE_BLOCK is used.`,
+    desc: `Ask the user for permission to create/overwrite a file.  `,
     propDesc: {
       filePath:
         "The path to which the file is written. If the file path doesn't exist, directories will be recursively created until we are able to create the file.",
@@ -99,7 +118,7 @@ export const TOOL_TEMPLATES = {
   },
   ASSISTANT_REPLACE_BLOCK: {
     role: 'assistant',
-    desc: `A block from the assistant to address a user's focus block. You will need to provide ONLY the contents of the code to replace the block. The focus block will be the only part of the code programmatically replaced with the replace block, so make sure the outputs are immediately runnable. Instead of including comments in the output of the replace block, any parts of the thought process should be in the planning block or info block instead. A replace block should only address the latest USER_FOCUS_BLOCK in the prompt history. If there is more than one USER_FOCUS_BLOCK in the prompt history, the rest can be ignored. Always use this as the first code writing action after an USER_FOCUS_BLOCK, after the info and planning blocks.`,
+    desc: `A block from the assistant to address a user's focus block. The focus block will be the only part of the code programmatically replaced with the replace block, so make sure the outputs are immediately runnable. Instead of including comments in the output of the replace block, any parts of the thought process should be in the planning block or info block instead.`,
     propDesc: {
       filePath: 'The file path where the contents are from',
     },
@@ -112,14 +131,25 @@ export const TOOL_TEMPLATES = {
       newContents: undefined as string | undefined,
     },
   },
-  // ASSISTANT_READ_FILE: {
-  //   role: 'assistant',
-  //   desc: "Ask the user for permission to add a file to the context. The contents of the tool call should be all the files that need to be read, seperated by newlines. After calling this tool, no other tool calls can be made by the assistant, as we have to wait for the user's response",
-  //   propDesc: {},
-  //   sampleProps: {},
-  //   sampleBody: 'src/index.ts\nsrc/messages/helloWorld.ts',
-  // },
+  ASSISTANT_READ_FILE: {
+    role: 'assistant',
+    desc: "Ask the user for permission to add a file to the context. The contents of the tool call should be all the files that need to be read, seperated by newlines. After calling this tool, no other tool calls can be made by the assistant, as we have to wait for the user's response",
+    propDesc: {},
+    sampleProps: {},
+    sampleBody: 'src/index.ts\nsrc/messages/helloWorld.ts',
+    data: {},
+  },
+
   //USER TOOLS
+  USER_TOOL_ERROR: {
+    role: 'user',
+    desc: 'Information regarding incorrect tool usage. The occurence of this indicates a previous generation produced a result that did not follow a particular rule. Take extra notice of the rule that was not followed correctly in subsequent generations',
+    propDesc: {},
+    sampleProps: {},
+    sampleBody:
+      'We tried to write to a file without first reading the contents',
+    data: {},
+  },
   USER_PROMPT: {
     role: 'user',
     desc: 'The prompt from the user',
@@ -130,17 +160,22 @@ export const TOOL_TEMPLATES = {
   },
   USER_FILE_CONTENTS: {
     role: 'user',
-    desc: 'Information from the user regarding the contents of a file. If there are multiple FILE_CONTENTS tool responses, the latest one should be considered as the correct one.',
+    desc: 'Information from the user regarding the contents of a file. If there are multiple FILE_CONTENTS tool responses, the latest one should be considered as the correct one. If exists is true, the body can be considered the entire contents of the file. Otherwise, the body may consider additional info on the file not existing.',
     propDesc: {
       filePath: 'The file path where the contents are from',
+      exists: 'Whether the file exists',
     },
     sampleProps: {
       filePath: 'src/utils/helloWorld.ts',
+      exists: 'true',
     },
     sampleBody: `export default function HelloWorld() {
   const name = 'Thomas';
   ${'console'}.log("Hello World");
-}`,
+}
+>>>>OR<<<<
+The file does not exist.  
+`,
     data: {},
   },
   USER_FOCUS_BLOCK: {
@@ -189,6 +224,7 @@ export type ToolRenderTemplate<ToolName extends ToolType> = {
   onRemove?: ToolAction<ToolName>;
   onFocus?: ToolAction<ToolName>;
   actions?: ToolActionMeta<ToolName>[];
+  rules: ToolRule[];
 };
 export const TOOL_RENDER_TEMPLATES: {
   [ToolName in ToolType]: ToolRenderTemplate<ToolName>;
@@ -198,34 +234,72 @@ export const TOOL_RENDER_TEMPLATES: {
     title: () => 'You',
     body: (data) => data.body,
     content: (data) => data.contents,
+    rules: [],
   },
   ASSISTANT_INFO: {
     Icon: BotIcon,
     title: () => 'Taffy',
     body: (data) => data.body,
     content: (data) => data.contents,
+    rules: [],
   },
   ASSISTANT_PLANNING: {
     Icon: WaypointsIcon,
     title: () => 'Taffy Planning',
     body: (data) => data.body,
     content: (data) => data.contents,
+    rules: [
+      {
+        description:
+          'Planning should only come immediately after an assistant info block',
+        check: (messages) => {
+          if (
+            messages.at(-1)?.type === 'ASSISTANT_PLANNING' &&
+            messages.at(-2)?.type !== 'ASSISTANT_INFO'
+          ) {
+            return (
+              'The latest message is of type ASSISTANT_PLANNING but the previous message is of type ' +
+              messages.at(-2)?.type
+            );
+          }
+          return undefined;
+        },
+      },
+    ],
   },
-  // ASSISTANT_READ_FILE: {
-  //   Icon: FilePlus2Icon,
-  //   title: () => 'Shall I add the following?',
-  //   description: (data) => data.body,
-  //   actions: [
-  //     {
-  //       name: 'approve',
-  //       action: () => {},
-  //       shortcutEnd: 'enter',
-  //     },
-  //   ],
-  // },
+  ASSISTANT_READ_FILE: {
+    Icon: BookPlusIcon,
+    title: () => 'Can I read these files?',
+    body: (data) => data.body,
+    content: (data) => data.contents,
+    onRemove: (data) => {},
+    rules: [],
+    actions: [
+      {
+        name: 'Approve',
+        action: async (msg) => {
+          const fileNames = msg.body.trim().split('\n');
+          for (const fileName of fileNames) {
+            await addAddtionalContext(fileName);
+          }
+
+          await continuePrompt(chatStore.get('mode'));
+        },
+        shortcutEnd: 'enter',
+      },
+    ],
+  },
+  USER_TOOL_ERROR: {
+    Icon: ShieldAlertIcon,
+    title: () => 'Tool error',
+    body: (data) => data.body,
+    content: (data) => data.contents,
+    rules: [],
+  },
   USER_FOCUS_BLOCK: {
     Icon: FileInput,
     title: () => 'File Context Added',
+    rules: [],
     body: (data) => {
       if (!data.props) return;
       return (
@@ -245,6 +319,70 @@ export const TOOL_RENDER_TEMPLATES: {
   ASSISTANT_REPLACE_BLOCK: {
     Icon: FilePlus2Icon,
     title: () => 'Can I edit these files?',
+    rules: [
+      {
+        description:
+          'Only user actions, ASSISTANT_INFO, ASSISTANT_READ_FILE and ASSISTANT_PLANNING are allowed after a USER_FOCUS_BLOCK.',
+        check: (messages) => {
+          const latestFocusBlock = findLatest(
+            messages,
+            (msg) => msg.type === 'USER_FOCUS_BLOCK'
+          );
+          if (!latestFocusBlock) return undefined;
+          const checkStartIdx = messages.indexOf(latestFocusBlock) + 1;
+          for (let i = checkStartIdx; i < messages.length; i += 1) {
+            const curMsg = messages[i];
+            if (curMsg.role === 'user') continue;
+            if (curMsg.type === 'ASSISTANT_INFO') continue;
+            if (curMsg.type === 'ASSISTANT_PLANNING') continue;
+            if (curMsg.type === 'ASSISTANT_READ_FILE') continue;
+            if (curMsg.type === 'ASSISTANT_REPLACE_BLOCK') break;
+            return `We expected only legal actions after a USER_FOCUS_BLOCK, but instead found ${curMsg.type}`;
+          }
+          return undefined;
+        },
+      },
+      {
+        description:
+          'The filename of the replace block should match the preceding FOCUS_BLOCK',
+        check: (messages) => {
+          const latestMsg = messages.at(-1);
+          if (!latestMsg?.isType('ASSISTANT_REPLACE_BLOCK')) {
+            return undefined;
+          }
+          const latestFocusBlock = findLatest(messages, (msg) =>
+            msg.isType('USER_FOCUS_BLOCK')
+          );
+          if (!latestFocusBlock) {
+            return 'We can only run ASSISTANT_REPLACE_BLOCK when there is a preceding FOCUS_BLOCK, but there was none found!';
+          }
+          if (!latestFocusBlock?.isType('USER_FOCUS_BLOCK')) {
+            throw new Error('Expected user focus block');
+          }
+          if (!latestMsg.props?.filePath) return undefined;
+          if (!latestFocusBlock.props?.filePath) return undefined;
+          if (latestMsg.props.filePath !== latestFocusBlock.props.filePath) {
+            return `Expected replace block filePath to match latest focus block filePath ${latestFocusBlock.props.filePath} but instead got ${latestMsg.props.filePath}`;
+          }
+          return undefined;
+        },
+      },
+      // {
+      //   description:
+      //     'Repeat the preceding 4 lines before the replace block, if any, matching the original indentation exactly. The preceding lines should be inside a {PRECEDING_START}\n{PRECEDING_END} block',
+      //   check: () => undefined,
+      // },
+      // {
+      //   description:
+      //     'Start and end the new code to replace the existing focused code with a {REPLACE_START}\n{REPLACE_END} block',
+      //   check: () => undefined,
+      // },
+      // {
+      //   description:
+      //     'End the block with a {SUCCEEDING_START}\n{SUCCEEDING_END} block, whose contents should be the 4 lines after the replace block, if any, matching the original indentation exactly.',
+      //   check: () => undefined,
+      // },
+    ],
     body: (data) => {
       if (!data.props) return;
       const thoughtsString = data.thoughts ? `💡${data.thoughts}` : '';
@@ -282,11 +420,16 @@ export const TOOL_RENDER_TEMPLATES: {
         return;
       }
       message.data.oldContents = curContents.fullContents;
-      message.data.newContents = [
-        curContents.preSelection,
-        message.body,
-        curContents.postSelection,
-      ].join('\n');
+      const newContentsArr: string[] = [];
+      if (curContents.preSelection) {
+        newContentsArr.push(curContents.preSelection);
+      }
+      newContentsArr.push(message.body);
+      if (curContents.postSelection) {
+        newContentsArr.push(curContents.postSelection);
+      }
+      //We need to do it like above to prevent new line issues
+      message.data.newContents = newContentsArr.join('\n');
       trpc.files.previewFileChange.mutate({
         fileName: message.props.filePath,
         newContents: message.data.newContents,
@@ -330,10 +473,46 @@ export const TOOL_RENDER_TEMPLATES: {
       return data.props.filePath;
     },
     content: (data) => data.props?.filePath ?? '',
+    rules: [],
   },
   ASSISTANT_WRITE_FILE: {
     Icon: FilePlus2Icon,
-    title: () => 'Shall I add the following?',
+    title: () => 'Shall I update the following file?',
+    rules: [
+      {
+        description:
+          'You cannot write to a file until the file contents have been provided to you. Do not make assumptions about the contents of a file.',
+        check: (messages) => {
+          const latestMsg = messages.at(-1);
+          if (!latestMsg?.isType('ASSISTANT_WRITE_FILE')) return undefined;
+          if (!latestMsg.props) return undefined;
+          const precedingFileContents = findLatest(messages, (msg) => {
+            if (
+              !msg.isType('USER_FOCUS_BLOCK') &&
+              !msg.isType('USER_FILE_CONTENTS')
+            ) {
+              return false;
+            }
+            if (msg.props?.filePath !== latestMsg.props?.filePath) return false;
+            return true;
+          });
+          if (!precedingFileContents) {
+            return `You are trying to write to ${latestMsg.props.filePath}, but there is no such file in the context! Ask for permission to read the file first.`;
+          }
+          return undefined;
+        },
+      },
+      {
+        description:
+          'You will need to provide the FULL FILE CONTENTS, because the action suggested to the user will be a full override of the existing file.',
+        check: () => undefined,
+      },
+      // {
+      //   description:
+      //     'You cannot write to a file more than once until you obtain the updated contents of that file',
+      //   check: () => undefined,
+      // },
+    ],
     body: (data) => {
       if (!data.props) return;
       const thoughtsString = data.thoughts ? `💡${data.thoughts}` : '';
@@ -401,6 +580,7 @@ export const TOOL_RENDER_TEMPLATES: {
   USER_AVAILABLE_FILES: {
     Icon: FilePlus2Icon,
     title: () => 'Available Files in Repository',
+    rules: [],
     body: (data) => {
       const numFiles = data.body.split('\n').length;
       return `${numFiles} filenames added to context`;

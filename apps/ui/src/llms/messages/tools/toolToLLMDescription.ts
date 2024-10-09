@@ -1,4 +1,10 @@
-import { Tools, ToolTemplate, ToolType } from './toolTemplates';
+import {
+  TOOL_RENDER_TEMPLATES,
+  TOOL_TEMPLATES,
+  Tools,
+  ToolTemplate,
+  ToolType,
+} from './toolTemplates';
 
 export function toolToLLMDescription<T extends ToolType>(
   toolName: T,
@@ -16,11 +22,22 @@ export function toolToLLMDescription<T extends ToolType>(
     sampleTool.body = tool.sampleBody;
   }
 
+  const toolRules = TOOL_RENDER_TEMPLATES[toolName].rules;
+
+  const additionalRules =
+    toolRules.length > 0
+      ? toolRules
+          .map((rule, idx) => `${idx + 1}. ${rule.description}`)
+          .join('\n')
+      : 'There are no rules for this tool.';
+
   return `Name: ${toolName}
 Description:
 ${tool.desc}
 Props:
 ${propDescStr}
+Tool Rules:
+${additionalRules}
 Sample:
 ${toolToToolString(toolName, sampleTool)}`;
 }

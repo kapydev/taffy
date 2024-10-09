@@ -1,3 +1,4 @@
+import { createBetterStore } from '@taffy/shared-helpers';
 import { RawMessage } from '@taffy/shared-types';
 import { trpc } from '../client';
 import { LLM } from '../llms/base-llm';
@@ -9,12 +10,11 @@ import { SystemPromptMessage } from '../llms/messages/SystemPromptMessage';
 import { createToolMessage, ToolMessage } from '../llms/messages/ToolMessage';
 import { TOOL_RENDER_TEMPLATES, ToolType } from '../llms/messages/tools';
 import { getPossibleModes } from './possible-modes';
-import { booleanFilter, createBetterStore } from '@taffy/shared-helpers';
 
 /**If you need the same functionality for multiple completion modes, you can include the keywords together.
  * By doing that, we can use the str.contains() function to determin the behaviour
  */
-export type CompletionMode = 'full' | 'edit' | 'inline' | 'inline-edit';
+export type CompletionMode = 'full'; //| 'edit' | 'inline' | 'inline-edit';
 
 export const chatStore = createBetterStore({
   messages: [new SystemPromptMessage()] as CustomMessage[],
@@ -25,8 +25,9 @@ export const chatStore = createBetterStore({
    * inline-edit - For fixing a previous inline prompt
    * inline - For editing a specific part of the code
    */
-  mode: 'inline' as CompletionMode,
+  mode: 'full' as CompletionMode,
   showSettings: false as boolean,
+  showVerboseMessages: false as boolean,
 });
 
 //@ts-expect-error for debugging
@@ -36,7 +37,7 @@ export const keyStore = createBetterStore(
   {
     claudeKey: '',
     gptKey: '',
-    deepSeekKey: '',
+    // deepSeekKey: '',
   },
   { persistKey: 'key-store' }
 );
@@ -95,6 +96,11 @@ export async function continuePrompt(
   const stream = llm.prompt(rawMessages, stopSequences);
 
   await parser.handleTextStream(stream, mode);
+
+  if (parser.earlyExit) {
+    //If we had an error, run again
+    continuePrompt(mode, llm);
+  }
 }
 
 export function getRawMessages(messages: CustomMessage[]): RawMessage[] {
@@ -156,7 +162,7 @@ export async function getSelectionDetailsByFile(
 }
 
 export async function getLatestFocusedContent() {
-  const fileContextMsg = [...getToolMessages()]
+  const fileContextMsg = [...getToolMessagesWithoutErrors()]
     .reverse()
     .find((msg) => msg.type === 'USER_FOCUS_BLOCK');
 
@@ -239,43 +245,58 @@ export function removeMessage<T extends ToolType>(message: ToolMessage<T>) {
   renderTemplate.onRemove?.(message);
 }
 
-export function getToolMessages(): ToolMessage[] {
+export function getToolMessagesWithoutErrors(): ToolMessage[] {
   const allMessages = chatStore.get('messages');
-  return allMessages.filter((msg) => msg instanceof ToolMessage);
+  return allMessages.filter(
+    (msg): msg is ToolMessage =>
+      msg instanceof ToolMessage && msg.type !== 'USER_TOOL_ERROR'
+  );
 }
 
-export async function setAdditionalContext(fileNames: string[]) {
-  const currentMessages = chatStore.get('messages');
-  const newMessages = currentMessages.filter(
-    (msg) => !(msg instanceof ToolMessage && msg.type === 'USER_FILE_CONTENTS')
-  );
-
-  const newFileContentMessages = (
-    await Promise.all(
-      fileNames.map(async (filePath) => {
-        const data = await trpc.files.getFileContents.query({ filePath });
-        if (data === undefined) return undefined;
-        return createToolMessage('USER_FILE_CONTENTS', {
-          body: data, // Assuming full file contents are fetched elsewhere,
-          props: {
-            filePath: filePath,
-          },
-        });
-      })
-    )
-  ).filter(booleanFilter);
-
-  const lastFocusIndex = newMessages.findIndex(
-    (msg) => msg instanceof ToolMessage && msg.type === 'USER_FOCUS_BLOCK'
-  );
-
-  if (lastFocusIndex === -1) {
-    chatStore.set('messages', [...newMessages, ...newFileContentMessages]);
-  } else {
-    chatStore.set('messages', [
-      ...newMessages.slice(0, lastFocusIndex),
-      ...newFileContentMessages,
-      ...newMessages.slice(lastFocusIndex),
-    ]);
-  }
+export async function addAddtionalContext(filePath: string) {
+  const data = await trpc.files.getFileContents.query({ filePath });
+  const additionalCtxMsg = createToolMessage('USER_FILE_CONTENTS', {
+    body: data !== undefined ? data : 'The file does not exist', // Assuming full file contents are fetched elsewhere,
+    props: {
+      filePath,
+      exists: String(data !== undefined),
+    },
+  });
+  chatStore.set('messages', [...chatStore.get('messages'), additionalCtxMsg]);
 }
+
+// export async function setAdditionalContext(fileNames: string[]) {
+//   const currentMessages = chatStore.get('messages');
+//   const newMessages = currentMessages.filter(
+//     (msg) => !(msg instanceof ToolMessage && msg.type === 'USER_FILE_CONTENTS')
+//   );
+
+//   const newFileContentMessages = (
+//     await Promise.all(
+//       fileNames.map(async (filePath) => {
+//         const data = await trpc.files.getFileContents.query({ filePath });
+//         if (data === undefined) return undefined;
+//         return createToolMessage('USER_FILE_CONTENTS', {
+//           body: data, // Assuming full file contents are fetched elsewhere,
+//           props: {
+//             filePath: filePath,
+//           },
+//         });
+//       })
+//     )
+//   ).filter(booleanFilter);
+
+//   const lastFocusIndex = newMessages.findIndex(
+//     (msg) => msg instanceof ToolMessage && msg.type === 'USER_FOCUS_BLOCK'
+//   );
+
+//   if (lastFocusIndex === -1) {
+//     chatStore.set('messages', [...newMessages, ...newFileContentMessages]);
+//   } else {
+//     chatStore.set('messages', [
+//       ...newMessages.slice(0, lastFocusIndex),
+//       ...newFileContentMessages,
+//       ...newMessages.slice(lastFocusIndex),
+//     ]);
+//   }
+// }

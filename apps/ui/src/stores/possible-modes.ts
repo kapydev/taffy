@@ -1,7 +1,7 @@
-import { getToolMessages, CompletionMode } from './chat-store';
+import { getToolMessagesWithoutErrors, CompletionMode } from './chat-store';
 
 function canBeInline() {
-  const toolMessages = getToolMessages();
+  const toolMessages = getToolMessagesWithoutErrors();
   const hasUserFileContents = toolMessages.some((msg) =>
     msg.isType('USER_FILE_CONTENTS')
   );
@@ -9,7 +9,7 @@ function canBeInline() {
 }
 
 function inlineHasPriority() {
-  const toolMessages = getToolMessages();
+  const toolMessages = getToolMessagesWithoutErrors();
 
   if (toolMessages.at(-1)?.isType('USER_FILE_CONTENTS')) {
     return true;
@@ -31,7 +31,7 @@ function inlineHasPriority() {
 }
 
 function canBeEdit() {
-  const toolMessages = getToolMessages();
+  const toolMessages = getToolMessagesWithoutErrors();
   const latestMsg = toolMessages.at(-1);
   const numWriteFileMsgs = toolMessages.filter(
     (m) => m.type === 'ASSISTANT_WRITE_FILE'
@@ -44,16 +44,16 @@ export function getPossibleModes(): CompletionMode[] {
   const result: CompletionMode[] = [];
   const canInline = canBeInline();
   const canEdit = canBeEdit();
-  if (canEdit) {
-    if (canInline) {
-      result.push('inline-edit');
-    }
-    result.push('edit');
-  }
+  // if (canEdit) {
+  //   if (canInline) {
+  //     result.push('inline-edit');
+  //   }
+  //   result.push('edit');
+  // }
 
-  if (canInline) {
-    result.push('inline');
-  }
+  // if (canInline) {
+  //   result.push('inline');
+  // }
   result.push('full');
 
   const inlinePriority = inlineHasPriority();

@@ -1,23 +1,30 @@
-import { useEditor, EditorContent, Editor, JSONContent } from '@tiptap/react';
-import Placeholder from '@tiptap/extension-placeholder';
+import { Button } from '@taffy/components';
+import { booleanFilter } from '@taffy/shared-helpers';
 import Mention, { MentionOptions } from '@tiptap/extension-mention';
+import Placeholder from '@tiptap/extension-placeholder';
+import {
+  Editor,
+  EditorContent,
+  JSONContent,
+  ReactRenderer,
+  useEditor,
+} from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import { Send, Settings } from 'lucide-react';
 import {
   forwardRef,
+  KeyboardEvent,
   useEffect,
   useImperativeHandle,
   useState,
-  Ref,
-  KeyboardEvent,
 } from 'react';
 import tippy, { Instance as TippyInstance } from 'tippy.js';
-import { ReactRenderer } from '@tiptap/react';
 import { trpc } from '../client';
-import { booleanFilter } from '@taffy/shared-helpers';
+import { ButtonWithHotkey } from '../components/ButtonWithHotkey';
 import {
+  addAddtionalContext,
   chatStore,
   continuePrompt,
-  setAdditionalContext,
 } from '../stores/chat-store';
 import { updateChat } from '../stores/update-prompt';
 
@@ -102,6 +109,8 @@ interface RichTextAreaProps {
 }
 
 export function RichTextArea({ onSend }: RichTextAreaProps) {
+  const showSettings = chatStore.use('showSettings');
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -120,13 +129,6 @@ export function RichTextArea({ onSend }: RichTextAreaProps) {
           'focus-visible:outline-none min-h-[80px] bg-vsc-input-background py-1 pl-3 pr-10 rounded-b-md text-xs',
       },
     },
-    onUpdate(props) {
-      const mentions = getNodesByType(props.editor, 'mention');
-      const additionalFileNames: string[] = mentions
-        .map((mention) => mention.attrs?.id)
-        .filter(booleanFilter);
-      setAdditionalContext(additionalFileNames);
-    },
   });
 
   useEffect(() => {
@@ -142,25 +144,57 @@ export function RichTextArea({ onSend }: RichTextAreaProps) {
 
   const handleSend = async () => {
     const input = editor?.getText();
+    if (!editor) return;
     if (!input?.trim()) return;
     editor?.commands.clearContent();
     const mode = chatStore.get('mode');
+    const mentions = getNodesByType(editor, 'mention');
+    const additionalFileNames: string[] = mentions
+      .map((mention) => mention.attrs?.id)
+      .filter(booleanFilter);
+    await Promise.all(
+      additionalFileNames.map(async (fileName) => {
+        await addAddtionalContext(fileName);
+      })
+    );
     await updateChat(input, mode);
     await continuePrompt(mode);
     onSend?.(input);
   };
 
   return (
-    <EditorContent
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-          e.preventDefault();
-          handleSend();
-        }
-      }}
-      className="w-full"
-      editor={editor}
-    />
+    <div className="relative">
+      <EditorContent
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSend();
+          }
+        }}
+        className="w-full"
+        editor={editor}
+      />
+      <div className="flex flex-col absolute right-0 inset-y-0 p-1.5">
+        <ButtonWithHotkey hideHint keys="enter" action={handleSend}>
+          <Button
+            className="hover:bg-white/10 w-8 h-8 shadow-none"
+            size="icon"
+            variant="default"
+            onClick={handleSend}
+          >
+            <Send className="h-3.5 w-3.5" />
+          </Button>
+        </ButtonWithHotkey>
+        <Button
+          className="hover:bg-white/10 w-8 h-8 shadow-none"
+          size="icon"
+          variant="default"
+          onClick={() => chatStore.set('showSettings', !showSettings)}
+        >
+          <Settings className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+    </div>
   );
 }
 
