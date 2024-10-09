@@ -66,6 +66,7 @@ function SingleMessage({ message }: { message: CustomMessage }) {
   const hiddenByDefault = useMemo(() => {
     if (message instanceof SystemPromptMessage) return true;
     if (message.type === 'ASSISTANT_PLANNING') return true;
+    if (message.type === 'USER_TOOL_ERROR') return true;
     return false;
   }, [message]);
 
