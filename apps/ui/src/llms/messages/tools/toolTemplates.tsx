@@ -344,15 +344,47 @@ export const TOOL_RENDER_TEMPLATES: {
       },
       {
         description:
-          'The filename of the replace block should match the preceding FOCUS_BLOCK',
+          'Each USER_FOCUS_BLOCK should have exactly one corresponding REPLACE_BLOCK, otherwise, use ASSISTANT_WRITE_FILE and overwrite the full file. ',
+        check: (messages) => {
+          //This looks like a double of the previous, but is required because sometimes when we are halfway generating the rule is not complete yet
+          const latestReplaceBLock = findLatest(
+            messages,
+            (msg) => msg.type === 'ASSISTANT_REPLACE_BLOCK'
+          );
+          if (!latestReplaceBLock) return undefined;
+          const checkStartIdx = messages.indexOf(latestReplaceBLock) - 1;
+          for (let i = checkStartIdx; i >= 0; i -= 1) {
+            const curMsg = messages[i];
+            if (curMsg.role === 'user') continue;
+            if (curMsg.type === 'ASSISTANT_INFO') continue;
+            if (curMsg.type === 'ASSISTANT_PLANNING') continue;
+            if (curMsg.type === 'ASSISTANT_READ_FILE') continue;
+            if (curMsg.type === 'ASSISTANT_REPLACE_BLOCK') break;
+            return `We expected only legal actions after a USER_FOCUS_BLOCK, but instead found ${curMsg.type}`;
+          }
+          return undefined;
+        },
+      },
+      {
+        description:
+          'Each USER_FOCUS_BLOCK should have exactly one corresponding REPLACE_BLOCK, otherwise, use ASSISTANT_WRITE_FILE and overwrite the full file. The filename of the replace block should match the preceding FOCUS_BLOCK',
         check: (messages) => {
           const latestMsg = messages.at(-1);
           if (!latestMsg?.isType('ASSISTANT_REPLACE_BLOCK')) {
             return undefined;
           }
-          const latestFocusBlock = findLatest(messages, (msg) =>
-            msg.isType('USER_FOCUS_BLOCK')
-          );
+          const checkStartIdx = messages.indexOf(latestMsg) - 1;
+          let latestFocusBlock: ToolMessage<'USER_FOCUS_BLOCK'> | undefined;
+          for (let i = checkStartIdx; i >= 0; i -= 1) {
+            const curMsg = messages[i];
+            if (curMsg.isType('ASSISTANT_REPLACE_BLOCK')) {
+              return `Each replace block can only correspond to a single focus block, there are two replace blocks one after another! Use ASSISTANT_WRITE_FILE instead for the second one.`;
+            }
+            if (curMsg.isType('USER_FOCUS_BLOCK')) {
+              latestFocusBlock = curMsg;
+              break;
+            }
+          }
           if (!latestFocusBlock) {
             return 'We can only run ASSISTANT_REPLACE_BLOCK when there is a preceding FOCUS_BLOCK, but there was none found!';
           }

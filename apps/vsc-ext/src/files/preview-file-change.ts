@@ -8,27 +8,33 @@ export async function previewFileChange(
   newContents: string,
   previewId: string
 ) {
-  console.log('preview id created', previewId);
+  const listeners: ((...args: any[]) => any)[] = [];
   const fileChangeApproved = new Promise<void>((res) => {
-    ee.on('fileChangeApproved', (approvedId) => {
+    const listener = (approvedId: string) => {
       if (approvedId !== previewId) return;
+      editor.acceptDiff();
       res();
-    });
+    };
+    ee.on('fileChangeApproved', listener);
+    listeners.push(listener);
   });
   const fileChangeRemoved = new Promise<void>((res) => {
-    ee.on('fileChangeRemoved', (removedId) => {
+    const listener = (removedId: string) => {
       if (removedId !== previewId) return;
+      editor.declineDiff();
       res();
-    });
+    };
+    ee.on('fileChangeRemoved', listener);
+    listeners.push(listener);
   });
   const editor = new FileEditor(filePath);
   await editor.showDiffView(newContents);
   //Refocus taffy
   getCurWebView()?.reveal(getBestColForWebView());
 
-  fileChangeRemoved.then(async () => {
-    editor.declineDiff();
+  await Promise.race([fileChangeApproved, fileChangeRemoved]);
+  listeners.forEach((listener) => {
+    ee.off('fileChangeApproved', listener);
+    ee.off('fileChangeRemoved', listener);
   });
-  await fileChangeApproved;
-  editor.acceptDiff();
 }

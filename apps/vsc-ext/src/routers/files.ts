@@ -10,7 +10,7 @@ import { latestActiveEditor } from '../main';
 import { previewFileChange } from '../files/preview-file-change';
 import { getWorkspaceFiles } from '../files/get-folder-structure';
 import { FileEditor } from '../files/file-editor';
-import { fileStore } from '../files/file-indexer';
+import { fileStore, finishedIndexing } from '../files/file-indexer';
 import fuzzysort from 'fuzzysort';
 
 function getIndentLen(line: string) {
@@ -40,10 +40,14 @@ export const fileRouter = router({
       }
     );
   }),
+  indexingCompleted: publicProcedure.query(async () => {
+    await finishedIndexing;
+    return { success: true };
+  }),
   searchFiles: publicProcedure
     .input(z.object({ query: z.string() }))
     .query(async (opts) => {
-      //TODO: Should probably wait for inital index to finish before returning results, or update list as updates come in
+      await finishedIndexing;
       const allFiles = [...fileStore.get('filePaths')];
       const matchResults = fuzzysort.go(opts.input.query, allFiles, {
         threshold: 0.5,

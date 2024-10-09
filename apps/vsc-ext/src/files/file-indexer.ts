@@ -9,6 +9,12 @@ export const fileStore = createBetterStore({
   filePaths: new Set<string>(),
 });
 
+let resolveFinishIndexing: () => void | undefined;
+
+export const finishedIndexing = new Promise<void>((res) => {
+  resolveFinishIndexing = res;
+});
+
 async function runIndexer() {
   const getFiles = async (
     basePath: string,
@@ -42,7 +48,8 @@ async function runIndexer() {
   const ignorePatternRegexes = ignorePatternGlobs.map((glob) =>
     globToRegexp(glob)
   );
-  return getFiles(root, ignorePatternRegexes);
+  await getFiles(root, ignorePatternRegexes);
+  resolveFinishIndexing();
 }
 
 /**For now only support single root folder otherwise relative paths will get nasty */

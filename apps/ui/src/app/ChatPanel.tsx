@@ -1,6 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Messages } from './Messages';
 import { RichTextArea } from './RichTextArea';
+import { chatStore } from '../stores/chat-store';
+import { booleanFilter } from '@taffy/shared-helpers';
+import { SystemPromptMessage } from '../llms/messages/SystemPromptMessage';
+import { ToolMessage } from '../llms/messages/ToolMessage';
 
 export function ChatPanel() {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -56,11 +60,34 @@ function Hints() {
     setCurrentHintIndex((prevIndex) => (prevIndex + increment) % hints.length);
   };
 
+  const filesCtx = useCurFilesContext();
+
   return (
     <div className="flex gap-1 items-center bg-vsc-input-background py-2 pl-3 rounded-t-md text-xs text-vsc-disabledForeground select-none">
+      <div className="text-red-500">
+        There are currently {filesCtx.length} file(s) in the context window
+      </div>
       {hints.map((hint) => (
         <span className="italic">{hint}, </span>
       ))}
     </div>
   );
+}
+
+export function useCurFilesContext() {
+  const messages = chatStore.use('messages');
+  const filesContext = useMemo(() => {
+    return messages
+      .map((msg) => {
+        if (!(msg instanceof ToolMessage)) return undefined;
+        if (
+          !msg.isType('USER_FOCUS_BLOCK') &&
+          !msg.isType('USER_FILE_CONTENTS')
+        )
+          return undefined;
+        return msg.props?.filePath;
+      })
+      .filter(booleanFilter);
+  }, [messages]);
+  return filesContext;
 }
