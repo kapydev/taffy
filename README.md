@@ -1,6 +1,9 @@
 # 🍬Taffy
 AI Code Editor focused on multi file editing and better context
 
+## Demo
+[![](https://markdown-videos-api.jorgenkh.no/youtube/n9ILHXSuhEo)](https://youtu.be/n9ILHXSuhEo)
+
 ## 🏃 Getting Started
 
 1. Add to VSCode from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=FireJet.taffy)
