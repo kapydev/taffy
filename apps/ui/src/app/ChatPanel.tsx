@@ -58,22 +58,24 @@ function ContextArea() {
 
   return (
     <div className="flex flex-row items-center">
-      <div className="flex gap-1">
-        {filesCtx.map((filePath, index) => (
-          <Tooltip>
-            <TooltipTrigger>
-              <Badge
-                variant="default"
-                className="bg-vsc-input-background rounded-md pb-[3px] font-normal cursor-default"
-              >
-                {getFileName(filePath)}
-              </Badge>
-            </TooltipTrigger>
-            <TooltipContent className="bg-vsc-input-background px-2 py-1 border-vsc-disabledForeground">
-              <p className="text-[10px]">{filePath}</p>
-            </TooltipContent>
-          </Tooltip>
-        ))}
+      <div className='relative flex-1 h-full'>
+        <div className="flex gap-1 absolute inset-0 overflow-x-auto overflow-y-hidden scrollbar-hide">
+          {filesCtx.map((filePath, index) => (
+            <Tooltip>
+              <TooltipTrigger>
+                <Badge
+                  variant="default"
+                  className="bg-vsc-input-background rounded-md pb-[3px] font-normal cursor-default text-nowrap"
+                >
+                  {getFileName(filePath)}
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent className="bg-vsc-input-background px-2 py-1 border-vsc-disabledForeground">
+                <p className="text-[10px]">{filePath}</p>
+              </TooltipContent>
+            </Tooltip>
+          ))}
+        </div>
       </div>
       <div className="flex gap-1 items-center py-2 pl-3 rounded-t-md text-xs text-vsc-disabledForeground leading-tight select-none">
         {hints.map((hint) => (
