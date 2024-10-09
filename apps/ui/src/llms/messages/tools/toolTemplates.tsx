@@ -19,6 +19,7 @@ import {
 import { ToolMessage } from '../ToolMessage';
 import { CustomMessage } from '../Messages';
 import { findLatest } from '@taffy/shared-helpers';
+import { toolToToolString } from './toolToLLMDescription';
 
 export type MessageIcon = React.ForwardRefExoticComponent<
   Omit<LucideProps, 'ref'> & React.RefAttributes<SVGSVGElement>
@@ -131,6 +132,17 @@ export const TOOL_TEMPLATES = {
       newContents: undefined as string | undefined,
     },
   },
+  ASSISTANT_FILE_SEARCH: {
+    role: 'assistant',
+    desc: "Recursively search a directory for a particular regex. Use this tool when you need to understand the user's codebase at a wider scale, for example when you need to replace all instances of a function call with an updated function signature.",
+    propDesc: {
+      filePath: 'The path in which you want to perform the search',
+      search: 'The regex you are searching for',
+    },
+    sampleProps: { filePath: 'apps', search: 'SUPABASE' },
+    sampleBody: '',
+    data: {},
+  },
   ASSISTANT_READ_PATHS: {
     role: 'assistant',
     desc: "Ask the user for permission to add certain paths to the context. The contents of the tool call should be all the paths that need to be read, seperated by newlines. After calling this tool, no other tool calls can be made by the assistant, as we have to wait for the user's response. This tool can be used to read file contents, read files available in a directory, and check if a path exists.",
@@ -142,6 +154,44 @@ export const TOOL_TEMPLATES = {
   },
 
   //USER TOOLS
+  USER_FILE_SEARCH_RESULT: {
+    role: 'user',
+    desc: 'The result from a regex search in a directory',
+    propDesc: {
+      filePath: 'The path where the search was performed',
+    },
+    sampleProps: {
+      filePath: 'apps',
+    },
+    data: {},
+    sampleBody: `Found 7 results.
+
+apps/server/src/supabase.ts
+│----
+│const supabaseUrl = process.env.VITE_SUPABASE_URL;
+│----
+│
+│const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
+│
+│----
+
+apps/frontend/src/utility/supabaseClient.ts
+│----
+│const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+│----
+│const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+│
+│----
+│if (!SUPABASE_URL || !SUPABASE_KEY) {
+│  throw new Error('Missing Supabase URL or Key');
+│export const supabaseClient = createClient<Database>(
+│----
+│  SUPABASE_URL,
+│----
+│  SUPABASE_KEY,
+│  {
+│----`,
+  },
   USER_TOOL_ERROR: {
     role: 'user',
     desc: 'Information regarding incorrect tool usage. The occurence of this indicates a previous generation produced a result that did not follow a particular rule. Take extra notice of the rule that was not followed correctly in subsequent generations',
@@ -250,6 +300,15 @@ export const TOOL_RENDER_TEMPLATES: {
     content: (data) => data.contents,
     rules: [],
   },
+  USER_FILE_SEARCH_RESULT: {
+    Icon: UserIcon,
+    title: (msg) => `Search result for in ${msg.props?.filePath}`,
+    body: (data) => {
+      return data.body.split('\n')[0];
+    },
+    content: (data) => data.contents,
+    rules: [],
+  },
   ASSISTANT_PLANNING: {
     Icon: WaypointsIcon,
     title: () => 'Taffy Planning',
@@ -296,6 +355,43 @@ export const TOOL_RENDER_TEMPLATES: {
       },
     ],
   },
+
+  ASSISTANT_FILE_SEARCH: {
+    Icon: BookPlusIcon,
+    title: (msg) =>
+      `Can I search "${msg.props?.filePath}" for "${msg.props?.search}"`,
+    body: (data) => undefined,
+    content: (data) => '',
+    rules: [],
+    actions: [
+      {
+        name: 'Approve',
+        action: async (msg) => {
+          if (!msg.props) return;
+          const searchResult =
+            (await trpc.files.searchFilesContents.query({
+              search: msg.props.search,
+              relativeDir: msg.props.filePath,
+            })) ?? 'Search failed, please use alternative method';
+
+          const searchResultMsg = new ToolMessage(
+            toolToToolString('USER_FILE_SEARCH_RESULT', {
+              body: searchResult,
+              props: { filePath: msg.props.filePath },
+            })
+          );
+
+          chatStore.set('messages', [
+            ...chatStore.get('messages'),
+            searchResultMsg,
+          ]);
+
+          await continuePrompt(chatStore.get('mode'));
+        },
+        shortcutEnd: 'enter',
+      },
+    ],
+  },
   USER_TOOL_ERROR: {
     Icon: ShieldAlertIcon,
     title: () => 'Tool error',
@@ -329,7 +425,7 @@ export const TOOL_RENDER_TEMPLATES: {
     rules: [
       {
         description:
-          'Only user actions, ASSISTANT_INFO, ASSISTANT_READ_PATHS and ASSISTANT_PLANNING are allowed after a USER_FOCUS_BLOCK.',
+          'The file editing action after a USER_FOCUS_BLOCK must be an ASSISTANT_REPLACE_BLOCK. Other file editing actions like ASSISTANT_WRITE_FILE are not allowed.',
         check: (messages) => {
           const latestFocusBlock = findLatest(
             messages,
@@ -340,11 +436,10 @@ export const TOOL_RENDER_TEMPLATES: {
           for (let i = checkStartIdx; i < messages.length; i += 1) {
             const curMsg = messages[i];
             if (curMsg.role === 'user') continue;
-            if (curMsg.type === 'ASSISTANT_INFO') continue;
-            if (curMsg.type === 'ASSISTANT_PLANNING') continue;
-            if (curMsg.type === 'ASSISTANT_READ_PATHS') continue;
+            if (curMsg.type === 'ASSISTANT_WRITE_FILE') {
+              return `We expected only legal actions after a USER_FOCUS_BLOCK, but instead found ${curMsg.type}`;
+            }
             if (curMsg.type === 'ASSISTANT_REPLACE_BLOCK') break;
-            return `We expected only legal actions after a USER_FOCUS_BLOCK, but instead found ${curMsg.type}`;
           }
           return undefined;
         },

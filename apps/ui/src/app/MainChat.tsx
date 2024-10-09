@@ -65,6 +65,19 @@ function LeftPanel() {
         <Button size="sm" onClick={toggleVerboseMessages}>
           {showVerbose ? 'Hide Verbose Messages' : 'Show Verbose Messages'}
         </Button>
+        <Button
+          size="sm"
+          onClick={() => {
+            trpc.files.searchFilesContents
+              .query({
+                relativeDir: 'apps',
+                search: 'SUPABASE',
+              })
+              .then(console.log);
+          }}
+        >
+          Test Func
+        </Button>
         <KeyInput />
         {claudeKey === '' && gptKey === '' && (
           //  && deepSeekKey === ''

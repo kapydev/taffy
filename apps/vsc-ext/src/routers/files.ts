@@ -10,9 +10,14 @@ import { latestActiveEditor } from '../main';
 import { previewFileChange } from '../files/preview-file-change';
 import { getWorkspaceFiles } from '../files/get-folder-structure';
 import { FileEditor } from '../files/file-editor';
-import { fileStore, finishedIndexing } from '../files/file-indexer';
+import {
+  fileStore,
+  finishedIndexing,
+  getRootPath,
+} from '../files/file-indexer';
 import fuzzysort from 'fuzzysort';
 import path from 'path';
+import { regexSearchFiles } from '../files/file-search/ripgrep';
 
 function getIndentLen(line: string) {
   return (line.match(/^\s*/)?.[0] ?? '').replace(/\t/g, '    ').length;
@@ -87,6 +92,19 @@ export const fileRouter = router({
       } catch {
         return undefined;
       }
+    }),
+  searchFilesContents: publicProcedure
+    .input(z.object({ search: z.string(), relativeDir: z.string() }))
+    .query(async (opts) => {
+      const { search, relativeDir } = opts.input;
+      const fullPath = getFullPath(relativeDir);
+      const cwd = getRootPath();
+      if (!cwd) return undefined;
+      try {
+        const result = await regexSearchFiles(cwd, fullPath, search);
+        return result;
+      } catch {}
+      return undefined;
     }),
   getPathContents: publicProcedure
     .input(z.object({ filePath: z.string() }))
