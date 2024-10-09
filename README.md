@@ -37,6 +37,7 @@ With our initial release, we've solved multi-file support, and with subsequent r
 - Fast edits (Only edit the section being updated)
 - LLM Tools (LLM can read other files in your codebase, and make necessary updates)
 - `@mentions` files in your codebase to reference them
+- Full Prompting Transparency (Toggle to see exact prompts sent to LLM)
 - Bring Your Own key (BYOK)
 - MIT Licensed
 

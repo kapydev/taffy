@@ -16,7 +16,12 @@ export function toolToLLMDescription<T extends ToolType>(
     sampleTool.body = tool.sampleBody;
   }
 
-  const additionalRules = tool.rules.map((rule,idx) => `${idx}. ${rule.description}`).join('\n')
+  const additionalRules =
+    tool.rules.length > 0
+      ? tool.rules
+          .map((rule, idx) => `${idx + 1}. ${rule.description}`)
+          .join('\n')
+      : 'There are no rules for this tool.';
 
   return `Name: ${toolName}
 Description:

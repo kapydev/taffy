@@ -19,6 +19,7 @@ function LeftPanel() {
   const showSettings = chatStore.use('showSettings');
   const claudeKey = keyStore.use('claudeKey');
   const gptKey = keyStore.use('gptKey');
+  const showVerbose = chatStore.use('showVerboseMessages');
   // const deepSeekKey = keyStore.use('deepSeekKey');
 
   useEffect(() => {
@@ -33,9 +34,10 @@ function LeftPanel() {
     }
   }, []);
 
-  const runTestFunc = () => {
+  const toggleVerboseMessages = () => {
     // console.log(chatStore.get('messages'));
-    trpc.testFunc.query();
+    // trpc.testFunc.query();
+    chatStore.set('showVerboseMessages', !showVerbose);
   };
 
   return (
@@ -60,8 +62,8 @@ function LeftPanel() {
         <Button size="sm" onClick={resetChatStore}>
           Reset Chat
         </Button>
-        <Button size="sm" onClick={runTestFunc}>
-          Test Func
+        <Button size="sm" onClick={toggleVerboseMessages}>
+          {showVerbose ? 'Hide Verbose Messages' : 'Show Verbose Messages'}
         </Button>
         <KeyInput />
         {claudeKey === '' && gptKey === '' && (

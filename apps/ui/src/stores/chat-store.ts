@@ -27,6 +27,7 @@ export const chatStore = createBetterStore({
    */
   mode: 'inline' as CompletionMode,
   showSettings: false as boolean,
+  showVerboseMessages: false as boolean,
 });
 
 //@ts-expect-error for debugging
