@@ -67,6 +67,8 @@ function SingleMessage({ message }: { message: CustomMessage }) {
     if (message instanceof SystemPromptMessage) return true;
     if (message.type === 'ASSISTANT_PLANNING') return true;
     if (message.type === 'USER_TOOL_ERROR') return true;
+    if (message.type === 'USER_FILE_CONTENTS') return true;
+    if (message.type === 'USER_FOCUS_BLOCK') return true;
     return false;
   }, [message]);
 

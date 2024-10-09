@@ -10,6 +10,9 @@ import { SystemPromptMessage } from '../llms/messages/SystemPromptMessage';
 import { createToolMessage, ToolMessage } from '../llms/messages/ToolMessage';
 import { TOOL_RENDER_TEMPLATES, ToolType } from '../llms/messages/tools';
 import { getPossibleModes } from './possible-modes';
+import toast from 'react-hot-toast';
+
+const MAX_RETRIES = 3;
 
 /**If you need the same functionality for multiple completion modes, you can include the keywords together.
  * By doing that, we can use the str.contains() function to determin the behaviour
@@ -78,7 +81,8 @@ export async function getInlineStopSequence(): Promise<string | undefined> {
 
 export async function continuePrompt(
   mode: CompletionMode,
-  llm: LLM | null = chatStore.get('llm')
+  llm: LLM | null = chatStore.get('llm'),
+  retryCount: number = 0
 ) {
   if (!llm) {
     llm = setLlm();
@@ -98,8 +102,14 @@ export async function continuePrompt(
   await parser.handleTextStream(stream, mode);
 
   if (parser.earlyExit) {
-    //If we had an error, run again
-    continuePrompt(mode, llm);
+    // If we had an error, check retry count
+    if (retryCount >= MAX_RETRIES) {
+      // Display error message to the user
+      toast.error('Max retries exceeded. Please try again later.');
+    } else {
+      // Run again
+      continuePrompt(mode, llm, retryCount + 1);
+    }
   }
 }
 
