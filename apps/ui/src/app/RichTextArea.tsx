@@ -13,7 +13,13 @@ import {
   useEditor,
 } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { LoaderCircle, Send, Settings } from 'lucide-react';
+import {
+  LoaderCircle,
+  MessageSquarePlus,
+  Plus,
+  Send,
+  Settings,
+} from 'lucide-react';
 import {
   forwardRef,
   KeyboardEvent,
@@ -28,6 +34,7 @@ import {
   addAddtionalContext,
   chatStore,
   continuePrompt,
+  resetChatStore,
 } from '../stores/chat-store';
 import { updateChat } from '../stores/update-prompt';
 import { SuggestionProps } from '@tiptap/suggestion';
@@ -70,7 +77,7 @@ export function RichTextArea({ onSend }: RichTextAreaProps) {
     editorProps: {
       attributes: {
         class:
-          'focus-visible:outline-none min-h-[80px] bg-vsc-input-background py-1 pl-3 pr-10 rounded-b-md text-xs',
+          'focus-visible:outline-none min-h-[90px] bg-vsc-input-background py-1 pt-3 pl-3 pr-10 rounded-md text-xs',
       },
     },
   });
@@ -120,7 +127,7 @@ export function RichTextArea({ onSend }: RichTextAreaProps) {
       />
       <div className="flex flex-col absolute right-0 inset-y-0 p-1.5">
         <Button
-          className="hover:bg-white/10 w-8 h-8 shadow-none"
+          className="hover:bg-white/10 w-7 h-7 shadow-none"
           size="icon"
           variant="default"
           onClick={handleSend}
@@ -128,12 +135,20 @@ export function RichTextArea({ onSend }: RichTextAreaProps) {
           <Send className="h-3.5 w-3.5" />
         </Button>
         <Button
-          className="hover:bg-white/10 w-8 h-8 shadow-none"
+          className="hover:bg-white/10 w-7 h-7 shadow-none"
           size="icon"
           variant="default"
           onClick={() => chatStore.set('showSettings', !showSettings)}
         >
           <Settings className="h-3.5 w-3.5" />
+        </Button>
+        <Button
+          className="hover:bg-white/10 w-7 h-7 shadow-none text-vsc-foreground"
+          size="icon"
+          variant="default"
+          onClick={resetChatStore}
+        >
+          <MessageSquarePlus className="h-3.5 w-3.5" />
         </Button>
       </div>
     </div>
@@ -257,9 +272,9 @@ const MentionList = forwardRef<unknown, MentionListProps>((props, ref) => {
 
   return (
     <div className="flex flex-col bg-background border rounded-md w-full text-xs p-2">
-      <p className="p-1 italic text-foreground opacity-6  0">
+      {/* <p className="p-1 italic text-foreground opacity-6  0">
         Press "Tab" to select file
-      </p>
+      </p> */}
       {props.items.length ? (
         props.items.map((item, index) => (
           <button

@@ -215,7 +215,8 @@ function formatResults(results: SearchResult[], cwd: string): string {
   });
 
   for (const [filePath, fileResults] of Object.entries(groupedResults)) {
-    output += `${filePath.toPosix()}\n│----\n`;
+    // output += `${filePath.toPosix()}\n│----\n`;
+    output += `${path.posix.normalize(filePath)}\n│----\n`;
 
     fileResults.forEach((result, index) => {
       const allLines = [

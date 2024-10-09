@@ -1,17 +1,20 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Messages } from './Messages';
 import { RichTextArea } from './RichTextArea';
-import { chatStore } from '../stores/chat-store';
+import { chatStore, resetChatStore } from '../stores/chat-store';
 import { booleanFilter } from '@taffy/shared-helpers';
 import { SystemPromptMessage } from '../llms/messages/SystemPromptMessage';
 import { ToolMessage } from '../llms/messages/ToolMessage';
 import {
   Badge,
+  Button,
+  Separator,
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@taffy/components';
 import { getFileName } from '../utils/fileUtils';
+import { File } from 'lucide-react';
 
 export function ChatPanel() {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -28,8 +31,8 @@ export function ChatPanel() {
       </div>
       <div className="flex flex-col">
         <div className="flex gap-2 mt-2">
-          <div className="flex flex-col w-full relative">
-            <Hints />
+          <div className="flex flex-col gap-0.5 w-full relative">
+            <ContextArea />
             {/* <Separator className="bg-vsc-disabledForeground opacity-70 h-[0.8px]" /> */}
             <div className="relative">
               <RichTextArea
@@ -48,29 +51,13 @@ export function ChatPanel() {
   );
 }
 
-function Hints() {
-  const hints = [
-    'Key "@" to add context files',
-    'Ctrl+L to add all files as context',
-  ];
-  const [currentHintIndex, setCurrentHintIndex] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentHintIndex((prevIndex) => (prevIndex + 1) % hints.length);
-    }, 600000); // 10 minutes
-
-    return () => clearInterval(interval);
-  }, [hints.length]);
-
-  // const handleClick = (increment: number) => {
-  //   setCurrentHintIndex((prevIndex) => (prevIndex + increment) % hints.length);
-  // };
+function ContextArea() {
+  const hints = ['"@" to add a context file', '"Ctrl+L" to add ALL files'];
 
   const filesCtx = useCurFilesContext();
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-row items-center">
       <div className="flex gap-1">
         {filesCtx.map((filePath, index) => (
           <Tooltip>
@@ -82,15 +69,15 @@ function Hints() {
                 {getFileName(filePath)}
               </Badge>
             </TooltipTrigger>
-            <TooltipContent>
-              <p className='text-xs'>{filePath}</p>
+            <TooltipContent className="bg-vsc-input-background px-2 py-1 border-vsc-disabledForeground">
+              <p className="text-[10px]">{filePath}</p>
             </TooltipContent>
           </Tooltip>
         ))}
       </div>
-      <div className="flex gap-1 items-center bg-vsc-input-background py-2 pl-3 rounded-t-md text-xs text-vsc-disabledForeground leading-tight">
+      <div className="flex gap-1 items-center py-2 pl-3 rounded-t-md text-xs text-vsc-disabledForeground leading-tight select-none">
         {hints.map((hint) => (
-          <span className="italic">{hint}, </span>
+          <span className="italic mb-0.5">{hint}, </span>
         ))}
       </div>
     </div>

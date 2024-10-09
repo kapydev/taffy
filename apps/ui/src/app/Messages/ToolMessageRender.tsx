@@ -1,11 +1,12 @@
 import { Alert, AlertDescription, AlertTitle, Button } from '@taffy/components';
 import { ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { Children, isValidElement, ReactNode, useState } from 'react';
 import { ButtonWithHotkey } from '../../components/ButtonWithHotkey';
 import { ToolMessage } from '../../llms/messages/ToolMessage';
 import { TOOL_RENDER_TEMPLATES, ToolType } from '../../llms/messages/tools';
 import { chatStore, removeMessage } from '../../stores/chat-store';
 import Markdown from 'react-markdown';
+import React from 'react';
 
 export function ToolMessageRender<T extends ToolType>({
   message,
@@ -79,33 +80,51 @@ export function ToolMessageRender<T extends ToolType>({
                 </ButtonWithHotkey>
               );
             })}
-            {/* DELETE BUTTON */}
-            {message.type === 'USER_FOCUS_BLOCK' && (
-              <ButtonWithHotkey
-                className="text-vsc-errorForeground"
-                action={() => removeMessage(message)}
-                keys={`${keyPrefix}del`}
-              >
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="text-vsc-errorForeground w-3.5 h-3.5"
+            {message.type === 'USER_FOCUS_BLOCK' ||
+              (message.type === 'ASSISTANT_INFO' && (
+                <ButtonWithHotkey
+                  className="text-vsc-errorForeground"
+                  action={() => removeMessage(message)}
+                  keys={`${keyPrefix}del`}
                 >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </ButtonWithHotkey>
-            )}
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="text-vsc-foreground w-3.5 h-3.5"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </ButtonWithHotkey>
+              ))}
           </div>
         </AlertTitle>
-        <AlertDescription className="w-full text-xs">
+        <AlertDescription className="w-full text-xs whitespace-pre-wrap break-words">
           {mode === 'RAW'
             ? message
                 .toRawMessages()
-                .flatMap((rawMsg) => rawMsg.content)
+                .flatMap((rawMsg) => rawMsg.content.trim())
                 .join()
-            : renderTemplate.body(message)}
+            : trimTrailingNewlines(renderTemplate.body(message))}
         </AlertDescription>
       </Alert>
     </div>
   );
 }
+
+const trimTrailingNewlines = (node: ReactNode): ReactNode => {
+  if (typeof node === 'string') {
+    return node.replace(/\s+$/g, '');
+  }
+  if (isValidElement(node)) {
+    const { children, ...props } = node.props;
+    return React.cloneElement(
+      node,
+      props,
+      Children.map(children, trimTrailingNewlines)
+    );
+  }
+  if (Array.isArray(node)) {
+    return node.map(trimTrailingNewlines);
+  }
+  return node;
+};

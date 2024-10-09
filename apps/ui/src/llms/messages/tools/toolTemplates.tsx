@@ -618,6 +618,16 @@ export const TOOL_RENDER_TEMPLATES: {
         shortcutEnd: 'p',
       },
       {
+        name: 'Reject',
+        action: (message) => {
+          if (!message.props) return;
+          trpc.files.removeFileChange.mutate({
+            id: message.id,
+          });
+        },
+        shortcutEnd: 'enter',
+      },
+      {
         name: 'Approve',
         action: (message) => {
           trpc.files.approveFileChange.mutate({ id: message.id });
