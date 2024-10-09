@@ -5,6 +5,13 @@ import { chatStore } from '../stores/chat-store';
 import { booleanFilter } from '@taffy/shared-helpers';
 import { SystemPromptMessage } from '../llms/messages/SystemPromptMessage';
 import { ToolMessage } from '../llms/messages/ToolMessage';
+import {
+  Badge,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@taffy/components';
+import { getFileName } from '../utils/fileUtils';
 
 export function ChatPanel() {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -56,24 +63,39 @@ function Hints() {
     return () => clearInterval(interval);
   }, [hints.length]);
 
-  const handleClick = (increment: number) => {
-    setCurrentHintIndex((prevIndex) => (prevIndex + increment) % hints.length);
-  };
+  // const handleClick = (increment: number) => {
+  //   setCurrentHintIndex((prevIndex) => (prevIndex + increment) % hints.length);
+  // };
 
   const filesCtx = useCurFilesContext();
 
   return (
-    <div className="flex gap-1 items-center bg-vsc-input-background py-2 pl-3 rounded-t-md text-xs text-vsc-disabledForeground select-none">
-      <div className="text-red-500">
-        There are currently {filesCtx.length} file(s) in the context window
+    <div className="flex flex-col gap-2">
+      <div className="flex gap-1">
+        {filesCtx.map((filePath, index) => (
+          <Tooltip>
+            <TooltipTrigger>
+              <Badge
+                variant="default"
+                className="bg-vsc-input-background rounded-md pb-[3px] font-normal cursor-default"
+              >
+                {getFileName(filePath)}
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className='text-xs'>{filePath}</p>
+            </TooltipContent>
+          </Tooltip>
+        ))}
       </div>
-      {hints.map((hint) => (
-        <span className="italic">{hint}, </span>
-      ))}
+      <div className="flex gap-1 items-center bg-vsc-input-background py-2 pl-3 rounded-t-md text-xs text-vsc-disabledForeground leading-tight">
+        {hints.map((hint) => (
+          <span className="italic">{hint}, </span>
+        ))}
+      </div>
     </div>
   );
 }
-
 export function useCurFilesContext() {
   const messages = chatStore.use('messages');
   const filesContext = useMemo(() => {

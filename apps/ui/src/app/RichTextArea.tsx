@@ -256,7 +256,10 @@ const MentionList = forwardRef<unknown, MentionListProps>((props, ref) => {
   }));
 
   return (
-    <div className="flex flex-col bg-background border rounded-md w-full text-xs">
+    <div className="flex flex-col bg-background border rounded-md w-full text-xs p-2">
+      <p className="p-1 italic text-foreground opacity-6  0">
+        Press "Tab" to select file
+      </p>
       {props.items.length ? (
         props.items.map((item, index) => (
           <button

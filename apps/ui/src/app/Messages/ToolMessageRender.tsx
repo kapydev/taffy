@@ -98,7 +98,7 @@ export function ToolMessageRender<T extends ToolType>({
             )}
           </div>
         </AlertTitle>
-        <AlertDescription className="break-words whitespace-pre-wrap w-full text-xs">
+        <AlertDescription className="w-full text-xs">
           {mode === 'RAW'
             ? message
                 .toRawMessages()
