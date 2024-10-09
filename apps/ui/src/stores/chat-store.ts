@@ -264,12 +264,22 @@ export function getToolMessagesWithoutErrors(): ToolMessage[] {
 }
 
 export async function addAddtionalContext(filePath: string) {
-  const data = await trpc.files.getFileContents.query({ filePath });
+  const data = await trpc.files.getPathContents.query({ filePath });
+
+  let contents = '';
+  if (data.type === 'directory') {
+    contents = data.contents
+      .map((subPath) => `(${subPath.type})${subPath.fullPath}`)
+      .join('\n');
+  } else {
+    contents = data.contents;
+  }
+
   const additionalCtxMsg = createToolMessage('USER_FILE_CONTENTS', {
-    body: data !== undefined ? data : 'The file does not exist', // Assuming full file contents are fetched elsewhere,
+    body: contents,
     props: {
       filePath,
-      exists: String(data !== undefined),
+      type: data.type,
     },
   });
   chatStore.set('messages', [...chatStore.get('messages'), additionalCtxMsg]);
