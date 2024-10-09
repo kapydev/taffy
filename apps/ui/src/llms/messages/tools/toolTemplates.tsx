@@ -5,6 +5,7 @@ import {
   FileInputIcon,
   FilePlus2Icon,
   LucideProps,
+  ShieldAlertIcon,
   UserIcon,
   WaypointsIcon,
 } from 'lucide-react';
@@ -36,7 +37,7 @@ export interface ToolRule {
   /**Description passed to LLM regarding tool usage. */
   description: string;
   /**Checks to be done for the tool. Always just check the latest message, REGARDLESS of type*/
-  check: (messages: CustomMessage[]) => ToolRuleResult;
+  check: (messagesWithoutErrors: ToolMessage<any>[]) => ToolRuleResult;
 }
 
 export interface ToolTemplate {
@@ -98,7 +99,12 @@ export const TOOL_TEMPLATES = {
       {
         description:
           'Planning should only come immediately after an assistant info block',
-        check: () => undefined,
+        check: (messages) => {
+          if (true) {
+            return 'I just need an error to test';
+          }
+          return undefined;
+        },
       },
     ],
   },
@@ -190,7 +196,18 @@ export const TOOL_TEMPLATES = {
     data: {},
     rules: [],
   },
+
   //USER TOOLS
+  USER_TOOL_ERROR: {
+    role: 'user',
+    desc: 'Information regarding incorrect tool usage. The occurence of this indicates a previous generation produced a result that did not follow a particular rule. Take extra notice of the rule that was not followed correctly in subsequent generations',
+    propDesc: {},
+    sampleProps: {},
+    sampleBody:
+      'We tried to write to a file without first reading the contents',
+    rules: [],
+    data: {},
+  },
   USER_PROMPT: {
     role: 'user',
     desc: 'The prompt from the user',
@@ -291,19 +308,21 @@ export const TOOL_RENDER_TEMPLATES: {
     title: () => 'Can I read these files?',
     body: (data) => data.body,
     content: (data) => data.contents,
+    onRemove: (data) => {},
+    actions: [
+      {
+        name: 'approve',
+        action: () => {},
+        shortcutEnd: 'enter',
+      },
+    ],
   },
-  // ASSISTANT_READ_FILE: {
-  //   Icon: FilePlus2Icon,
-  //   title: () => 'Shall I add the following?',
-  //   description: (data) => data.body,
-  //   actions: [
-  //     {
-  //       name: 'approve',
-  //       action: () => {},
-  //       shortcutEnd: 'enter',
-  //     },
-  //   ],
-  // },
+  USER_TOOL_ERROR: {
+    Icon: ShieldAlertIcon,
+    title: () => 'Tool error',
+    body: (data) => data.body,
+    content: (data) => data.contents,
+  },
   USER_FOCUS_BLOCK: {
     Icon: FileInput,
     title: () => 'File Context Added',

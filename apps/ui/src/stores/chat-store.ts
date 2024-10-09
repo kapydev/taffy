@@ -157,7 +157,7 @@ export async function getSelectionDetailsByFile(
 }
 
 export async function getLatestFocusedContent() {
-  const fileContextMsg = [...getToolMessages()]
+  const fileContextMsg = [...getToolMessagesWithoutErrors()]
     .reverse()
     .find((msg) => msg.type === 'USER_FOCUS_BLOCK');
 
@@ -240,9 +240,12 @@ export function removeMessage<T extends ToolType>(message: ToolMessage<T>) {
   renderTemplate.onRemove?.(message);
 }
 
-export function getToolMessages(): ToolMessage[] {
+export function getToolMessagesWithoutErrors(): ToolMessage[] {
   const allMessages = chatStore.get('messages');
-  return allMessages.filter((msg) => msg instanceof ToolMessage);
+  return allMessages.filter(
+    (msg): msg is ToolMessage =>
+      msg instanceof ToolMessage && msg.type !== 'USER_TOOL_ERROR'
+  );
 }
 
 export async function setAdditionalContext(fileNames: string[]) {
