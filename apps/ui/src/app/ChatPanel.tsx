@@ -16,9 +16,7 @@ export function ChatPanel() {
 
   const handleSend = async () => {
     if (!input.trim()) return;
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
-    }
+
     setInput('');
     const mode = chatStore.get('mode');
     await updateChat(input, mode);
@@ -48,7 +46,14 @@ export function ChatPanel() {
             <Hints />
             <Separator className="bg-vsc-disabledForeground opacity-70 h-[0.8px]" />
             <div className="relative">
-              <RichTextArea />
+              <RichTextArea
+                onSend={() => {
+                  if (scrollAreaRef.current) {
+                    scrollAreaRef.current.scrollTop =
+                      scrollAreaRef.current.scrollHeight;
+                  }
+                }}
+              />
               {/* <Textarea
                 ref={inputRef}
                 value={input}

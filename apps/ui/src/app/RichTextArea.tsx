@@ -14,7 +14,12 @@ import tippy, { Instance as TippyInstance } from 'tippy.js';
 import { ReactRenderer } from '@tiptap/react';
 import { trpc } from '../client';
 import { booleanFilter } from '@taffy/shared-helpers';
-import { setAdditionalContext } from '../stores/chat-store';
+import {
+  chatStore,
+  continuePrompt,
+  setAdditionalContext,
+} from '../stores/chat-store';
+import { updateChat } from '../stores/update-prompt';
 
 type MentionItem = string;
 type MentionCommandProps = {
@@ -92,7 +97,11 @@ function getNodesByType(editor: Editor, type: string) {
   return results;
 }
 
-export function RichTextArea() {
+interface RichTextAreaProps {
+  onSend?: (input: string) => void;
+}
+
+export function RichTextArea({ onSend }: RichTextAreaProps) {
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -132,7 +141,28 @@ export function RichTextArea() {
     };
   }, [editor]);
 
-  return <EditorContent className="w-full" editor={editor} />;
+  const handleSend = async () => {
+    const input = editor?.getText();
+    if (!input?.trim()) return;
+    editor?.commands.clearContent();
+    const mode = chatStore.get('mode');
+    await updateChat(input, mode);
+    await continuePrompt(mode);
+    onSend?.(input);
+  };
+
+  return (
+    <EditorContent
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          handleSend();
+        }
+      }}
+      className="w-full"
+      editor={editor}
+    />
+  );
 }
 
 interface MentionListProps {
@@ -161,7 +191,7 @@ const MentionList = forwardRef<unknown, MentionListProps>((props, ref) => {
     setSelectedIndex((selectedIndex + 1) % props.items.length);
   };
 
-  const enterHandler = () => {
+  const tabHandler = () => {
     selectItem(selectedIndex);
   };
 
@@ -179,13 +209,8 @@ const MentionList = forwardRef<unknown, MentionListProps>((props, ref) => {
         return true;
       }
 
-      if (event.key === 'Enter') {
-        enterHandler();
-        return true;
-      }
-
       if (event.key === 'Tab') {
-        enterHandler();
+        tabHandler();
         return true;
       }
 
@@ -205,7 +230,7 @@ const MentionList = forwardRef<unknown, MentionListProps>((props, ref) => {
             key={index}
             onClick={() => selectItem(index)}
           >
-            <span className='flex truncate w-full'>{item}</span>
+            <span className="flex truncate w-full">{item}</span>
           </button>
         ))
       ) : (
