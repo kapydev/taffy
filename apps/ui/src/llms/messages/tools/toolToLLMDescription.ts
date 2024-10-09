@@ -16,11 +16,15 @@ export function toolToLLMDescription<T extends ToolType>(
     sampleTool.body = tool.sampleBody;
   }
 
+  const additionalRules = tool.rules.map((rule,idx) => `${idx}. ${rule.description}`).join('\n')
+
   return `Name: ${toolName}
 Description:
 ${tool.desc}
 Props:
 ${propDescStr}
+Tool Rules:
+${additionalRules}
 Sample:
 ${toolToToolString(toolName, sampleTool)}`;
 }

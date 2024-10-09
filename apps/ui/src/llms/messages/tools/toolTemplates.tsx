@@ -35,7 +35,7 @@ type ToolRuleResult = string | undefined;
 export interface ToolRule {
   /**Description passed to LLM regarding tool usage. */
   description: string;
-  /**Checks to be done for the tool. Only runs if the tool type matches the latest tool and only runs on the latest tool*/
+  /**Checks to be done for the tool. Always just check the latest message, REGARDLESS of type*/
   check: (messages: CustomMessage[]) => ToolRuleResult;
 }
 
@@ -90,8 +90,9 @@ export const TOOL_TEMPLATES = {
     propDesc: {},
     sampleProps: {},
     sampleBody: `Example 1:
-    1. Update the src/utils/helloWorld.ts file using ASSISTANT_REPLACE_BLOCK
-    2. Update the barrel file src/utils/index.ts to include the export from helloWorld.ts using ASSISTANT_WRITE_FILE`,
+    1. Read the src/utils/index.ts and other relevant files to understand what files need to be updated
+    2. Update the src/utils/helloWorld.ts file using ASSISTANT_REPLACE_BLOCK
+    3. Update the barrel file src/utils/index.ts to include the export from helloWorld.ts using ASSISTANT_WRITE_FILE`,
     data: {},
     rules: [
       {
