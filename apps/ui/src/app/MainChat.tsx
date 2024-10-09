@@ -19,10 +19,14 @@ function LeftPanel() {
   const showSettings = chatStore.use('showSettings');
   const claudeKey = keyStore.use('claudeKey');
   const gptKey = keyStore.use('gptKey');
-  const deepSeekKey = keyStore.use('deepSeekKey');
+  // const deepSeekKey = keyStore.use('deepSeekKey');
 
   useEffect(() => {
-    if (claudeKey === '' && gptKey === '' && deepSeekKey === '') {
+    if (
+      claudeKey === '' &&
+      gptKey === ''
+      //  && deepSeekKey === ''
+    ) {
       chatStore.set('showSettings', true);
     } else {
       chatStore.set('showSettings', false);
@@ -60,7 +64,8 @@ function LeftPanel() {
           Test Func
         </Button>
         <KeyInput />
-        {claudeKey === '' && gptKey === '' && deepSeekKey === '' && (
+        {claudeKey === '' && gptKey === '' && (
+          //  && deepSeekKey === ''
           <p className="text-vsc-errorForeground text-xs">
             Please enter one of the API keys.
           </p>

@@ -8,11 +8,8 @@ import {
   WaypointsIcon,
 } from 'lucide-react';
 import { trpc } from '../../../client';
+import { getLatestFocusedContent } from '../../../stores/chat-store';
 import { ToolMessage } from '../ToolMessage';
-import {
-  getLatestFocusedContent,
-  getSelectionDetailsByFile,
-} from '../../../stores/chat-store';
 
 export type MessageIcon = React.ForwardRefExoticComponent<
   Omit<LucideProps, 'ref'> & React.RefAttributes<SVGSVGElement>

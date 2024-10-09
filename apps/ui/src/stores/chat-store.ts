@@ -36,7 +36,7 @@ export const keyStore = createBetterStore(
   {
     claudeKey: '',
     gptKey: '',
-    deepSeekKey: '',
+    // deepSeekKey: '',
   },
   { persistKey: 'key-store' }
 );
