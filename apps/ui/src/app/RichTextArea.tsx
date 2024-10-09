@@ -29,7 +29,6 @@ import {
 } from 'react';
 import tippy, { Instance as TippyInstance } from 'tippy.js';
 import { trpc } from '../client';
-import { ButtonWithHotkey } from '../components/ButtonWithHotkey';
 import {
   addAddtionalContext,
   chatStore,
@@ -40,9 +39,6 @@ import { updateChat } from '../stores/update-prompt';
 import { SuggestionProps } from '@tiptap/suggestion';
 
 type MentionItem = string;
-type MentionCommandProps = {
-  id: string;
-};
 
 function getNodesByType(editor: Editor, type: string) {
   const json = editor.getJSON();
