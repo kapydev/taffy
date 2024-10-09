@@ -1,6 +1,9 @@
 import { Button } from '@taffy/components';
 import { booleanFilter } from '@taffy/shared-helpers';
-import Mention, { MentionOptions } from '@tiptap/extension-mention';
+import Mention, {
+  MentionNodeAttrs,
+  MentionOptions,
+} from '@tiptap/extension-mention';
 import Placeholder from '@tiptap/extension-placeholder';
 import {
   Editor,
@@ -27,70 +30,11 @@ import {
   continuePrompt,
 } from '../stores/chat-store';
 import { updateChat } from '../stores/update-prompt';
+import { SuggestionProps } from '@tiptap/suggestion';
 
 type MentionItem = string;
 type MentionCommandProps = {
   id: string;
-};
-
-const mentionSuggestion: MentionOptions['suggestion'] = {
-  items: async ({ query }): Promise<MentionItem[]> => {
-    const results = await trpc.files.searchFiles.query({ query });
-    return results.map((item) => item.target);
-  },
-  render: () => {
-    let component: ReactRenderer<MentionListProps> | null = null;
-    let popup: TippyInstance[] | null = null;
-
-    return {
-      onStart: (props) => {
-        component = new ReactRenderer(MentionList, {
-          props,
-          editor: props.editor,
-        }) as any;
-
-        if (!props.clientRect) {
-          return;
-        }
-
-        popup = tippy('body', {
-          getReferenceClientRect: props.clientRect,
-          appendTo: () => document.body,
-          content: (component as any).element,
-          showOnCreate: true,
-          interactive: true,
-          trigger: 'manual',
-          //   placement: 'top-start',
-        } as any);
-      },
-
-      onUpdate(props) {
-        component!.updateProps(props);
-
-        if (!props.clientRect) {
-          return;
-        }
-
-        popup![0].setProps({
-          getReferenceClientRect: props.clientRect as any,
-        });
-      },
-
-      onKeyDown(props) {
-        if (props.event.key === 'Escape') {
-          popup![0].hide();
-          return true;
-        }
-
-        return (component!.ref as any)?.onKeyDown(props);
-      },
-
-      onExit() {
-        popup![0].destroy();
-        component!.destroy();
-      },
-    };
-  },
 };
 
 function getNodesByType(editor: Editor, type: string) {
@@ -198,13 +142,75 @@ export function RichTextArea({ onSend }: RichTextAreaProps) {
   );
 }
 
-interface MentionListProps {
-  items: MentionItem[];
-  command: (command: MentionCommandProps) => void;
-}
+const mentionSuggestion: MentionOptions['suggestion'] = {
+  items: async ({ query }): Promise<MentionItem[]> => {
+    const results = await trpc.files.searchFiles.query({ query });
+    return results.map((item) => item.target);
+  },
+
+  render: () => {
+    let component: ReactRenderer<MentionListProps> | null = null;
+    let popup: TippyInstance[] | null = null;
+
+    return {
+      onBeforeStart(props) {
+        component = new ReactRenderer(MentionList, {
+          props,
+          editor: props.editor,
+        }) as any;
+
+        if (!props.clientRect) {
+          return;
+        }
+
+        popup = tippy('body', {
+          getReferenceClientRect: props.clientRect,
+          appendTo: () => document.body,
+          content: (component as any).element,
+          showOnCreate: true,
+          interactive: true,
+          trigger: 'manual',
+          //   placement: 'top-start',
+        } as any);
+      },
+
+      onUpdate(props) {
+        component?.updateProps(props);
+
+        if (!props.clientRect) {
+          return;
+        }
+
+        popup?.[0].setProps({
+          getReferenceClientRect: props.clientRect as any,
+        });
+      },
+
+      onKeyDown(props) {
+        if (props.event.key === 'Escape') {
+          popup?.[0].hide();
+          return true;
+        }
+
+        return (component?.ref as any)?.onKeyDown(props);
+      },
+
+      onExit() {
+        popup?.[0].destroy();
+        component?.destroy();
+      },
+    };
+  },
+};
+
+type MentionListProps = SuggestionProps<any, MentionNodeAttrs>;
 
 const MentionList = forwardRef<unknown, MentionListProps>((props, ref) => {
+  const [loading, setLoading] = useState(true);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  useEffect(() => {
+    trpc.files.indexingCompleted.query().then(() => setLoading(false));
+  });
 
   const selectItem = (index: number) => {
     const item = props.items[index];
@@ -266,8 +272,11 @@ const MentionList = forwardRef<unknown, MentionListProps>((props, ref) => {
             <span className="flex truncate w-full">{item}</span>
           </button>
         ))
+      ) : loading ? (
+        //TODO: Make better loading indicator
+        <div className="p-1">Indexing files, please wait...</div>
       ) : (
-        <div className="item">No result</div>
+        <div className="p-1">No results</div>
       )}
     </div>
   );

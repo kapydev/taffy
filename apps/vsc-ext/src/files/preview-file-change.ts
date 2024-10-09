@@ -8,7 +8,6 @@ export async function previewFileChange(
   newContents: string,
   previewId: string
 ) {
-  console.log('preview id created', previewId);
   const fileChangeApproved = new Promise<void>((res) => {
     ee.on('fileChangeApproved', (approvedId) => {
       if (approvedId !== previewId) return;
