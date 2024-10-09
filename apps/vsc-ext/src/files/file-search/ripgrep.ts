@@ -3,6 +3,7 @@ import * as childProcess from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as readline from 'readline';
+import { toPosix } from '../../helpers/to-posix';
 
 /*
 This file provides functionality to perform regex searches on files using ripgrep.
@@ -45,6 +46,8 @@ rel/path/to/helper.ts
 │  }
 │----
 */
+
+const logger = console;
 
 const isWindows = /^win/.test(process.platform);
 const binName = isWindows ? 'rg.exe' : 'rg';
@@ -149,7 +152,8 @@ export async function regexSearchFiles(
   let output: string;
   try {
     output = await execRipgrep(rgPath, args);
-  } catch {
+  } catch (e) {
+    logger.error(e);
     return 'No results found';
   }
   const results: SearchResult[] = [];
@@ -179,7 +183,7 @@ export async function regexSearchFiles(
           }
         }
       } catch (error) {
-        console.error('Error parsing ripgrep output:', error);
+        logger.error('Error parsing ripgrep output:', error);
       }
     }
   });
@@ -215,7 +219,7 @@ function formatResults(results: SearchResult[], cwd: string): string {
   });
 
   for (const [filePath, fileResults] of Object.entries(groupedResults)) {
-    output += `${filePath.toPosix()}\n│----\n`;
+    output += `${toPosix(filePath)}\n│----\n`;
 
     fileResults.forEach((result, index) => {
       const allLines = [

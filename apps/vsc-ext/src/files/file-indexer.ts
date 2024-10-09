@@ -53,7 +53,7 @@ async function runIndexer() {
 }
 
 /**For now only support single root folder otherwise relative paths will get nasty */
-function getRootPath() {
+export function getRootPath() {
   const workspaceFolders = vscode.workspace.workspaceFolders;
   if (!workspaceFolders) {
     return undefined;
