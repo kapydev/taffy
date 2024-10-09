@@ -22,9 +22,9 @@ import tippy, { Instance as TippyInstance } from 'tippy.js';
 import { trpc } from '../client';
 import { ButtonWithHotkey } from '../components/ButtonWithHotkey';
 import {
+  addAddtionalContext,
   chatStore,
   continuePrompt,
-  setAdditionalContext,
 } from '../stores/chat-store';
 import { updateChat } from '../stores/update-prompt';
 
@@ -130,13 +130,6 @@ export function RichTextArea({ onSend }: RichTextAreaProps) {
           'focus-visible:outline-none min-h-[80px] bg-vsc-input-background py-2 pl-3 pr-10 rounded-b-md text-xs',
       },
     },
-    onUpdate(props) {
-      const mentions = getNodesByType(props.editor, 'mention');
-      const additionalFileNames: string[] = mentions
-        .map((mention) => mention.attrs?.id)
-        .filter(booleanFilter);
-      setAdditionalContext(additionalFileNames);
-    },
   });
 
   useEffect(() => {
@@ -152,9 +145,19 @@ export function RichTextArea({ onSend }: RichTextAreaProps) {
 
   const handleSend = async () => {
     const input = editor?.getText();
+    if (!editor) return;
     if (!input?.trim()) return;
     editor?.commands.clearContent();
     const mode = chatStore.get('mode');
+    const mentions = getNodesByType(editor, 'mention');
+    const additionalFileNames: string[] = mentions
+      .map((mention) => mention.attrs?.id)
+      .filter(booleanFilter);
+    await Promise.all(
+      additionalFileNames.map(async (fileName) => {
+        await addAddtionalContext(fileName);
+      })
+    );
     await updateChat(input, mode);
     await continuePrompt(mode);
     onSend?.(input);

@@ -10,7 +10,12 @@ import {
   WaypointsIcon,
 } from 'lucide-react';
 import { trpc } from '../../../client';
-import { getLatestFocusedContent } from '../../../stores/chat-store';
+import {
+  addAddtionalContext,
+  chatStore,
+  continuePrompt,
+  getLatestFocusedContent,
+} from '../../../stores/chat-store';
 import { ToolMessage } from '../ToolMessage';
 import { CustomMessage } from '../Messages';
 import { findLatest } from '@taffy/shared-helpers';
@@ -155,17 +160,22 @@ export const TOOL_TEMPLATES = {
   },
   USER_FILE_CONTENTS: {
     role: 'user',
-    desc: 'Information from the user regarding the contents of a file. If there are multiple FILE_CONTENTS tool responses, the latest one should be considered as the correct one.',
+    desc: 'Information from the user regarding the contents of a file. If there are multiple FILE_CONTENTS tool responses, the latest one should be considered as the correct one. If exists is true, the body can be considered the entire contents of the file. Otherwise, the body may consider additional info on the file not existing.',
     propDesc: {
       filePath: 'The file path where the contents are from',
+      exists: 'Whether the file exists',
     },
     sampleProps: {
       filePath: 'src/utils/helloWorld.ts',
+      exists: 'true',
     },
     sampleBody: `export default function HelloWorld() {
   const name = 'Thomas';
   ${'console'}.log("Hello World");
-}`,
+}
+>>>>OR<<<<
+The file does not exist.  
+`,
     data: {},
   },
   USER_FOCUS_BLOCK: {
@@ -266,8 +276,14 @@ export const TOOL_RENDER_TEMPLATES: {
     rules: [],
     actions: [
       {
-        name: 'approve',
-        action: () => {},
+        name: 'Approve',
+        action: async (msg) => {
+          const fileNames = msg.body.split('\n');
+          await Promise.all(
+            fileNames.map((fileName) => addAddtionalContext(fileName))
+          );
+          await continuePrompt(chatStore.get('mode'));
+        },
         shortcutEnd: 'enter',
       },
     ],
@@ -305,7 +321,7 @@ export const TOOL_RENDER_TEMPLATES: {
     rules: [
       {
         description:
-          'Only user actions, ASSISTANT_INFO and ASSISTANT_PLANNING are allowed after a USER_FOCUS_BLOCK.',
+          'Only user actions, ASSISTANT_INFO, ASSISTANT_READ_FILE and ASSISTANT_PLANNING are allowed after a USER_FOCUS_BLOCK.',
         check: (messages) => {
           const latestFocusBlock = findLatest(
             messages,
@@ -318,6 +334,7 @@ export const TOOL_RENDER_TEMPLATES: {
             if (curMsg.role === 'user') continue;
             if (curMsg.type === 'ASSISTANT_INFO') continue;
             if (curMsg.type === 'ASSISTANT_PLANNING') continue;
+            if (curMsg.type === 'ASSISTANT_READ_FILE') continue;
             if (curMsg.type === 'ASSISTANT_REPLACE_BLOCK') break;
             return `We expected only legal actions after a USER_FOCUS_BLOCK, but instead found ${curMsg.type}`;
           }
