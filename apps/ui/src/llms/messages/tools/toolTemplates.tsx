@@ -425,7 +425,7 @@ export const TOOL_RENDER_TEMPLATES: {
     rules: [
       {
         description:
-          'Only user actions, ASSISTANT_INFO, ASSISTANT_READ_PATHS and ASSISTANT_PLANNING are allowed after a USER_FOCUS_BLOCK.',
+          'The file editing action after a USER_FOCUS_BLOCK must be an ASSISTANT_REPLACE_BLOCK. Other file editing actions like ASSISTANT_WRITE_FILE are not allowed.',
         check: (messages) => {
           const latestFocusBlock = findLatest(
             messages,
@@ -436,11 +436,10 @@ export const TOOL_RENDER_TEMPLATES: {
           for (let i = checkStartIdx; i < messages.length; i += 1) {
             const curMsg = messages[i];
             if (curMsg.role === 'user') continue;
-            if (curMsg.type === 'ASSISTANT_INFO') continue;
-            if (curMsg.type === 'ASSISTANT_PLANNING') continue;
-            if (curMsg.type === 'ASSISTANT_READ_PATHS') continue;
+            if (curMsg.type === 'ASSISTANT_WRITE_FILE') {
+              return `We expected only legal actions after a USER_FOCUS_BLOCK, but instead found ${curMsg.type}`;
+            }
             if (curMsg.type === 'ASSISTANT_REPLACE_BLOCK') break;
-            return `We expected only legal actions after a USER_FOCUS_BLOCK, but instead found ${curMsg.type}`;
           }
           return undefined;
         },
