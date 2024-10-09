@@ -1,4 +1,5 @@
 import {
+  BookPlusIcon,
   BotIcon,
   FileInput,
   FileInputIcon,
@@ -10,6 +11,7 @@ import {
 import { trpc } from '../../../client';
 import { getLatestFocusedContent } from '../../../stores/chat-store';
 import { ToolMessage } from '../ToolMessage';
+import { CustomMessage } from '../Messages';
 
 export type MessageIcon = React.ForwardRefExoticComponent<
   Omit<LucideProps, 'ref'> & React.RefAttributes<SVGSVGElement>
@@ -26,6 +28,17 @@ export type Tools = {
   };
 };
 
+/**returns undefined or a string to pass back to llm to scold it to do better */
+type ToolRuleResult = string | undefined;
+
+/**Used to enforce certain formats for the LLM output and to hint it in the right direction if it messes up */
+export interface ToolRule {
+  /**Description passed to LLM regarding tool usage. */
+  description: string;
+  /**Checks to be done for the tool. Only runs if the tool type matches the latest tool and only runs on the latest tool*/
+  check: (messages: CustomMessage[]) => ToolRuleResult;
+}
+
 export interface ToolTemplate {
   role: 'assistant' | 'user';
   desc: string;
@@ -34,6 +47,7 @@ export interface ToolTemplate {
   sampleProps: Record<string, string>;
   /**Used for storing additional data in a particular message, for example the contents at the time of parsing */
   data: object;
+  rules: ToolRule[];
 }
 
 /**
@@ -68,20 +82,28 @@ export const TOOL_TEMPLATES = {
     sampleBody:
       'To prevent .env files from being committed into the codebase, we need to update the .gitignore file.',
     data: {},
+    rules: [],
   },
   ASSISTANT_PLANNING: {
     role: 'assistant',
-    desc: "For the assistant to plan how to tackle the task from the user. If an assistant info block or the user's prompt suggests that the user's codebase will be edited, the planning block should be between the info block and the write file block, or whatever action on the users codebase. Reason how to tackle the user's task step by step, placing steps in a logical order. After the planning tool is done, execute the plan. In each step, indicate what tool you will use, and how you will use it",
+    desc: "For the assistant to plan how to tackle the task from the user. Reason how to tackle the user's task step by step, placing steps in a logical order. After the planning tool is done, execute the plan. In each step, indicate what tool you will use, and how you will use it",
     propDesc: {},
     sampleProps: {},
     sampleBody: `Example 1:
     1. Update the src/utils/helloWorld.ts file using ASSISTANT_REPLACE_BLOCK
     2. Update the barrel file src/utils/index.ts to include the export from helloWorld.ts using ASSISTANT_WRITE_FILE`,
     data: {},
+    rules: [
+      {
+        description:
+          'Planning should only come immediately after an assistant info block',
+        check: () => undefined,
+      },
+    ],
   },
   ASSISTANT_WRITE_FILE: {
     role: 'assistant',
-    desc: `Ask the user for permission to create/overwrite a file. You will need to provide the FULL FILE CONTENTS, because the action suggested to the user will be a full override of the existing file. This tool cannot be used after an USER_FOCUS_BLOCK, until an ASSISTANT_REPLACE_BLOCK is used.`,
+    desc: `Ask the user for permission to create/overwrite a file.  `,
     propDesc: {
       filePath:
         "The path to which the file is written. If the file path doesn't exist, directories will be recursively created until we are able to create the file.",
@@ -93,10 +115,32 @@ export const TOOL_TEMPLATES = {
   ${'console'}.log("Hello World!");
 }`,
     data: {},
+    rules: [
+      {
+        description:
+          'You cannot write to a file until the file contents have been provided to you. Do not make assumptions about the contents of a file.',
+        check: () => undefined,
+      },
+      {
+        description:
+          'You will need to provide the FULL FILE CONTENTS, because the action suggested to the user will be a full override of the existing file.',
+        check: () => undefined,
+      },
+      {
+        description:
+          'This tool cannot be used after an USER_FOCUS_BLOCK, until an ASSISTANT_REPLACE_BLOCK is used',
+        check: () => undefined,
+      },
+      {
+        description:
+          'You cannot write to a file more than once until you obtain the updated contents of that file',
+        check: () => undefined,
+      },
+    ],
   },
   ASSISTANT_REPLACE_BLOCK: {
     role: 'assistant',
-    desc: `A block from the assistant to address a user's focus block. You will need to provide ONLY the contents of the code to replace the block. The focus block will be the only part of the code programmatically replaced with the replace block, so make sure the outputs are immediately runnable. Instead of including comments in the output of the replace block, any parts of the thought process should be in the planning block or info block instead. A replace block should only address the latest USER_FOCUS_BLOCK in the prompt history. If there is more than one USER_FOCUS_BLOCK in the prompt history, the rest can be ignored. Always use this as the first code writing action after an USER_FOCUS_BLOCK, after the info and planning blocks.`,
+    desc: `A block from the assistant to address a user's focus block. The focus block will be the only part of the code programmatically replaced with the replace block, so make sure the outputs are immediately runnable. Instead of including comments in the output of the replace block, any parts of the thought process should be in the planning block or info block instead.`,
     propDesc: {
       filePath: 'The file path where the contents are from',
     },
@@ -108,14 +152,43 @@ export const TOOL_TEMPLATES = {
       oldContents: undefined as string | undefined,
       newContents: undefined as string | undefined,
     },
+    rules: [
+      {
+        description:
+          'The first code editing action after a FOCUS_BLOCK must be an ASSISTANT_REPLACE_BLOCK',
+        check: () => undefined,
+      },
+      {
+        description:
+          'The filename of the replace block should match the preceding FOCUS_BLOCK',
+        check: () => undefined,
+      },
+      {
+        description:
+          'Repeat the preceding 4 lines before the replace block, if any, matching the original indentation exactly. The preceding lines should be inside a {PRECEDING_START}\n{PRECEDING_END} block',
+        check: () => undefined,
+      },
+      {
+        description:
+          'Start and end the new code to replace the existing focused code with a {REPLACE_START}\n{REPLACE_END} block',
+        check: () => undefined,
+      },
+      {
+        description:
+          'End the block with a {SUCCEEDING_START}\n{SUCCEEDING_END} block, whose contents should be the 4 lines after the replace block, if any, matching the original indentation exactly.',
+        check: () => undefined,
+      },
+    ],
   },
-  // ASSISTANT_READ_FILE: {
-  //   role: 'assistant',
-  //   desc: "Ask the user for permission to add a file to the context. The contents of the tool call should be all the files that need to be read, seperated by newlines. After calling this tool, no other tool calls can be made by the assistant, as we have to wait for the user's response",
-  //   propDesc: {},
-  //   sampleProps: {},
-  //   sampleBody: 'src/index.ts\nsrc/messages/helloWorld.ts',
-  // },
+  ASSISTANT_READ_FILE: {
+    role: 'assistant',
+    desc: "Ask the user for permission to add a file to the context. The contents of the tool call should be all the files that need to be read, seperated by newlines. After calling this tool, no other tool calls can be made by the assistant, as we have to wait for the user's response",
+    propDesc: {},
+    sampleProps: {},
+    sampleBody: 'src/index.ts\nsrc/messages/helloWorld.ts',
+    data: {},
+    rules: [],
+  },
   //USER TOOLS
   USER_PROMPT: {
     role: 'user',
@@ -124,6 +197,7 @@ export const TOOL_TEMPLATES = {
     sampleProps: {},
     sampleBody: `Stop commiting .env files into the codebase`,
     data: {},
+    rules: [],
   },
   USER_FILE_CONTENTS: {
     role: 'user',
@@ -139,6 +213,7 @@ export const TOOL_TEMPLATES = {
   ${'console'}.log("Hello World");
 }`,
     data: {},
+    rules: [],
   },
   USER_FOCUS_BLOCK: {
     role: 'user',
@@ -155,6 +230,7 @@ export const TOOL_TEMPLATES = {
     },
     sampleBody: `  const name = 'Thomas';`,
     data: {},
+    rules: [],
   },
   USER_AVAILABLE_FILES: {
     role: 'user',
@@ -163,6 +239,7 @@ export const TOOL_TEMPLATES = {
     sampleProps: {},
     sampleBody: 'src/index.ts\nsrc/utils/anotherFile.ts',
     data: {},
+    rules: [],
   },
 } satisfies Record<string, ToolTemplate>;
 
@@ -205,6 +282,12 @@ export const TOOL_RENDER_TEMPLATES: {
   ASSISTANT_PLANNING: {
     Icon: WaypointsIcon,
     title: () => 'Taffy Planning',
+    body: (data) => data.body,
+    content: (data) => data.contents,
+  },
+  ASSISTANT_READ_FILE: {
+    Icon: BookPlusIcon,
+    title: () => 'Can I read these files?',
     body: (data) => data.body,
     content: (data) => data.contents,
   },
