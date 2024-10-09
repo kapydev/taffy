@@ -1,5 +1,5 @@
 <div align="center">
-  <p style="font-size: 3em; margin-bottom: 0px;">Taffy 🍬</p>
+  <p style="font-size: 9em; margin-bottom: 0px;">Taffy 🍬</p>
   <p style="font-style: italic;">AI Code Editor focused on multi file editing and better context</p>
 ![Placeholder gif demonstrating Taffy in action](#)
 </div>
@@ -41,17 +41,17 @@ With our initial release, we've solved multi-file support, and with subsequent r
 - Bring Your Own key (BYOK)
 - MIT Licensed
 
-### Upcoming Features
+### Upcoming Features (as of Oct 2024)
 
 Right now, we have a base of features that we believe make a good foundation for the developer experience that we expect from an AI code assistant. 
 
 We have several ideas of how we can improve the developer experience, and we need your feedback and votes in order to better shape the development of this product.
 
-- **Small Model Context Big Model Thinking**: [Upvote this feature](#)
-- **Types Context**: [Upvote this feature](#)
-- **Library Context**: [Upvote this feature](#)
-- **Diagnostics Context**: [Upvote this feature](#)
-- **Best Practices Context**: [Upvote this feature](#)
+- **Small Model Context Big Model Thinking**: [Upvote this feature](#https://github.com/kapydev/taffy/issues/1)
+- **Types Context**: [Upvote this feature](#https://github.com/kapydev/taffy/issues/2)
+- **Library Context**: [Upvote this feature](#https://github.com/kapydev/taffy/issues/3)
+- **Diagnostics Context**: [Upvote this feature](#https://github.com/kapydev/taffy/issues/4)
+- **Best Practices Context**: [Upvote this feature](#https://github.com/kapydev/taffy/issues/5)
 
 ## Local Development
 
