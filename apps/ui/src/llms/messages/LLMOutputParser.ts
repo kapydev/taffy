@@ -16,6 +16,7 @@ import {
   TOOL_RENDER_TEMPLATES,
   TOOL_TEMPLATES,
   toolToToolString,
+  ToolType,
 } from './tools';
 
 const logger = console;
@@ -144,7 +145,8 @@ function checkRules() {
     faultyMsg: ToolMessage | undefined;
   }[] = [];
   Object.entries(TOOL_TEMPLATES).forEach(([toolType, toolMeta]) => {
-    toolMeta.rules.forEach((rule) => {
+    const toolRules = TOOL_RENDER_TEMPLATES[toolType as ToolType].rules;
+    toolRules.forEach((rule) => {
       const checkResult = rule.check(messages);
       if (checkResult === undefined) return;
       errors.push({

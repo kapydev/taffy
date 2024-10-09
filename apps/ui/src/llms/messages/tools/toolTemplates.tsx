@@ -32,12 +32,13 @@ export type Tools = {
 /**returns undefined or a string to pass back to llm to scold it to do better */
 type ToolRuleResult = string | undefined;
 
+//TODO: ToolRules need to be moved to render templates for type inference
 /**Used to enforce certain formats for the LLM output and to hint it in the right direction if it messes up */
 export interface ToolRule {
   /**Description passed to LLM regarding tool usage. */
   description: string;
   /**Checks to be done for the tool. Always just check the latest message, REGARDLESS of type*/
-  check: (messagesWithoutErrors: ToolMessage<any>[]) => ToolRuleResult;
+  check: (messagesWithoutErrors: ToolMessage[]) => ToolRuleResult;
 }
 
 export interface ToolTemplate {
@@ -48,7 +49,6 @@ export interface ToolTemplate {
   sampleProps: Record<string, string>;
   /**Used for storing additional data in a particular message, for example the contents at the time of parsing */
   data: object;
-  rules: ToolRule[];
 }
 
 /**
@@ -83,7 +83,6 @@ export const TOOL_TEMPLATES = {
     sampleBody:
       'To prevent .env files from being committed into the codebase, we need to update the .gitignore file.',
     data: {},
-    rules: [],
   },
   ASSISTANT_PLANNING: {
     role: 'assistant',
@@ -95,18 +94,6 @@ export const TOOL_TEMPLATES = {
     2. Update the src/utils/helloWorld.ts file using ASSISTANT_REPLACE_BLOCK
     3. Update the barrel file src/utils/index.ts to include the export from helloWorld.ts using ASSISTANT_WRITE_FILE`,
     data: {},
-    rules: [
-      {
-        description:
-          'Planning should only come immediately after an assistant info block',
-        check: (messages) => {
-          if (true) {
-            return 'I just need an error to test';
-          }
-          return undefined;
-        },
-      },
-    ],
   },
   ASSISTANT_WRITE_FILE: {
     role: 'assistant',
@@ -122,28 +109,6 @@ export const TOOL_TEMPLATES = {
   ${'console'}.log("Hello World!");
 }`,
     data: {},
-    rules: [
-      {
-        description:
-          'You cannot write to a file until the file contents have been provided to you. Do not make assumptions about the contents of a file.',
-        check: () => undefined,
-      },
-      {
-        description:
-          'You will need to provide the FULL FILE CONTENTS, because the action suggested to the user will be a full override of the existing file.',
-        check: () => undefined,
-      },
-      {
-        description:
-          'This tool cannot be used after an USER_FOCUS_BLOCK, until an ASSISTANT_REPLACE_BLOCK is used',
-        check: () => undefined,
-      },
-      {
-        description:
-          'You cannot write to a file more than once until you obtain the updated contents of that file',
-        check: () => undefined,
-      },
-    ],
   },
   ASSISTANT_REPLACE_BLOCK: {
     role: 'assistant',
@@ -159,6 +124,183 @@ export const TOOL_TEMPLATES = {
       oldContents: undefined as string | undefined,
       newContents: undefined as string | undefined,
     },
+  },
+  ASSISTANT_READ_FILE: {
+    role: 'assistant',
+    desc: "Ask the user for permission to add a file to the context. The contents of the tool call should be all the files that need to be read, seperated by newlines. After calling this tool, no other tool calls can be made by the assistant, as we have to wait for the user's response",
+    propDesc: {},
+    sampleProps: {},
+    sampleBody: 'src/index.ts\nsrc/messages/helloWorld.ts',
+    data: {},
+  },
+
+  //USER TOOLS
+  USER_TOOL_ERROR: {
+    role: 'user',
+    desc: 'Information regarding incorrect tool usage. The occurence of this indicates a previous generation produced a result that did not follow a particular rule. Take extra notice of the rule that was not followed correctly in subsequent generations',
+    propDesc: {},
+    sampleProps: {},
+    sampleBody:
+      'We tried to write to a file without first reading the contents',
+    data: {},
+  },
+  USER_PROMPT: {
+    role: 'user',
+    desc: 'The prompt from the user',
+    propDesc: {},
+    sampleProps: {},
+    sampleBody: `Stop commiting .env files into the codebase`,
+    data: {},
+  },
+  USER_FILE_CONTENTS: {
+    role: 'user',
+    desc: 'Information from the user regarding the contents of a file. If there are multiple FILE_CONTENTS tool responses, the latest one should be considered as the correct one.',
+    propDesc: {
+      filePath: 'The file path where the contents are from',
+    },
+    sampleProps: {
+      filePath: 'src/utils/helloWorld.ts',
+    },
+    sampleBody: `export default function HelloWorld() {
+  const name = 'Thomas';
+  ${'console'}.log("Hello World");
+}`,
+    data: {},
+  },
+  USER_FOCUS_BLOCK: {
+    role: 'user',
+    desc: 'A block from the user that specifies a particular section of the code that he has a question about, or he wants to replace. If only a question is asked, just reply the question in the info block. If the user wants the code to be edited, run through the info -> planning -> replace block flow. Make sure to match the original indendation of the line.',
+    propDesc: {
+      filePath: 'The file path where the contents are from',
+      startLine: 'The start line of the specific area to focus on',
+      endLine: 'The end line of the specific area to focus on',
+    },
+    sampleProps: {
+      filePath: 'src/utils/helloWorld.ts',
+      startLine: '2',
+      endLine: '2',
+    },
+    sampleBody: `  const name = 'Thomas';`,
+    data: {},
+  },
+  USER_AVAILABLE_FILES: {
+    role: 'user',
+    desc: 'Information from the user regarding available files in the repository',
+    propDesc: {},
+    sampleProps: {},
+    sampleBody: 'src/index.ts\nsrc/utils/anotherFile.ts',
+    data: {},
+  },
+} satisfies Record<string, ToolTemplate>;
+
+type ToolAction<ToolName extends ToolType> = (
+  message: ToolMessage<ToolName>
+) => void;
+
+export type ToolActionMeta<ToolName extends ToolType> = {
+  name: string;
+  action: ToolAction<ToolName>;
+  /**For a keyboard shortcut Ctrl+T, or Ctrl+1+T for an older
+   * message for example, just put 't' as the shortcut - it
+   * will be concatenated to the end */
+  shortcutEnd: string;
+};
+export type ToolRenderTemplate<ToolName extends ToolType> = {
+  Icon: MessageIcon;
+  title: (message: ToolMessage<ToolName>) => React.ReactNode;
+  body: (message: ToolMessage<ToolName>) => React.ReactNode;
+  content: (message: ToolMessage<ToolName>) => string; // THIS IS FOR SHOWING MARKDOWN BUT ITS QUITE BUGGY. FIX AND USE THIS IN THE UI NEXT TIME
+  onRemove?: ToolAction<ToolName>;
+  onFocus?: ToolAction<ToolName>;
+  actions?: ToolActionMeta<ToolName>[];
+  rules: ToolRule[];
+};
+export const TOOL_RENDER_TEMPLATES: {
+  [ToolName in ToolType]: ToolRenderTemplate<ToolName>;
+} = {
+  USER_PROMPT: {
+    Icon: UserIcon,
+    title: () => 'You',
+    body: (data) => data.body,
+    content: (data) => data.contents,
+    rules: [],
+  },
+  ASSISTANT_INFO: {
+    Icon: BotIcon,
+    title: () => 'Taffy',
+    body: (data) => data.body,
+    content: (data) => data.contents,
+    rules: [],
+  },
+  ASSISTANT_PLANNING: {
+    Icon: WaypointsIcon,
+    title: () => 'Taffy Planning',
+    body: (data) => data.body,
+    content: (data) => data.contents,
+    rules: [
+      {
+        description:
+          'Planning should only come immediately after an assistant info block',
+        check: (messages) => {
+          if (
+            messages.at(-1)?.type === 'ASSISTANT_PLANNING' &&
+            messages.at(-2)?.type !== 'ASSISTANT_INFO'
+          ) {
+            return (
+              'The latest message is of type ASSISTANT_PLANNING but the previous message is of type ' +
+              messages.at(-2)?.type
+            );
+          }
+          return undefined;
+        },
+      },
+    ],
+  },
+  ASSISTANT_READ_FILE: {
+    Icon: BookPlusIcon,
+    title: () => 'Can I read these files?',
+    body: (data) => data.body,
+    content: (data) => data.contents,
+    onRemove: (data) => {},
+    rules: [],
+    actions: [
+      {
+        name: 'approve',
+        action: () => {},
+        shortcutEnd: 'enter',
+      },
+    ],
+  },
+  USER_TOOL_ERROR: {
+    Icon: ShieldAlertIcon,
+    title: () => 'Tool error',
+    body: (data) => data.body,
+    content: (data) => data.contents,
+    rules: [],
+  },
+  USER_FOCUS_BLOCK: {
+    Icon: FileInput,
+    title: () => 'File Context Added',
+    rules: [],
+    body: (data) => {
+      if (!data.props) return;
+      return (
+        <p className="">
+          {data.props.filePath} <br />
+          Line {data.props.startLine} to Line {data.props.endLine}
+        </p>
+      );
+    },
+    content: (data) =>
+      data.props?.filePath +
+      'Line ' +
+      data.props?.startLine +
+      ' to Line ' +
+      data.props?.endLine,
+  },
+  ASSISTANT_REPLACE_BLOCK: {
+    Icon: FilePlus2Icon,
+    title: () => 'Can I edit these files?',
     rules: [
       {
         description:
@@ -186,165 +328,6 @@ export const TOOL_TEMPLATES = {
         check: () => undefined,
       },
     ],
-  },
-  ASSISTANT_READ_FILE: {
-    role: 'assistant',
-    desc: "Ask the user for permission to add a file to the context. The contents of the tool call should be all the files that need to be read, seperated by newlines. After calling this tool, no other tool calls can be made by the assistant, as we have to wait for the user's response",
-    propDesc: {},
-    sampleProps: {},
-    sampleBody: 'src/index.ts\nsrc/messages/helloWorld.ts',
-    data: {},
-    rules: [],
-  },
-
-  //USER TOOLS
-  USER_TOOL_ERROR: {
-    role: 'user',
-    desc: 'Information regarding incorrect tool usage. The occurence of this indicates a previous generation produced a result that did not follow a particular rule. Take extra notice of the rule that was not followed correctly in subsequent generations',
-    propDesc: {},
-    sampleProps: {},
-    sampleBody:
-      'We tried to write to a file without first reading the contents',
-    rules: [],
-    data: {},
-  },
-  USER_PROMPT: {
-    role: 'user',
-    desc: 'The prompt from the user',
-    propDesc: {},
-    sampleProps: {},
-    sampleBody: `Stop commiting .env files into the codebase`,
-    data: {},
-    rules: [],
-  },
-  USER_FILE_CONTENTS: {
-    role: 'user',
-    desc: 'Information from the user regarding the contents of a file. If there are multiple FILE_CONTENTS tool responses, the latest one should be considered as the correct one.',
-    propDesc: {
-      filePath: 'The file path where the contents are from',
-    },
-    sampleProps: {
-      filePath: 'src/utils/helloWorld.ts',
-    },
-    sampleBody: `export default function HelloWorld() {
-  const name = 'Thomas';
-  ${'console'}.log("Hello World");
-}`,
-    data: {},
-    rules: [],
-  },
-  USER_FOCUS_BLOCK: {
-    role: 'user',
-    desc: 'A block from the user that specifies a particular section of the code that he has a question about, or he wants to replace. If only a question is asked, just reply the question in the info block. If the user wants the code to be edited, run through the info -> planning -> replace block flow. Make sure to match the original indendation of the line.',
-    propDesc: {
-      filePath: 'The file path where the contents are from',
-      startLine: 'The start line of the specific area to focus on',
-      endLine: 'The end line of the specific area to focus on',
-    },
-    sampleProps: {
-      filePath: 'src/utils/helloWorld.ts',
-      startLine: '2',
-      endLine: '2',
-    },
-    sampleBody: `  const name = 'Thomas';`,
-    data: {},
-    rules: [],
-  },
-  USER_AVAILABLE_FILES: {
-    role: 'user',
-    desc: 'Information from the user regarding available files in the repository',
-    propDesc: {},
-    sampleProps: {},
-    sampleBody: 'src/index.ts\nsrc/utils/anotherFile.ts',
-    data: {},
-    rules: [],
-  },
-} satisfies Record<string, ToolTemplate>;
-
-type ToolAction<ToolName extends ToolType> = (
-  message: ToolMessage<ToolName>
-) => void;
-
-export type ToolActionMeta<ToolName extends ToolType> = {
-  name: string;
-  action: ToolAction<ToolName>;
-  /**For a keyboard shortcut Ctrl+T, or Ctrl+1+T for an older
-   * message for example, just put 't' as the shortcut - it
-   * will be concatenated to the end */
-  shortcutEnd: string;
-};
-export type ToolRenderTemplate<ToolName extends ToolType> = {
-  Icon: MessageIcon;
-  title: (message: ToolMessage<ToolName>) => React.ReactNode;
-  body: (message: ToolMessage<ToolName>) => React.ReactNode;
-  content: (message: ToolMessage<ToolName>) => string; // THIS IS FOR SHOWING MARKDOWN BUT ITS QUITE BUGGY. FIX AND USE THIS IN THE UI NEXT TIME
-  onRemove?: ToolAction<ToolName>;
-  onFocus?: ToolAction<ToolName>;
-  actions?: ToolActionMeta<ToolName>[];
-};
-export const TOOL_RENDER_TEMPLATES: {
-  [ToolName in ToolType]: ToolRenderTemplate<ToolName>;
-} = {
-  USER_PROMPT: {
-    Icon: UserIcon,
-    title: () => 'You',
-    body: (data) => data.body,
-    content: (data) => data.contents,
-  },
-  ASSISTANT_INFO: {
-    Icon: BotIcon,
-    title: () => 'Taffy',
-    body: (data) => data.body,
-    content: (data) => data.contents,
-  },
-  ASSISTANT_PLANNING: {
-    Icon: WaypointsIcon,
-    title: () => 'Taffy Planning',
-    body: (data) => data.body,
-    content: (data) => data.contents,
-  },
-  ASSISTANT_READ_FILE: {
-    Icon: BookPlusIcon,
-    title: () => 'Can I read these files?',
-    body: (data) => data.body,
-    content: (data) => data.contents,
-    onRemove: (data) => {},
-    actions: [
-      {
-        name: 'approve',
-        action: () => {},
-        shortcutEnd: 'enter',
-      },
-    ],
-  },
-  USER_TOOL_ERROR: {
-    Icon: ShieldAlertIcon,
-    title: () => 'Tool error',
-    body: (data) => data.body,
-    content: (data) => data.contents,
-  },
-  USER_FOCUS_BLOCK: {
-    Icon: FileInput,
-    title: () => 'File Context Added',
-    body: (data) => {
-      if (!data.props) return;
-      return (
-        <p className="">
-          {data.props.filePath} <br />
-          Line {data.props.startLine} to Line {data.props.endLine}
-        </p>
-      );
-    },
-    content: (data) =>
-      data.props?.filePath +
-      'Line ' +
-      data.props?.startLine +
-      ' to Line ' +
-      data.props?.endLine,
-  },
-  ASSISTANT_REPLACE_BLOCK: {
-    Icon: FilePlus2Icon,
-    title: () => 'Can I edit these files?',
     body: (data) => {
       if (!data.props) return;
       const thoughtsString = data.thoughts ? `💡${data.thoughts}` : '';
@@ -430,10 +413,33 @@ export const TOOL_RENDER_TEMPLATES: {
       return data.props.filePath;
     },
     content: (data) => data.props?.filePath ?? '',
+    rules: [],
   },
   ASSISTANT_WRITE_FILE: {
     Icon: FilePlus2Icon,
     title: () => 'Shall I add the following?',
+    rules: [
+      {
+        description:
+          'You cannot write to a file until the file contents have been provided to you. Do not make assumptions about the contents of a file.',
+        check: () => undefined,
+      },
+      {
+        description:
+          'You will need to provide the FULL FILE CONTENTS, because the action suggested to the user will be a full override of the existing file.',
+        check: () => undefined,
+      },
+      {
+        description:
+          'This tool cannot be used after an USER_FOCUS_BLOCK, until an ASSISTANT_REPLACE_BLOCK is used',
+        check: () => undefined,
+      },
+      {
+        description:
+          'You cannot write to a file more than once until you obtain the updated contents of that file',
+        check: () => undefined,
+      },
+    ],
     body: (data) => {
       if (!data.props) return;
       const thoughtsString = data.thoughts ? `💡${data.thoughts}` : '';
@@ -501,6 +507,7 @@ export const TOOL_RENDER_TEMPLATES: {
   USER_AVAILABLE_FILES: {
     Icon: FilePlus2Icon,
     title: () => 'Available Files in Repository',
+    rules: [],
     body: (data) => {
       const numFiles = data.body.split('\n').length;
       return `${numFiles} filenames added to context`;
