@@ -53,7 +53,7 @@ export function ToolMessageRender<T extends ToolType>({
             <Button
               size="icon"
               variant="ghost"
-              className="cursor-pointer w-3.5 h-3.5"
+              className="cursor-pointer w-3.5 h-3.5 mt-[1.5px]"
               onClick={() => setMode(mode === 'RAW' ? 'SIMPLIFIED' : 'RAW')}
             >
               {mode === 'SIMPLIFIED' && <ChevronDown className="w-4 h-4" />}
@@ -62,7 +62,7 @@ export function ToolMessageRender<T extends ToolType>({
           </div>
 
           <div
-            className={`flex items-center justify-end text-xs ${
+            className={`flex items-center justify-end text-xs gap-1 ${
               message.loading && 'hidden'
             }`}
           >
@@ -70,11 +70,10 @@ export function ToolMessageRender<T extends ToolType>({
             {renderTemplate.actions?.map((meta) => {
               return (
                 <ButtonWithHotkey
-                  className="text-vsc-foreground"
                   action={() => meta.action(message)}
                   keys={keyPrefix + meta.shortcutEnd}
                 >
-                  <div className="text-[11px] whitespace-nowrap border-[0.5px] border-vsc-foreground rounded-md px-2 py-1 scale-90">
+                  <div className="text-[9.5px] whitespace-nowrap border-0.5 border px-1 py-0.5 border-vsc-foreground rounded-md font-bold">
                     {meta.name}
                   </div>
                 </ButtonWithHotkey>
