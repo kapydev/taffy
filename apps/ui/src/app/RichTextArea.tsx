@@ -90,7 +90,6 @@ export function RichTextArea({ onSend }: RichTextAreaProps) {
     const input = editor?.getText();
     if (!editor) return;
     if (!input?.trim()) return;
-    editor?.commands.clearContent();
     const mode = chatStore.get('mode');
     const mentions = getNodesByType(editor, 'mention');
     const additionalFileNames: string[] = mentions
@@ -101,6 +100,7 @@ export function RichTextArea({ onSend }: RichTextAreaProps) {
         await addAddtionalContext(fileName);
       })
     );
+    editor?.commands.clearContent();
     await updateChat(input, mode);
     await continuePrompt(mode);
     onSend?.(input);
