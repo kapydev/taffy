@@ -119,16 +119,14 @@ export function RichTextArea({ onSend }: RichTextAreaProps) {
         editor={editor}
       />
       <div className="flex flex-col absolute right-0 inset-y-0 p-1.5">
-        <ButtonWithHotkey hideHint keys="enter" action={handleSend}>
-          <Button
-            className="hover:bg-white/10 w-8 h-8 shadow-none"
-            size="icon"
-            variant="default"
-            onClick={handleSend}
-          >
-            <Send className="h-3.5 w-3.5" />
-          </Button>
-        </ButtonWithHotkey>
+        <Button
+          className="hover:bg-white/10 w-8 h-8 shadow-none"
+          size="icon"
+          variant="default"
+          onClick={handleSend}
+        >
+          <Send className="h-3.5 w-3.5" />
+        </Button>
         <Button
           className="hover:bg-white/10 w-8 h-8 shadow-none"
           size="icon"
