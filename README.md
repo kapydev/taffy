@@ -1,13 +1,13 @@
 # 🍬Taffy
 AI Code Editor focused on multi file editing and better context
 
-## Getting Started
+## 🏃 Getting Started
 
 1. Add to VSCode from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=FireJet.taffy)
 2. Add either a OpenAI, Anthropic or DeepSeek API Key
 3. Select any portion of your code, then press `Ctrl+Shift+M` to ask a question
 
-## Motivation
+## 💪 Motivation
 
 We found that often with AI code assistants, they just don't seem smart enough to generate the correct code in the context required. Examples include
 
@@ -26,7 +26,7 @@ However, with alternative AI code assistants, they fall fall short in one of the
 
 With our initial release, we've solved multi-file support, and with subsequent releases we hope to solve the other problems as well.
 
-## Features
+## 🎁 Features
 ### Current Features
 
 - Multi File Editing
@@ -43,13 +43,13 @@ Right now, we have a base of features that we believe make a good foundation for
 
 We have several ideas of how we can improve the developer experience, and we need your feedback and votes in order to better shape the development of this product.
 
-- **Small Model Context Big Model Thinking**: [Upvote this feature](#https://github.com/kapydev/taffy/issues/1)
-- **Types Context**: [Upvote this feature](#https://github.com/kapydev/taffy/issues/2)
-- **Library Context**: [Upvote this feature](#https://github.com/kapydev/taffy/issues/3)
-- **Diagnostics Context**: [Upvote this feature](#https://github.com/kapydev/taffy/issues/4)
-- **Best Practices Context**: [Upvote this feature](#https://github.com/kapydev/taffy/issues/5)
+- **Small Model Context Big Model Thinking**: [👍Upvote this feature](https://github.com/kapydev/taffy/issues/1)
+- **Types Context**: [👍Upvote this feature](https://github.com/kapydev/taffy/issues/2)
+- **Library Context**: [👍Upvote this feature](https://github.com/kapydev/taffy/issues/3)
+- **Diagnostics Context**: [👍Upvote this feature](https://github.com/kapydev/taffy/issues/4)
+- **Best Practices Context**: [👍Upvote this feature](https://github.com/kapydev/taffy/issues/5)
 
-## Local Development
+## 🏠 Local Development
 
 To run Taffy locally:
 
@@ -60,6 +60,6 @@ npm run serve  # Start the development server
 
 Press `F5` to debug or run it in the standard VSCode extension host.
 
-## License
+## 📃 License
 
-MIT
+MIT License
