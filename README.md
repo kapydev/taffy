@@ -1,9 +1,5 @@
-<div align="center">
-  <p style="font-size: 9em; margin-bottom: 0px;">Taffy 🍬</p>
-  <p style="font-style: italic;">AI Code Editor focused on multi file editing and better context</p>
-![Placeholder gif demonstrating Taffy in action](#)
-</div>
-
+# 🍬Taffy
+AI Code Editor focused on multi file editing and better context
 
 ## Getting Started
 
