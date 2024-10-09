@@ -278,10 +278,11 @@ export const TOOL_RENDER_TEMPLATES: {
       {
         name: 'Approve',
         action: async (msg) => {
-          const fileNames = msg.body.split('\n');
-          await Promise.all(
-            fileNames.map((fileName) => addAddtionalContext(fileName))
-          );
+          const fileNames = msg.body.trim().split('\n');
+          for (const fileName of fileNames) {
+            await addAddtionalContext(fileName);
+          }
+
           await continuePrompt(chatStore.get('mode'));
         },
         shortcutEnd: 'enter',
@@ -419,11 +420,16 @@ export const TOOL_RENDER_TEMPLATES: {
         return;
       }
       message.data.oldContents = curContents.fullContents;
-      message.data.newContents = [
-        curContents.preSelection,
-        message.body,
-        curContents.postSelection,
-      ].join('\n');
+      const newContentsArr: string[] = [];
+      if (curContents.preSelection) {
+        newContentsArr.push(curContents.preSelection);
+      }
+      newContentsArr.push(message.body);
+      if (curContents.postSelection) {
+        newContentsArr.push(curContents.postSelection);
+      }
+      //We need to do it like above to prevent new line issues
+      message.data.newContents = newContentsArr.join('\n');
       trpc.files.previewFileChange.mutate({
         fileName: message.props.filePath,
         newContents: message.data.newContents,
@@ -471,7 +477,7 @@ export const TOOL_RENDER_TEMPLATES: {
   },
   ASSISTANT_WRITE_FILE: {
     Icon: FilePlus2Icon,
-    title: () => 'Shall I add the following?',
+    title: () => 'Shall I update the following file?',
     rules: [
       {
         description:

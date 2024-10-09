@@ -254,17 +254,6 @@ export function getToolMessagesWithoutErrors(): ToolMessage[] {
 }
 
 export async function addAddtionalContext(filePath: string) {
-  const curToolMessages = getToolMessagesWithoutErrors();
-  if (
-    curToolMessages.some(
-      (msg) =>
-        (msg.isType('USER_FOCUS_BLOCK') || msg.isType('USER_FILE_CONTENTS')) &&
-        msg.props?.filePath === filePath
-    )
-  ) {
-    //Message already exists, but we can always read again for updated contents
-    //noop
-  }
   const data = await trpc.files.getFileContents.query({ filePath });
   const additionalCtxMsg = createToolMessage('USER_FILE_CONTENTS', {
     body: data !== undefined ? data : 'The file does not exist', // Assuming full file contents are fetched elsewhere,

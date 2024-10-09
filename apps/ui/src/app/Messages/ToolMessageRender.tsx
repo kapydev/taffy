@@ -74,12 +74,9 @@ export function ToolMessageRender<T extends ToolType>({
                   action={() => meta.action(message)}
                   keys={keyPrefix + meta.shortcutEnd}
                 >
-                  <button
-                    className="text-[11px] whitespace-nowrap border-[0.5px] border-vsc-foreground rounded-md px-2 py-1 scale-90"
-                    onClick={() => meta.action(message)}
-                  >
+                  <div className="text-[11px] whitespace-nowrap border-[0.5px] border-vsc-foreground rounded-md px-2 py-1 scale-90">
                     {meta.name}
-                  </button>
+                  </div>
                 </ButtonWithHotkey>
               );
             })}
@@ -94,7 +91,6 @@ export function ToolMessageRender<T extends ToolType>({
                   size="icon"
                   variant="ghost"
                   className="text-vsc-errorForeground w-3.5 h-3.5"
-                  onClick={() => removeMessage(message)}
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>
