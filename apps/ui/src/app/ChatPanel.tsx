@@ -1,6 +1,6 @@
 import { Button, Separator, Textarea } from '@taffy/components';
 import { Send, Settings } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ButtonWithHotkey } from '../components/ButtonWithHotkey';
 import { chatStore, continuePrompt } from '../stores/chat-store';
 import { updateChat } from '../stores/update-prompt';
@@ -45,10 +45,11 @@ export function ChatPanel() {
         </ButtonWithHotkey> */}
         <div className="flex gap-2 mt-2">
           <div className="flex flex-col w-full relative">
-            <RichTextArea />
-            <Separator className='bg-vsc-disabledForeground opacity-70 h-[0.8px]'/>
+            <Hints />
+            <Separator className="bg-vsc-disabledForeground opacity-70 h-[0.8px]" />
             <div className="relative">
-              <Textarea
+              <RichTextArea />
+              {/* <Textarea
                 ref={inputRef}
                 value={input}
                 onChange={(e) => {
@@ -62,7 +63,7 @@ export function ChatPanel() {
                 }}
                 placeholder="Type your message..."
                 className="flex-1 pr-10 border-none text-xs rounded-t-none"
-              />
+              /> */}
               <div className="flex flex-col absolute right-0 inset-y-0 p-1.5">
                 <ButtonWithHotkey hideHint keys="enter" action={handleSend}>
                   <Button
@@ -87,6 +88,35 @@ export function ChatPanel() {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function Hints() {
+  const hints = [
+    'Key "@" to add context files.',
+    'Press Ctrl+L to add codebase files to the context',
+  ];
+  const [currentHintIndex, setCurrentHintIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentHintIndex((prevIndex) => (prevIndex + 1) % hints.length);
+    }, 600000); // 10 minutes
+
+    return () => clearInterval(interval);
+  }, [hints.length]);
+
+  const handleClick = () => {
+    setCurrentHintIndex((prevIndex) => (prevIndex + 1) % hints.length);
+  };
+
+  return (
+    <div
+      onClick={handleClick}
+      className="bg-vsc-input-background py-1 pl-3 rounded-t-md text-xs text-vsc-disabledForeground select-none cursor-pointer"
+    >
+      {hints[currentHintIndex]}
     </div>
   );
 }
