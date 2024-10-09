@@ -44,16 +44,16 @@ export function getPossibleModes(): CompletionMode[] {
   const result: CompletionMode[] = [];
   const canInline = canBeInline();
   const canEdit = canBeEdit();
-  if (canEdit) {
-    if (canInline) {
-      result.push('inline-edit');
-    }
-    result.push('edit');
-  }
+  // if (canEdit) {
+  //   if (canInline) {
+  //     result.push('inline-edit');
+  //   }
+  //   result.push('edit');
+  // }
 
-  if (canInline) {
-    result.push('inline');
-  }
+  // if (canInline) {
+  //   result.push('inline');
+  // }
   result.push('full');
 
   const inlinePriority = inlineHasPriority();
