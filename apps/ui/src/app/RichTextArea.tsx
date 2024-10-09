@@ -13,7 +13,7 @@ import {
   useEditor,
 } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { Send, Settings } from 'lucide-react';
+import { LoaderCircle, Send, Settings } from 'lucide-react';
 import {
   forwardRef,
   KeyboardEvent,
@@ -246,7 +246,7 @@ const MentionList = forwardRef<unknown, MentionListProps>((props, ref) => {
         return true;
       }
 
-      if (event.key === 'Tab') {
+      if (event.key === 'Enter') {
         tabHandler();
         return true;
       }
@@ -274,8 +274,10 @@ const MentionList = forwardRef<unknown, MentionListProps>((props, ref) => {
           </button>
         ))
       ) : loading ? (
-        //TODO: Make better loading indicator
-        <div className="p-1">Indexing files, please wait...</div>
+        <div className="p-1 flex items-center gap-1 text-xs">
+          <LoaderCircle className="animate-spin w-3 h-3" /> Indexing files,
+          please wait...
+        </div>
       ) : (
         <div className="p-1">No results</div>
       )}
