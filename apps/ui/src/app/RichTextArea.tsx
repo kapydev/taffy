@@ -117,8 +117,7 @@ export function RichTextArea({ onSend }: RichTextAreaProps) {
     editorProps: {
       attributes: {
         class:
-          // 'flex min-h-[80px] w-full rounded-md bg-background pl-3 pr-10 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 flex-1 border-none w-full',
-          'focus-visible:outline-none min-h-[80px] bg-vsc-input-background py-2 pl-3 pr-10 rounded-b-md text-xs',
+          'focus-visible:outline-none min-h-[80px] bg-vsc-input-background py-1 pl-3 pr-10 rounded-b-md text-xs',
       },
     },
     onUpdate(props) {

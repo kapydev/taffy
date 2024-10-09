@@ -1,5 +1,5 @@
 import { Button, Separator, Textarea } from '@taffy/components';
-import { Send, Settings } from 'lucide-react';
+import { Info, Send, Settings } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { ButtonWithHotkey } from '../components/ButtonWithHotkey';
 import { chatStore, continuePrompt } from '../stores/chat-store';
@@ -44,7 +44,7 @@ export function ChatPanel() {
         <div className="flex gap-2 mt-2">
           <div className="flex flex-col w-full relative">
             <Hints />
-            <Separator className="bg-vsc-disabledForeground opacity-70 h-[0.8px]" />
+            {/* <Separator className="bg-vsc-disabledForeground opacity-70 h-[0.8px]" /> */}
             <div className="relative">
               <RichTextArea
                 onSend={() => {
@@ -99,8 +99,8 @@ export function ChatPanel() {
 
 function Hints() {
   const hints = [
-    'Key "@" to add context files.',
-    'Press Ctrl+L to add codebase files to the context',
+    'Key "@" to add context files',
+    'Ctrl+L to add all files as context',
   ];
   const [currentHintIndex, setCurrentHintIndex] = useState(0);
 
@@ -112,16 +112,15 @@ function Hints() {
     return () => clearInterval(interval);
   }, [hints.length]);
 
-  const handleClick = () => {
-    setCurrentHintIndex((prevIndex) => (prevIndex + 1) % hints.length);
+  const handleClick = (increment: number) => {
+    setCurrentHintIndex((prevIndex) => (prevIndex + increment) % hints.length);
   };
 
   return (
-    <div
-      onClick={handleClick}
-      className="bg-vsc-input-background py-1 pl-3 rounded-t-md text-xs text-vsc-disabledForeground select-none cursor-pointer"
-    >
-      {hints[currentHintIndex]}
+    <div className="flex gap-1 items-center bg-vsc-input-background py-2 pl-3 rounded-t-md text-xs text-vsc-disabledForeground select-none">
+      {hints.map((hint) => (
+        <span className="italic">{hint}, </span>
+      ))}
     </div>
   );
 }
