@@ -37,6 +37,7 @@ import {
 } from '../stores/chat-store';
 import { updateChat } from '../stores/update-prompt';
 import { SuggestionProps } from '@tiptap/suggestion';
+import toast from 'react-hot-toast';
 
 type MentionItem = string;
 
@@ -90,7 +91,7 @@ export function RichTextArea({ onSend }: RichTextAreaProps) {
   }, [editor]);
 
   const handleSend = async () => {
-    const input = editor?.getText();
+    const input = editor?.getText().trimEnd();
     if (!editor) return;
     if (!input?.trim()) return;
     const mode = chatStore.get('mode');
@@ -104,6 +105,10 @@ export function RichTextArea({ onSend }: RichTextAreaProps) {
       })
     );
     editor?.commands.clearContent();
+    //Do not prompt if it is only mentions added
+    if (input.trim().split(' ').every((item) => item.includes('@'))) {
+      return toast.success('Files added to context!');
+    }
     await updateChat(input, mode);
     await continuePrompt(mode);
     onSend?.(input);
@@ -257,7 +262,7 @@ const MentionList = forwardRef<unknown, MentionListProps>((props, ref) => {
         return true;
       }
 
-      if (event.key === 'Enter') {
+      if (event.key === 'Enter' || event.key === 'Tab') {
         tabHandler();
         return true;
       }
